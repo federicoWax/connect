@@ -4,6 +4,8 @@ import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
 import { UserFirestore } from "../interfaces";
+import { post } from '../services/http';
+import { dialogDeleteDoc } from '../utils';
 
 const db = getFirestore();
 
@@ -51,7 +53,11 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<UserFirestore |
       <Button 
         shape="circle" 
         icon={<DeleteOutlined />}
-        onClick={() => {}}
+        onClick={() => {
+          const deleteUser = post('users/del', {id: record.id}) as Promise<void>;
+
+          dialogDeleteDoc(deleteUser);
+        }}
       />
     )
   },
