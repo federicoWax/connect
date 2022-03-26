@@ -1,1 +1,1 @@
-export type Rols = "Administrador" | "Venderdor" | "Monitorista" | "";
+export type Rols = "Administrador" | "Venderdor" | "Procesos" | "";
