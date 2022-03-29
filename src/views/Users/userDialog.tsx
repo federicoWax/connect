@@ -147,7 +147,7 @@ const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
                   rules={[{ required: true, message: 'Rol requerido.' }]}
                 >
                   <Select value={user.role} onChange={value => setUser({...user, role: value})}>
-                    <Option value="Venderdor">Venderdor</Option>
+                    <Option value="Vendedor">Vendedor</Option>
                     <Option value="Procesos">Procesos</Option>
                   </Select>
                 </Form.Item>

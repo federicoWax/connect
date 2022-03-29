@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 
 const Home = () => {
   const { userFirestore } = useAuth();
-  const { loading, sales, columns, open, sale, setOpen } = useHome();
+  const { loadingSales, sales, columns, open, sale, setOpen, users } = useHome();
 
   return (
     <div>
@@ -19,7 +19,7 @@ const Home = () => {
         </Button>
       }
       <h1>Ventas</h1>
-     <Table loading={loading} columns={columns} pagination={false} dataSource={sales.map(s => ({...s, key: s.id}))} locale={{emptyText: "Sin ventas..."}} />
+     <Table loading={loadingSales} columns={columns} pagination={false} dataSource={sales.map(s => ({...s, key: s.id}))} locale={{emptyText: "Sin ventas..."}} />
       <HomeDialog 
         open={open}
         onClose={() => setOpen(false)}

@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
-import { Sale } from "../interfaces";
+import { Sale, UserFirestore } from "../interfaces";
 import { post } from '../services/http';
 import { dialogDeleteDoc } from '../utils';
 
@@ -45,22 +45,25 @@ const useUsers = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [sale, setSale] = useState<Sale | null>(null);
   const [sales, setSales] = useState<Sale[]>([]);
-  const [snapshot, loading] = useOnSnapshot(query(collection(db, "sales"), orderBy('date')));
+  const [users, setUsers] = useState<UserFirestore[]>([]);
+  const [snapshotSales, loadingSales] = useOnSnapshot(query(collection(db, "sales"), orderBy('date')));
+  const [snapshotUsers, loadingUsers] = useOnSnapshot(query(collection(db, "users"), orderBy('name')));
   const columns = getColumns(setSale, setOpen);
 
   useEffect(() => {
     let mounted = true;
 
-    if(loading || !mounted) return;
+    if(loadingSales || loadingUsers || !mounted) return;
 
-    setSales(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as Sale[]);
+    setSales(snapshotSales.docs.map(doc => ({...doc.data(), id: doc.id})) as Sale[]);
+    setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
 
     return () => {
       mounted = false;
     }
-  }, [snapshot, loading]);
+  }, [snapshotSales, snapshotUsers, loadingSales, loadingUsers]);
 
-  return { loading, sales, columns, open, sale, setOpen, setSale };
+  return { loadingUsers, loadingSales, sales, users, columns, open, sale, setOpen, setSale };
 }
 
 export default useUsers;

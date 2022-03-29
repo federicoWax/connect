@@ -2,7 +2,7 @@ import { Rols } from "../types";
 import { Timestamp } from "firebase/firestore";
 
 export interface UserFirestore {
-  id: string;
+  id?: string;
   email: string;
   password?: string;
   passwordConfirm? : string;
@@ -14,17 +14,22 @@ export interface UserFirestore {
 };
 
 export interface Sale {
-  id: string;
-  userId: string;
+  id?: string;
+  userId?: string;
   client: string;
-  phone: number;
-  dateBirth: Timestamp;
-  esid: number;
+  phone?: string;
+  dateBirth: Timestamp | null;
+  esid?: number;
   address: string;
   email?: string;
-  additionalEmail: string;
-  additionalPhone: number
+  additionalEmail?: string;
+  additionalPhone?: string;
   statusSale: "Activación" | "Mensualidad";
   statusLight: "Con luz" | "Sin luz";
-  status: "Pendiente" | "Finalizada";
+  date: Timestamp | null;
+  concluded: boolean;
+  paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
+  referenceNumber?: number;
+  sends: string;
+  receives: string;
 };
