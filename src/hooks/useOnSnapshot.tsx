@@ -1,10 +1,10 @@
-import { DocumentData, Query, QuerySnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react'
+import { DocumentData, Query, QuerySnapshot } from 'firebase/firestore';
 import { onSnapshot } from "firebase/firestore";
 
-const useOnSnapshot = (query: Query<unknown>): [QuerySnapshot<DocumentData>, boolean]  => {
+const useOnSnapshot = (query: Query<DocumentData>): [QuerySnapshot<DocumentData>, boolean]  => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [snapshot, setSnapshot] = useState<QuerySnapshot<unknown>>();
+  const [snapshot, setSnapshot] = useState<QuerySnapshot<DocumentData>>();
 
   useEffect(() => {
     let mounted = true;
@@ -20,7 +20,7 @@ const useOnSnapshot = (query: Query<unknown>): [QuerySnapshot<DocumentData>, boo
       mounted = false;
       uns();
     }
-  }, []);
+  }, [query]);
 
   return [snapshot as QuerySnapshot<DocumentData>, loading];
 }

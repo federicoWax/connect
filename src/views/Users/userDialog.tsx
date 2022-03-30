@@ -36,16 +36,18 @@ const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
   }, [propUser]);
 
   const save = async () => {
+    if(saving) return;
+
     if(user.password && (user.password !== user.passwordConfirm)) {
       message.error("Las contraseñas no coinciden");
       return;
     }
 
+    setSaving(true);
+
     let _user = {...user};
 
     delete _user.passwordConfirm;
-
-    setSaving(true);
 
     try {
       await post(_user.id ? 'users/update' : 'users/create', _user);

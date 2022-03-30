@@ -54,7 +54,7 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<UserFirestore |
         shape="circle" 
         icon={<DeleteOutlined />}
         onClick={() => {
-          const deleteUser = post('users/del', {id: record.id}) as Promise<void>;
+          const deleteUser = () => post('users/del', {id: record.id});
 
           dialogDeleteDoc(deleteUser);
         }}
@@ -89,7 +89,7 @@ const useUsers = () => {
 
     if(loading || !mounted) return;
 
-    setUsers(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
+    //setUsers(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
 
     return () => {
       mounted = false;

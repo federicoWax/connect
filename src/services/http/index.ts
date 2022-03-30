@@ -1,7 +1,7 @@
 import { User, onIdTokenChanged } from "firebase/auth";
 import { auth } from "../../firebase";
 
-const baseUrl = "https://us-central1-connect-4dee9.cloudfunctions.net/api/";
+export const baseUrl = "https://us-central1-connect-4dee9.cloudfunctions.net/api/";
 
 const getCurrentToken = () => new Promise<string>((resolve, reject) => {
   const uns = onIdTokenChanged(auth, async (user: User | null) => {

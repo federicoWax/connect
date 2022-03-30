@@ -1,9 +1,10 @@
 import { FC, useEffect, useState } from "react";
-import { Col, DatePicker, Form, Input, Modal, Row, Select, Switch } from "antd";
+import { Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { Sale } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { Timestamp } from "firebase/firestore";
 import moment from "moment";
+import { add, update } from "../../services/firebase";
 
 const { Option } = Select;
 
@@ -25,6 +26,8 @@ const init_sale: Sale = {
   paymentMethod: "",
   sends: "",
   receives: "",
+  livingPlace: "",
+  previousCompany: ""
 };
 
 const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
@@ -34,34 +37,38 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if(user) {
-      const _sale = {
-        ...sale,
-        userId: user.uid,
-      };
+    form.setFieldsValue(init_sale);
+  }, [form]);
 
-      setSale(_sale);
+  const save = async () => {
+    if(saving) return;
 
-      form.setFieldsValue(_sale);
-    }
-  }, [user]);
+    setSaving(true);
 
-
-  const save = () => {
     let _sale = {...sale};
     _sale.date = Timestamp.now();
+    _sale.userId = user?.uid;
 
-    console.log(_sale);
+    const id = _sale.id;
+
+    delete _sale.id;
+
+    try {
+      id ? await update("sales", id, _sale ) : await add('sales', _sale);
+
+      message.success("Venta guardada con exito!");
+    } catch (error) {
+      console.log(error);
+      setSaving(false);
+    } finally {
+      setSaving(false);
+      resetForm();
+    }
   }
 
   const resetForm = () => {
-    const _sale: Sale = {
-      ...init_sale,
-      userId: user?.uid,
-    };
-
-    form.setFieldsValue(_sale);
-    setSale(_sale);
+    form.setFieldsValue(init_sale);
+    setSale(init_sale);
     onClose();
   }
 
@@ -227,7 +234,6 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
             <Form.Item
               label="Método de pago"
               name="paymentMethod"
-              rules={[{ required: true, message: 'Método de pago requerido.' }]}
             >
               <Select value={sale.paymentMethod} onChange={value => setSale({...sale, paymentMethod: value })}>
                 <Option value="BARRI">BARRI</Option>
@@ -243,12 +249,11 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
             <Form.Item
               label="Número de referencia"
               name="referenceNumber"
-              rules={[{ required: true, message: 'Número de referencia requerido.' }]}
             >
               <Input 
-                type="number"
+                type="text"
                 value={sale.referenceNumber} 
-                onChange={(e) => setSale({...sale, referenceNumber: Number(e.target.value)})}
+                onChange={(e) => setSale({...sale, referenceNumber: e.target.value})}
               />
             </Form.Item>
           </Col>
@@ -258,7 +263,6 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
             <Form.Item
               label="Envia"
               name="sends"
-              rules={[{ required: true, message: 'Envia requerido.' }]}
             >
               <Input 
                 type="text"
@@ -271,7 +275,6 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
             <Form.Item
               label="Recibe"
               name="receives"
-              rules={[{ required: true, message: 'Recibe requerida.' }]}
             >
               <Input 
                 type="text"
@@ -283,8 +286,29 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
         </Row>
         <Row gutter={10} style={{marginTop: 10}}>
           <Col xs={24} sm={24} md={12}>
-            <label style={{marginRight: 10}}>Venta concluida</label>
-            <Switch title="Venta concluida" checked={sale.concluded} onChange={checked => setSale({...sale, concluded: checked})} />
+            <Form.Item
+              label="Vivienda requerida"
+              name="livingPlace"
+              rules={[{ required: true, message: 'Vivienda requerida.' }]}
+            >
+              <Select value={sale.livingPlace} onChange={value => setSale({...sale, livingPlace: value })}>
+                <Option value="Casa">Casa</Option>
+                <Option value="Traila">Traila</Option>
+                <Option value="Apartamento">Apartamento</Option>
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={24} md={12}>
+            <Form.Item
+              label="Compañia anterior"
+              name="previousCompany"
+            >
+              <Input 
+                type="text"
+                value={sale.previousCompany} 
+                onChange={(e) => setSale({...sale, previousCompany: e.target.value})}
+              />
+            </Form.Item>
           </Col>
         </Row>
       </Form>

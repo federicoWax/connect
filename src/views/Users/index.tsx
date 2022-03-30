@@ -15,7 +15,7 @@ const Users = () => {
         Agregar usuario
       </Button>
       <h1>Usuarios</h1>
-      <Table loading={loading} columns={columns} pagination={false} dataSource={users.map(u => ({...u, key: u.id}))} locale={{emptyText: "Sin usuarios..."}} />
+      <Table loading={true} columns={columns} pagination={false} dataSource={users.map(u => ({...u, key: u.id}))} locale={{emptyText: "Sin usuarios..."}} />
       <UserDialog 
         open={open}
         onClose={() => setOpen(false)}

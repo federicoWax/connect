@@ -5,16 +5,23 @@ import { useAuth } from '../../context/AuthContext';
 import MenuComponent from '../Menu';
 
 const RoterChecker = () => {
-  const { user } = useAuth();
+  const { user, userFirestore } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const adminRoutes: string[] = [
+    "/usuarios"
+  ];
 
   useEffect(() => {
     if(!user && location.pathname !== "/login") {
       navigate('/login');   
+      return;
     }
 
-    if(user && (location.pathname === '/login' || location.pathname === '/')) {
+    const inPrivateRoute = adminRoutes.includes(location.pathname) && userFirestore && userFirestore.role !== "Administrador";
+
+    if(user && (location.pathname === '/login' || location.pathname === '/') || inPrivateRoute) {
       navigate('/ventas');
     }
   }, [user, location]);

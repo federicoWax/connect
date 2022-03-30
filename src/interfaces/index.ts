@@ -29,7 +29,16 @@ export interface Sale {
   date: Timestamp | null;
   concluded: boolean;
   paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
-  referenceNumber?: number;
+  referenceNumber?: string;
   sends: string;
   receives: string;
+  livingPlace: "Casa" | "Traila" | "Apartamento" | "";
+  previousCompany: string;
+};
+
+export interface FilterSale {
+  concluded: boolean;
+  startDate: null | moment.Moment;
+  endDate: null | moment.Moment;
+  userId?: string;
 };
