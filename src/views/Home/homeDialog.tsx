@@ -37,8 +37,15 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
   const { user } = useAuth();
 
   useEffect(() => {
+    if(propSale) {
+      form.setFieldsValue(propSale);
+      setSale(propSale);
+
+      return;
+    }
+
     form.setFieldsValue(init_sale);
-  }, [form]);
+  }, [form, propSale]);
 
   const save = async () => {
     if(saving) return;
@@ -67,7 +74,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
   }
 
   const resetForm = () => {
-    form.setFieldsValue(init_sale);
+    form.resetFields();
     setSale(init_sale);
     onClose();
   }
@@ -107,18 +114,13 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
             </Form.Item>
           </Col>
           <Col xs={24} sm={24} md={12}>
-            <Form.Item
-              label="Fecha de nacimiento"
-              name="dateBirth"
-              rules={[{ required: true, message: 'Fecha de nacimiento requerida.' }]}
-            >
-              <DatePicker
-                value={sale.dateBirth === null ? sale.dateBirth : moment(sale.dateBirth?.toDate())}
-                onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
-                style={{width: "100%"}}
-                placeholder="Fecha de nacimiento"
-              />
-            </Form.Item>
+            <DatePicker
+              clearIcon={null}
+              value={moment(sale.dateBirth === null ? undefined : sale.dateBirth?.toDate())}
+              onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
+              style={{width: "100%", marginTop: 30}}
+              placeholder="Fecha de nacimiento"
+            />
           </Col>
         </Row>
         <Row gutter={10} style={{marginTop: 10}}>

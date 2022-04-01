@@ -8,14 +8,19 @@ import { del, update } from '../services/firebase';
 import { dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
 import moment from 'moment';
-import { User } from 'firebase/auth';
 
 const db = getFirestore();
-const queryUsers = query(collection(db, "users"), orderBy('name'));
 const StartDate = moment();
-StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
+const EndDate = moment();
 
-const getColumns = (setUser: React.Dispatch<React.SetStateAction<Sale | null>>, setOpen: React.Dispatch<React.SetStateAction<boolean>>, users: UserFirestore[]) => [
+StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
+EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
+
+const getColumns = (
+  setSale: React.Dispatch<React.SetStateAction<Sale | null>>, 
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>, 
+  users: UserFirestore[], userFirestore: UserFirestore
+) => [
   {
     title: 'Vendedor',
     key: 'seller',
@@ -48,10 +53,10 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<Sale | null>>, 
     render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
   },
   {
-    title: 'Concluida',
+    title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Concluida' : '',
     key: 'concluded',
     render: (record: Sale) => (
-      <Switch 
+      ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Switch 
         checked={record.concluded}
         onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
       />
@@ -75,38 +80,35 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<Sale | null>>, 
   {
     title: 'Editar',
     key: 'edit',
-    render: (user: Sale) => (
+    render: (sale: Sale) => (
       <Button 
         shape="circle" 
         icon={<EditOutlined />}
         onClick={() => {
           setOpen(true);
-          setUser(user);
+          setSale(sale);
         }} 
       />
     )
   },
 ];
 
-const getQuery = (filter: FilterSale, userFirestore: UserFirestore, user: User) => 
-  userFirestore?.role === 'Vendedor' 
-  ? 
-    query(
-      collection(db, "sales"), 
-      orderBy('date'), 
-      where('userId', '==', filter.userId), 
-      where('concluded', '==', filter.concluded), 
-      where("date", ">=", filter.startDate?.toDate()), 
-      where("date", "<=", filter.endDate?.toDate())
-    )
-  : 
-    query(
-      collection(db, "sales"), 
-      orderBy('date'), 
-      where('concluded', '==', filter.concluded),
-      where("date", ">=", filter.startDate?.toDate()), 
-      where("date", "<=", filter.endDate?.toDate())
-    )
+const getQuery = (filter: FilterSale, userFirestore: UserFirestore) => {
+  const { startDate, endDate, concluded, userId } = filter;
+
+  let Query = query(
+    collection(db, "sales"), 
+    orderBy('date'), 
+    where('concluded', '==', concluded),
+    where("date", ">=", startDate ? startDate.toDate() : StartDate.toDate()), 
+    where("date", "<=", endDate ? endDate.toDate(): EndDate.toDate())
+  )
+  
+  if(userId) 
+    Query = query(Query, where('userId', '==', userId));
+
+  return Query;
+}
 
 const useUsers = () => {
   const { userFirestore, user } = useAuth();
@@ -116,21 +118,18 @@ const useUsers = () => {
   const [users, setUsers] = useState<UserFirestore[]>([]);
   const [filter, setFilter] = useState<FilterSale>({
     concluded: false,
-    startDate: StartDate,
-    endDate: moment(),
-    userId: user?.uid
+    startDate: null,
+    endDate: null,
+    userId: userFirestore?.role === "Administrador" ? "" : user?.uid
   });
+  const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name'), where("role", "==", "Vendedor")));
+  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuery(filter, userFirestore as UserFirestore));
   const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 
-  const columns = getColumns(setSale, setOpen, users);
-
-  const [Query, setQuery] = useState<Query<DocumentData>>(
-    getQuery(filter, userFirestore as UserFirestore, user as User)
-  );
-
-  const [snapshotSale, loadingSales] = useOnSnapshot(Query); 
+  const [snapshotSale, loadingSales] = useOnSnapshot(querySales); 
+  const columns = getColumns(setSale, setOpen, users, userFirestore as UserFirestore);
 
   useEffect(() => {
-    setQuery(getQuery(filter, userFirestore as UserFirestore, user as User));
+    setQuerySales(getQuery(filter, userFirestore as UserFirestore));
   }, [filter, userFirestore, user]);
       
   useEffect(() => {
@@ -146,7 +145,7 @@ const useUsers = () => {
     }
   }, [snapshotSale, loadingSales, snapshotUsers, loadingUsers]);
 
-  return { loadingUsers, loadingSales, sales, columns, sale, open, setOpen, setSale, filter, setFilter };
+  return { loadingUsers, loadingSales, users, sales, columns, sale, open, setOpen, setSale, filter, setFilter };
 }
 
 export default useUsers;

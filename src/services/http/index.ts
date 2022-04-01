@@ -29,7 +29,7 @@ export const post = async (url: string, body: any) => {
   const response = await fetch(baseUrl + url, {
     method: 'POST',
     headers: getHeaders(token),
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   });
 
   return response.json();

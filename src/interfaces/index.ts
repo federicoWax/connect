@@ -26,7 +26,7 @@ export interface Sale {
   additionalPhone?: string;
   statusSale: "Activación" | "Mensualidad";
   statusLight: "Con luz" | "Sin luz";
-  date: Timestamp | null;
+  date: Timestamp | null | moment.Moment;
   concluded: boolean;
   paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
   referenceNumber?: string;
