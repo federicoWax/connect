@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UserOutlined, DollarOutlined } from '@ant-design/icons';
+import { UserOutlined, DollarOutlined, UnorderedListOutlined} from '@ant-design/icons';
 import { MdGroup } from 'react-icons/md';
 import { BiDoorOpen } from 'react-icons/bi';
 import { Layout, Menu } from "antd";
@@ -27,6 +27,9 @@ const MenuComponent = () => {
       <Menu theme="dark" selectedKeys={[location.pathname]} mode="inline">
         <Menu.Item onClick={() => navigate("/ventas")} key="/ventas" icon={<DollarOutlined /> }>
           Ventas
+        </Menu.Item>
+        <Menu.Item onClick={() => navigate("/cobradores")} key="/cobradores" icon={<UnorderedListOutlined />}>
+          Cobradores
         </Menu.Item>
         {
           userFirestore?.role  === "Administrador" && <Menu.Item onClick={() => navigate("/usuarios")} key="/usuarios" icon={<MdGroup /> }>

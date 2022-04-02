@@ -42,3 +42,8 @@ export interface FilterSale {
   endDate: null | moment.Moment;
   userId?: string;
 };
+
+export interface Cobrador {
+  id?: string;
+  name: string;
+}

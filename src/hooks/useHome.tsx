@@ -26,11 +26,11 @@ const getColumns = (
     key: 'seller',
     render: (record: Sale) => {
       const user = users.find(user =>  user.id === record.userId);
-      
       return (
         <>
-          <div> { user?.name }</div>
-          <div> { user?.email }</div>
+          <div> Nombre:  { user?.name }</div>
+          <div> Correo: { user?.email }</div>
+          <div> Equipo: { user?.team }</div>
         </>
       )
     }
@@ -120,7 +120,7 @@ const useUsers = () => {
     concluded: false,
     startDate: null,
     endDate: null,
-    userId: userFirestore?.role === "Administrador" ? "" : user?.uid
+    userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid
   });
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name'), where("role", "==", "Vendedor")));
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuery(filter, userFirestore as UserFirestore));

@@ -1,11 +1,13 @@
 import { FC, useEffect, useState } from "react";
 import { Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
-import { Sale } from "../../interfaces";
+import { Cobrador, Sale } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
-import { Timestamp } from "firebase/firestore";
+import { collection, DocumentData, getFirestore, orderBy, query, Query, Timestamp } from "firebase/firestore";
 import moment from "moment";
 import { add, update } from "../../services/firebase";
+import useOnSnapshot from "../../hooks/useOnSnapshot";
 
+const db = getFirestore();
 const { Option } = Select;
 
 interface Props {
@@ -33,8 +35,23 @@ const init_sale: Sale = {
 const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [sale, setSale] = useState<Sale>(init_sale);
+  const [cobradores, setCobradores] = useState<Cobrador[]>([]);
+  const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
+  const [snapshotCobrador, loadingCobradores] = useOnSnapshot(queryCobradores); 
   const [form] = Form.useForm();
   const { user } = useAuth();
+
+  useEffect(() => {
+    let mounted = true;
+
+    if( loadingCobradores || !mounted) return;
+
+    setCobradores(snapshotCobrador.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
+
+    return () => {
+      mounted = false;
+    }
+  }, [snapshotCobrador, loadingCobradores]);
 
   useEffect(() => {
     if(propSale) {
@@ -278,11 +295,16 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
               label="Recibe"
               name="receives"
             >
-              <Input 
-                type="text"
+              <Select
+                onChange={(value) => setSale({...sale, receives: value})}
                 value={sale.receives} 
-                onChange={(e) => setSale({...sale, receives: e.target.value})}
-              />
+              >
+                {
+                  cobradores.map(cobrador => (
+                    <Option value={cobrador.id}>{cobrador.name}</Option>
+                  ))
+                }
+              </Select>
             </Form.Item>
           </Col>
         </Row>
