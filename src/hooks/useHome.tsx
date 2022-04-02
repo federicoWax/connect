@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Button, Switch } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { getFirestore, collection, query, orderBy, where, onSnapshot, doc, DocumentData, Query } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, where, DocumentData, Query } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
-import { FilterSale, Sale, UserFirestore } from "../interfaces";
+import { Cobrador, FilterSale, Sale, UserFirestore } from "../interfaces";
 import { del, update } from '../services/firebase';
 import { dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
 import moment from 'moment';
+import ExcelJS from 'exceljs';
 
 const db = getFirestore();
 const StartDate = moment();
@@ -93,7 +94,7 @@ const getColumns = (
   },
 ];
 
-const getQuery = (filter: FilterSale, userFirestore: UserFirestore) => {
+const getQuery = (filter: FilterSale) => {
   const { startDate, endDate, concluded, userId } = filter;
 
   let Query = query(
@@ -116,36 +117,90 @@ const useUsers = () => {
   const [sale, setSale] = useState<Sale | null>(null);
   const [sales, setSales] = useState<Sale[]>([]);
   const [users, setUsers] = useState<UserFirestore[]>([]);
+  const [cobradores, setCobradores] = useState<Cobrador[]>([]);
   const [filter, setFilter] = useState<FilterSale>({
     concluded: false,
     startDate: null,
     endDate: null,
     userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid
   });
+  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuery(filter));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name'), where("role", "==", "Vendedor")));
-  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuery(filter, userFirestore as UserFirestore));
-  const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 
+  const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
   const [snapshotSale, loadingSales] = useOnSnapshot(querySales); 
+  const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 
+  const [snapshotCobradores, loadingCobradores] = useOnSnapshot(queryCobradores); 
   const columns = getColumns(setSale, setOpen, users, userFirestore as UserFirestore);
 
   useEffect(() => {
-    setQuerySales(getQuery(filter, userFirestore as UserFirestore));
+    setQuerySales(getQuery(filter));
   }, [filter, userFirestore, user]);
       
   useEffect(() => {
     let mounted = true;
 
-    if(loadingUsers || loadingSales || !mounted) return;
+    if(loadingUsers || loadingSales || loadingCobradores || !mounted) return;
 
-    setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
     setSales(snapshotSale.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]);
+    setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
+    setCobradores(snapshotCobradores.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
 
     return () => {
       mounted = false;
     }
-  }, [snapshotSale, loadingSales, snapshotUsers, loadingUsers]);
+  }, [snapshotSale, snapshotUsers, snapshotCobradores, loadingSales, loadingUsers, loadingCobradores]);
 
-  return { loadingUsers, loadingSales, users, sales, columns, sale, open, setOpen, setSale, filter, setFilter };
+  const downloadExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Reporte de ventas');
+
+    worksheet.columns = [
+      { header: 'Vendedor', key: 'seller' },
+      { header: 'Correo Vendedor', key: 'email' },
+      { header: 'Equipo', key: 'team' },
+      { header: 'Cliente', key: 'client' },
+      { header: 'Fecha / Hora', key: 'date' },
+      { header: 'Teléfono', key: 'phone' },
+      { header: 'Teléfono adicional', key: 'additionalPhone' },
+      { header: 'ESID', key: 'esid' },
+      { header: 'Dirreción', key: 'address' },
+      { header: 'Correo electrónico', key: 'email' },
+      { header: 'Correo electrónico adicional', key: 'additionalEmail' },
+      { header: 'Estatus de venta', key: 'statusSale' },
+      { header: 'Estatus luz', key: 'statusLight' },
+      { header: 'Método de pago', key: 'paymentMethod' },
+      { header: 'Número de referencia', key: 'referenceNumber' },
+      { header: 'Recibe', key: 'sends' },
+      { header: 'Envia', key: 'receives' },
+      { header: 'Vivienda', key: 'livingPlace' },
+      { header: 'Compañia anterior', key: 'previousCompany' },
+    ];
+
+    const _sales = sales.map(sale => ({
+      ...sale, 
+      seller: users.find(user => user.id === sale.userId)?.name,
+      email: users.find(user => user.id === sale.userId)?.email,
+      team: users.find(user => user.id === sale.userId)?.team,
+      receives: cobradores.find(cobrador => cobrador.id === sale.receives)?.name || "",
+      date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
+      statusSale: sale.concluded ? "Concluida" : "Pendiente",
+    }));
+
+    worksheet.addRows(_sales);
+
+    const data =  await workbook.xlsx.writeBuffer();
+    
+    var blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    const url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = "Reporte de ventas.xlsx";
+    a.click();
+  }
+
+  return { loadingUsers, loadingSales, users, sales, columns, sale, open, setOpen, setSale, filter, setFilter, cobradores, downloadExcel };
 }
 
 export default useUsers;

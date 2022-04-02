@@ -3,7 +3,7 @@ import Home from '../views/Home';
 import Login from '../views/Login';
 import Users from '../views/Users';
 
-export default [
+const routes = [
   {
     key: 'login',
     path: '/login',
@@ -25,3 +25,5 @@ export default [
     element: <Users />,
   }
 ];
+
+export default routes;

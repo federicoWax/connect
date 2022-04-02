@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { getFirestore, collection, query, orderBy, where, onSnapshot, doc, DocumentData, Query } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, DocumentData, Query } from 'firebase/firestore';
 import useOnSnapshot from "./useOnSnapshot";
 import { Cobrador } from "../interfaces";
 import { del } from '../services/firebase';

@@ -1,19 +1,18 @@
 import { FC, useEffect, useState } from "react";
 import { Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
+import { Timestamp } from "firebase/firestore";
+import moment from "moment";
 import { Cobrador, Sale } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
-import { collection, DocumentData, getFirestore, orderBy, query, Query, Timestamp } from "firebase/firestore";
-import moment from "moment";
 import { add, update } from "../../services/firebase";
-import useOnSnapshot from "../../hooks/useOnSnapshot";
 
-const db = getFirestore();
 const { Option } = Select;
 
 interface Props {
   open: boolean;
   onClose: () => void;
   propSale: Sale | null;
+  cobradores: Cobrador[];
 };
 
 const init_sale: Sale = {
@@ -32,29 +31,18 @@ const init_sale: Sale = {
   previousCompany: ""
 };
 
-const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
+const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores}) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [sale, setSale] = useState<Sale>(init_sale);
-  const [cobradores, setCobradores] = useState<Cobrador[]>([]);
-  const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
-  const [snapshotCobrador, loadingCobradores] = useOnSnapshot(queryCobradores); 
   const [form] = Form.useForm();
   const { user } = useAuth();
 
   useEffect(() => {
-    let mounted = true;
-
-    if( loadingCobradores || !mounted) return;
-
-    setCobradores(snapshotCobrador.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
-
-    return () => {
-      mounted = false;
-    }
-  }, [snapshotCobrador, loadingCobradores]);
-
-  useEffect(() => {
     if(propSale) {
+      if(!cobradores.some(c => c.id === propSale.receives)) {
+        propSale.receives = "";
+      }
+      
       form.setFieldsValue(propSale);
       setSale(propSale);
 
@@ -62,7 +50,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
     }
 
     form.setFieldsValue(init_sale);
-  }, [form, propSale]);
+  }, [form, propSale, cobradores]);
 
   const save = async () => {
     if(saving) return;
@@ -301,7 +289,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
               >
                 {
                   cobradores.map(cobrador => (
-                    <Option value={cobrador.id}>{cobrador.name}</Option>
+                    <Option key={cobrador.id} value={cobrador.id}>{cobrador.name}</Option>
                   ))
                 }
               </Select>
@@ -311,7 +299,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale}) => {
         <Row gutter={10} style={{marginTop: 10}}>
           <Col xs={24} sm={24} md={12}>
             <Form.Item
-              label="Vivienda requerida"
+              label="Vivienda"
               name="livingPlace"
               rules={[{ required: true, message: 'Vivienda requerida.' }]}
             >

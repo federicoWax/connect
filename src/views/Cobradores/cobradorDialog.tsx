@@ -1,8 +1,6 @@
 import { FC, useEffect, useState } from "react";
-import { Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
+import { Col, Form, Input, message, Modal, Row } from "antd";
 import { Cobrador } from "../../interfaces";
-import { useAuth } from "../../context/AuthContext";
-import { Timestamp } from "firebase/firestore";
 import { add, update } from "../../services/firebase";
 
 interface Props {

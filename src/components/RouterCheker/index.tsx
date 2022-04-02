@@ -10,7 +10,8 @@ const RoterChecker = () => {
   const navigate = useNavigate();
 
   const adminRoutes: string[] = [
-    "/usuarios"
+    "/usuarios",
+    "/cobradores"
   ];
 
   useEffect(() => {
@@ -21,10 +22,10 @@ const RoterChecker = () => {
 
     const inPrivateRoute = adminRoutes.includes(location.pathname) && userFirestore && userFirestore.role !== "Administrador";
 
-    if(user && (location.pathname === '/login' || location.pathname === '/') || inPrivateRoute) {
+    if(user && (location.pathname === '/login' || location.pathname === '/' || inPrivateRoute)) {
       navigate('/ventas');
     }
-  }, [user, location]);
+  }, [user, userFirestore, location, navigate]);
   
   return (
     <Layout style={{minHeight: "100vh"}}>

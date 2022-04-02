@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { Modal, Row, Col, Form, Input, Select, message } from 'antd';
 import { UserFirestore } from '../../interfaces';
 import { post } from '../../services/http';
+import { getFirestore, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
 
 interface Props {
   open: boolean;
@@ -9,8 +10,8 @@ interface Props {
   propUser: UserFirestore | null;
 };
 
+const db = getFirestore();
 const { Option } = Select;
-
 const init_user: UserFirestore = {
   id: '',
   email: '',
@@ -33,13 +34,22 @@ const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
       form.setFieldsValue(propUser);
       setUser(propUser);
     }
-  }, [propUser]);
+  }, [propUser, form]);
 
   const save = async () => {
     if(saving) return;
 
     if(user.password && (user.password !== user.passwordConfirm)) {
+
       message.error("Las contraseñas no coinciden");
+      return;
+    }
+
+
+    const otherUser = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+
+    if(otherUser.docs[0].data().email === user.email && otherUser.docs[0].id !== user.id) {
+      message.error("El correo ya está registrado");
       return;
     }
 

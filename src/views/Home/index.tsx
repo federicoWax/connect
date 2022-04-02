@@ -1,52 +1,15 @@
-import { Button, Col, Row, Select, Table, DatePicker, Form, message } from "antd";
+import { Button, Col, Row, Select, Table, DatePicker, message } from "antd";
 import moment from "moment";
 import HomeDialog from "./homeDialog";
 import useHome from "../../hooks/useHome";
 import { useAuth } from "../../context/AuthContext";
-import ExcelJS from 'exceljs';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const Home = () => {
   const { userFirestore } = useAuth();
-  const { loadingUsers, loadingSales, sales, columns, open, sale, setOpen, filter, setFilter, users } = useHome();
-
-  const downloadExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Reporte de ventas');
-
-    worksheet.columns = [
-      { header: 'Vendedor', key: 'seller' },
-      { header: 'Correo Vendedor', key: 'email' },
-      { header: 'Equipo', key: 'team' },
-      { header: 'Cliente', key: 'client' },
-      { header: 'Estatus luz', key: 'statusLight' },
-      { header: 'Fecha / Hora', key: 'date' }
-    ];
-
-    const _sales = sales.map(sale => ({
-      seller: users.find(user => user.id === sale.userId)?.name,
-      email: users.find(user => user.id === sale.userId)?.email,
-      team: users.find(user => user.id === sale.userId)?.team,
-      client: sale.client, 
-      statusLight: sale.statusLight, 
-      date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a")
-    }));
-
-    worksheet.addRows(_sales);
-
-    const data =  await workbook.xlsx.writeBuffer();
-    
-    var blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-      
-    const a = document.createElement('a');
-    document.body.appendChild(a);
-    const url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = "Reporte.xlsx";
-    a.click();
-  }
+  const { loadingUsers, loadingSales, sales, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel } = useHome();
 
   return (
     <div>
@@ -60,7 +23,7 @@ const Home = () => {
           Agregar venta
         </Button>
       }
-      <Button type="primary" onClick={() => downloadExcel()}>
+      <Button type="primary" onClick={downloadExcel}>
         Descargar Reporte
       </Button>
       <br />
@@ -132,6 +95,7 @@ const Home = () => {
         open={open}
         onClose={() => setOpen(false)}
         propSale={sale}
+        cobradores={cobradores}
       />
     </div>
   )

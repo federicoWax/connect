@@ -28,9 +28,11 @@ const MenuComponent = () => {
         <Menu.Item onClick={() => navigate("/ventas")} key="/ventas" icon={<DollarOutlined /> }>
           Ventas
         </Menu.Item>
-        <Menu.Item onClick={() => navigate("/cobradores")} key="/cobradores" icon={<UnorderedListOutlined />}>
-          Cobradores
-        </Menu.Item>
+        {
+          userFirestore?.role  === "Administrador" && <Menu.Item onClick={() => navigate("/cobradores")} key="/cobradores" icon={<UnorderedListOutlined />}>
+            Cobradores
+          </Menu.Item>
+        }
         {
           userFirestore?.role  === "Administrador" && <Menu.Item onClick={() => navigate("/usuarios")} key="/usuarios" icon={<MdGroup /> }>
             Usuarios
