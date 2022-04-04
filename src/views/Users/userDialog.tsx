@@ -45,10 +45,9 @@ const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
       return;
     }
 
-
     const otherUser = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
 
-    if(otherUser.docs[0].data().email === user.email && otherUser.docs[0].id !== user.id) {
+    if(otherUser.docs.length && otherUser.docs[0].data()?.email === user.email && otherUser.docs[0].id !== user.id) {
       message.error("El correo ya está registrado");
       return;
     }

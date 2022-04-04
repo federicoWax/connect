@@ -156,7 +156,7 @@ const useUsers = () => {
 
     worksheet.columns = [
       { header: 'Vendedor', key: 'seller' },
-      { header: 'Correo Vendedor', key: 'email' },
+      { header: 'Correo Vendedor', key: 'emailSeller' },
       { header: 'Equipo', key: 'team' },
       { header: 'Cliente', key: 'client' },
       { header: 'Fecha / Hora', key: 'date' },
@@ -179,7 +179,7 @@ const useUsers = () => {
     const _sales = sales.map(sale => ({
       ...sale, 
       seller: users.find(user => user.id === sale.userId)?.name,
-      email: users.find(user => user.id === sale.userId)?.email,
+      emailSeller: users.find(user => user.id === sale.userId)?.email,
       team: users.find(user => user.id === sale.userId)?.team,
       receives: cobradores.find(cobrador => cobrador.id === sale.receives)?.name || "",
       date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
