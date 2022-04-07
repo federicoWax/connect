@@ -28,7 +28,8 @@ const init_sale: Sale = {
   sends: "",
   receives: "",
   livingPlace: "",
-  previousCompany: ""
+  previousCompany: "",
+  notes: ""
 };
 
 const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores}) => {
@@ -319,6 +320,17 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores}) => {
                 type="text"
                 value={sale.previousCompany} 
                 onChange={(e) => setSale({...sale, previousCompany: e.target.value})}
+              />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={24} md={24}>
+            <Form.Item
+              label="Notas"
+              name="notes"
+            >
+              <Input.TextArea
+                value={sale.notes} 
+                onChange={(e) => setSale({...sale, notes: e.target.value})}
               />
             </Form.Item>
           </Col>

@@ -14,15 +14,13 @@ const Home = () => {
   return (
     <div>
       <h1>Ventas: { sales.length }</h1>
-      {
-        ["Administrador", "Vendedor"].includes(userFirestore?.role as string) && <Button
-          style={{ float: "right", marginBottom: 10 }}
-          type="primary"
-          onClick={() => setOpen(true)}
-        >
-          Agregar venta
-        </Button>
-      }
+      <Button
+        style={{ float: "right", marginBottom: 10 }}
+        type="primary"
+        onClick={() => setOpen(true)}
+      >
+        Agregar venta
+      </Button>
       <Button type="primary" onClick={downloadExcel}>
         Descargar Reporte
       </Button>
@@ -53,10 +51,10 @@ const Home = () => {
                 }
 
                 if(startDate && endDate) {
-                  const diffMonths = endDate.diff(startDate, 'months', true);
+                  const diffMonths = endDate.diff(startDate, 'years', true);
 
                   if(diffMonths > 1) {
-                    message.error("No se puede seleccionar un rango mayor a un mes");
+                    message.error("No se puede seleccionar un rango mayor a un año");
                     setFilter({ ...filter, startDate: null, endDate: null });
                     return;
                   }

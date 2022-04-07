@@ -45,16 +45,17 @@ const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
       return;
     }
 
-    const otherUser = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
+    let _user = {...user};
+    _user.email = _user.email.toLowerCase();
 
-    if(otherUser.docs.length && otherUser.docs[0].data()?.email === user.email && otherUser.docs[0].id !== user.id) {
+    const otherUser = await getDocs(query(collection(db, "users"), where("email", "==", _user.email)));
+
+    if(otherUser.docs.length && otherUser.docs[0].id !== _user.id) {
       message.error("El correo ya está registrado");
       return;
     }
 
     setSaving(true);
-
-    let _user = {...user};
 
     delete _user.passwordConfirm;
 

@@ -125,7 +125,7 @@ const useUsers = () => {
     userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid
   });
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuery(filter));
-  const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name'), where("role", "==", "Vendedor")));
+  const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
   const [snapshotSale, loadingSales] = useOnSnapshot(querySales); 
   const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 

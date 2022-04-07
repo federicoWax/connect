@@ -34,6 +34,7 @@ export interface Sale {
   receives: string;
   livingPlace: "Casa" | "Traila" | "Apartamento" | "";
   previousCompany: string;
+  notes: string;
 };
 
 export interface FilterSale {
