@@ -20,8 +20,8 @@ const init_sale: Sale = {
   client: "",
   dateBirth: null,
   address: "",
-  statusSale: "Activación",
-  statusLight: "Con luz",
+  statusSale: "",
+  statusLight: "",
   date: null,
   concluded: false,
   paymentMethod: "",
@@ -46,11 +46,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores}) => {
       
       form.setFieldsValue(propSale);
       setSale(propSale);
-
-      return;
     }
-
-    form.setFieldsValue(init_sale);
   }, [form, propSale, cobradores]);
 
   const save = async () => {
@@ -167,7 +163,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores}) => {
               <Input 
                 type="number"
                 value={sale.esid} 
-                onChange={(e) => setSale({...sale, esid: Number(e.target.value)})}
+                onChange={(e) => setSale({...sale, esid: e.target.value})}
               />
             </Form.Item>
           </Col>
@@ -179,7 +175,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores}) => {
             >
               <Input 
                 type="text"
-                value={sale.esid} 
+                value={sale.address} 
                 onChange={(e) => setSale({...sale, address: e.target.value})}
               />
             </Form.Item>

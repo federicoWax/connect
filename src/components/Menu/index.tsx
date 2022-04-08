@@ -26,9 +26,8 @@ const MenuComponent = () => {
     <Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
       <div style={{color: "white", padding: 5}}>
         <div style={{textOverflow: "ellipsis", overflow: "hidden"}}>{userFirestore?.email}</div>
-        <div>{userFirestore?.role}</div>
+        <div style={{textOverflow: "ellipsis", overflow: "hidden"}}>{userFirestore?.role}</div>
       </div>
-     
       <Menu theme="dark" selectedKeys={[location.pathname]} mode="inline">
         <Menu.Item onClick={() => navigate("/ventas")} key="/ventas" icon={<DollarOutlined /> }>
           Ventas

@@ -19,13 +19,13 @@ export interface Sale {
   client: string;
   phone?: string;
   dateBirth: Timestamp | null;
-  esid?: number;
+  esid?: string;
   address: string;
   email?: string;
   additionalEmail?: string;
   additionalPhone?: string;
-  statusSale: "Activación" | "Mensualidad";
-  statusLight: "Con luz" | "Sin luz";
+  statusSale: "Activación" | "Mensualidad" | "";
+  statusLight: "Con luz" | "Sin luz" | "";
   date: Timestamp | null | moment.Moment;
   concluded: boolean;
   paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";

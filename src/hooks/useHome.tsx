@@ -17,82 +17,6 @@ const EndDate = moment();
 StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
-const getColumns = (
-  setSale: React.Dispatch<React.SetStateAction<Sale | null>>, 
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>, 
-  users: UserFirestore[], userFirestore: UserFirestore
-) => [
-  {
-    title: 'Vendedor',
-    key: 'seller',
-    render: (record: Sale) => {
-      const user = users.find(user =>  user.id === record.userId);
-      return (
-        <>
-          <div> Nombre:  { user?.name }</div>
-          <div> Correo: { user?.email }</div>
-          <div> Equipo: { user?.team }</div>
-        </>
-      )
-    }
-  },
-  {
-    title: 'Cliente',
-    key: 'client',
-    dataIndex: 'client',
-    render: (text: string) => text
-  },
-  {
-    title: 'Estatus luz',
-    key: 'statusLight',
-    dataIndex: 'statusLight',
-    render: (text: string) => text
-  },
-  {
-    title: 'Fecha / Hora',
-    key: 'date',
-    render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
-  },
-  {
-    title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Concluida' : '',
-    key: 'concluded',
-    render: (record: Sale) => (
-      ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Switch 
-        checked={record.concluded}
-        onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
-      />
-    )
-  },
-  {
-    title: 'Eliminar',
-    key: 'delete',
-    render: (record: Sale) => (
-      <Button 
-        shape="circle" 
-        icon={<DeleteOutlined />}
-        onClick={() => {
-          const deleteUser = () => del("sales", record.id as string);
-
-          dialogDeleteDoc(deleteUser);
-        }}
-      />
-    )
-  },
-  {
-    title: 'Editar',
-    key: 'edit',
-    render: (sale: Sale) => (
-      <Button 
-        shape="circle" 
-        icon={<EditOutlined />}
-        onClick={() => {
-          setOpen(true);
-          setSale(sale);
-        }} 
-      />
-    )
-  },
-];
 
 const getQuery = (filter: FilterSale) => {
   const { startDate, endDate, concluded, userId } = filter;
@@ -130,7 +54,84 @@ const useUsers = () => {
   const [snapshotSale, loadingSales] = useOnSnapshot(querySales); 
   const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 
   const [snapshotCobradores, loadingCobradores] = useOnSnapshot(queryCobradores); 
-  const columns = getColumns(setSale, setOpen, users, userFirestore as UserFirestore);
+  const columns = [
+    {
+      title: 'Vendedor',
+      key: 'seller',
+      render: (record: Sale) => {
+        const user = users.find(user =>  user.id === record.userId);
+        return (
+          <>
+            <div> Nombre:  { user?.name }</div>
+            <div> Correo: { user?.email }</div>
+            <div> Equipo: { user?.team }</div>
+          </>
+        )
+      }
+    },
+    {
+      title: 'id',
+      key: 'id',
+      dataIndex: 'id',
+      render: (text: string) => text
+    },
+    {
+      title: 'Cliente',
+      key: 'client',
+      dataIndex: 'client',
+      render: (text: string) => text
+    },
+    {
+      title: 'Estatus luz',
+      key: 'statusLight',
+      dataIndex: 'statusLight',
+      render: (text: string) => text
+    },
+    {
+      title: 'Fecha / Hora',
+      key: 'date',
+      render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+    },
+    {
+      title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Concluida' : '',
+      key: 'concluded',
+      render: (record: Sale) => (
+        ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Switch 
+          checked={record.concluded}
+          onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
+        />
+      )
+    },
+    {
+      title: 'Eliminar',
+      key: 'delete',
+      render: (record: Sale) => (
+        <Button 
+          shape="circle" 
+          icon={<DeleteOutlined />}
+          onClick={() => {
+            const deleteUser = () => del("sales", record.id as string);
+  
+            dialogDeleteDoc(deleteUser);
+          }}
+        />
+      )
+    },
+    {
+      title: 'Editar',
+      key: 'edit',
+      render: (sale: Sale) => (
+        <Button 
+          shape="circle" 
+          icon={<EditOutlined />}
+          onClick={() => {
+            setOpen(true);
+            setSale(sale);
+          }} 
+        />
+      )
+    },
+  ];
 
   useEffect(() => {
     setQuerySales(getQuery(filter));
