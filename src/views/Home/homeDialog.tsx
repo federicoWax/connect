@@ -56,9 +56,12 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores}) => {
 
     let _sale = {...sale};
     _sale.date = Timestamp.now();
-    _sale.userId = user?.uid;
 
     const id = _sale.id;
+
+    if(!id) {
+      _sale.userId = user?.uid;
+    }
 
     delete _sale.id;
 

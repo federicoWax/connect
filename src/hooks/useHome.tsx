@@ -69,12 +69,12 @@ const useUsers = () => {
         )
       }
     },
-    {
+   /*  {
       title: 'id',
       key: 'id',
       dataIndex: 'id',
       render: (text: string) => text
-    },
+    }, */
     {
       title: 'Cliente',
       key: 'client',
