@@ -32,9 +32,9 @@ const Home = () => {
       <br />
       <Row gutter={20}>
         <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-          <label>Concluidas / No concluidas</label>
+          <label>Concluidas / Pendientes</label>
           <Select value={filter.concluded} onChange={value => setFilter({ ...filter, concluded: value })}>
-            <Option value={false}>No concluidas</Option>
+            <Option value={false}>Pendientes</Option>
             <Option value={true}>Concluidas</Option>
           </Select>
         </Col>

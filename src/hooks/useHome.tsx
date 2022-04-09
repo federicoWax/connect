@@ -91,6 +91,33 @@ const useUsers = () => {
       }
     },
     {
+      title: 'Fecha / Hora',
+      key: 'date',
+      render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+    },
+    {
+      title: 'Estatus venta',
+      key: 'statusSale',
+      dataIndex: 'statusSale',
+      render: (text: string) => text
+    },
+    {
+      title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Concluida / Pendiente' : '',
+      key: 'concluded',
+      render: (record: Sale) => (
+        <>
+          {record.concluded ? "Concluida" : "Pendiente"}
+          <br />
+          {
+            ["Administrador", "Procesos"].includes(userFirestore?.role as string) && userFirestore?.email === record.processUser && <Switch 
+            checked={record.concluded}
+            onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
+            />
+          }
+        </>
+      )
+    },
+    {
       title: 'ESID',
       key: 'esid',
       dataIndex: 'esid',
@@ -107,21 +134,6 @@ const useUsers = () => {
       key: 'statusLight',
       dataIndex: 'statusLight',
       render: (text: string) => text
-    },
-    {
-      title: 'Fecha / Hora',
-      key: 'date',
-      render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
-    },
-    {
-      title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Concluida' : '',
-      key: 'concluded',
-      render: (record: Sale) => (
-        ["Administrador", "Procesos"].includes(userFirestore?.role as string) && userFirestore?.email === record.processUser && <Switch 
-          checked={record.concluded}
-          onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
-        />
-      )
     },
     {
       title: 'Eliminar',
@@ -205,7 +217,7 @@ const useUsers = () => {
       { header: 'Notas', key: 'notes' },
     ];
 
-    const columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y"]
+    const columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y"];
     //, "Z", "AA", "AB", "AC", "AD" , "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ"];
 
     columns.forEach(column => {
