@@ -3,7 +3,7 @@ import moment from "moment";
 import HomeDialog from "./homeDialog";
 import useHome from "../../hooks/useHome";
 import { useAuth } from "../../context/AuthContext";
-import { AutocompleteClients } from "../../interfaces";
+import { Autocomplete } from "../../interfaces";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -12,7 +12,7 @@ const Home = () => {
   const { userFirestore } = useAuth();
   const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel } = useHome();
 
-  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as AutocompleteClients[];
+  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as Autocomplete[];
 
   //Falta estrucutrar la vista en mas componentes
   return (
@@ -101,7 +101,7 @@ const Home = () => {
             filterOption={(inputValue, option) =>
               option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
             }
-            onSelect={(value: string, obj: AutocompleteClients | null) => {  
+            onSelect={(value: string, obj: Autocomplete | null) => {  
               if(obj) {
                 setFilter({ ...filter, esid: obj.value });
               }
@@ -126,6 +126,7 @@ const Home = () => {
         propSale={sale}
         cobradores={cobradores}
         clients={clients}
+        users={users}
       />
     </div>
   )

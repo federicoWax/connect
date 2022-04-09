@@ -17,7 +17,6 @@ const EndDate = moment();
 StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
-
 const getQuery = (filter: FilterSale) => {
   const { startDate, endDate, concluded, userId, esid } = filter;
 
@@ -46,7 +45,6 @@ const useUsers = () => {
   const [users, setUsers] = useState<UserFirestore[]>([]);
   const [cobradores, setCobradores] = useState<Cobrador[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-
   const [filter, setFilter] = useState<FilterSale>({
     concluded: false,
     startDate: null,
@@ -78,12 +76,26 @@ const useUsers = () => {
         )
       }
     },
-   /*  {
-      title: 'id',
-      key: 'id',
-      dataIndex: 'id',
+    {
+      title: 'Proceso',
+      key: 'processUser',
+      render: (record: Sale) => {
+        const user = users.find(user =>  user.email === record.processUser);
+        return (
+          <>
+            <div> Nombre:  { user?.name }</div>
+            <div> Correo: { user?.email }</div>
+            <div> Equipo: { user?.team }</div>
+          </>
+        )
+      }
+    },
+    {
+      title: 'ESID',
+      key: 'esid',
+      dataIndex: 'esid',
       render: (text: string) => text
-    }, */
+    },
     {
       title: 'Cliente',
       key: 'client',
@@ -105,7 +117,7 @@ const useUsers = () => {
       title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Concluida' : '',
       key: 'concluded',
       render: (record: Sale) => (
-        ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Switch 
+        ["Administrador", "Procesos"].includes(userFirestore?.role as string) && userFirestore?.email === record.processUser && <Switch 
           checked={record.concluded}
           onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
         />
@@ -167,10 +179,13 @@ const useUsers = () => {
 
     worksheet.columns = [
       { header: 'Vendedor', key: 'seller', width: 32 },
+      { header: 'Proceso', key: 'processUser', width: 32 },
+      { header: 'Fecha / Hora', key: 'date',  width: 22  },
+      { header: 'Concluida / Pendiente', key: 'status', width: 22 },
       { header: 'Correo Vendedor', key: 'emailSeller',  width: 32  },
       { header: 'Equipo', key: 'team'  },
       { header: 'Cliente', key: 'client',  width: 32  },
-      { header: 'Fecha / Hora', key: 'date',  width: 22  },
+      { header: 'Fecha de nacimiento', key: 'dateBirth',  width: 18  },
       { header: 'Teléfono', key: 'phone',  width: 16  },
       { header: 'Teléfono adicional', key: 'additionalPhone',  width: 16  },
       { header: 'ESID', key: 'esid',  width: 32  },
@@ -187,10 +202,11 @@ const useUsers = () => {
       { header: 'Compañia anterior', key: 'previousCompany',  width: 32  },
       { header: 'Cantidad de cobro', key: 'paymentAmount',  width: 22 },
       { header: 'Comición', key: 'comicion' },
+      { header: 'Notas', key: 'notes' },
     ];
 
-    const columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U"];
-    //"V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD" , "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ"];
+    const columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y"]
+    //, "Z", "AA", "AB", "AC", "AD" , "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ"];
 
     columns.forEach(column => {
       worksheet.getCell(column + '1').font = {
@@ -205,9 +221,10 @@ const useUsers = () => {
       team: users.find(user => user.id === sale.userId)?.team,
       receives: cobradores.find(cobrador => cobrador.id === sale.receives)?.name || "",
       date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
-      statusSale: sale.concluded ? "Concluida" : "Pendiente",
+      dateBirth: moment(sale.dateBirth?.toDate()).format("DD/MM/YYYY"),
+      status: sale.concluded ? "Concluida" : "Pendiente",
       paymentAmount: `$${Number(sale?.paymentAmount || 0).toFixed(2)}`,
-      comicion: "$20.00",
+      comicion: "$20.00"
     }));
 
     worksheet.addRows(_sales);

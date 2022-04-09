@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
 import moment from "moment";
-import { AutocompleteClients, Client, Cobrador, Sale } from "../../interfaces";
+import { Autocomplete, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, update } from "../../services/firebase";
 
@@ -15,6 +15,7 @@ interface Props {
   propSale: Sale | null;
   cobradores: Cobrador[];
   clients: Client[];
+  users: UserFirestore[];
 };
 
 const init_sale: Sale = {
@@ -31,14 +32,20 @@ const init_sale: Sale = {
   previousCompany: "",
   notes: "",
   paymentAmount: "",
+  email: ""
 };
 
-const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) => {
+const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, users}) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [searchESID, setSearchESID] = useState<string>("");
   const [sale, setSale] = useState<Sale>(init_sale);
   const [form] = Form.useForm();
   const { user } = useAuth();
+
+  const setForm = (_sale: Sale) => {
+    setSale(_sale);
+    form.setFieldsValue(_sale);
+  }
 
   useEffect(() => {
     if(propSale) {
@@ -81,7 +88,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) =
       const clientDocs = await getDocs(query(collection(db, "clients"), where("esid", "==", _sale.esid)));
 
       if(clientDocs.empty) {
-        const client: Client = {
+        let client: Client = {
           esid: _sale.esid,
           phone: _sale.phone,
           address: _sale.address,
@@ -99,10 +106,18 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) =
           notes: _sale.notes
         };
 
+        for(const key in client) {
+          const keyClinet = key as keyof Client;
+
+          if(client[keyClinet] === undefined) {
+            delete client[keyClinet];
+          }
+        }
+
         await add("clients", client);
       }
 
-      id ? await update("sales", id, _sale ) : await add('sales', _sale);
+      id ? await update("sales", id, _sale) : await add('sales', _sale);
 
       message.success("Venta guardada con exito!");
     } catch (error) {
@@ -120,13 +135,9 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) =
     form.resetFields();
   }
 
-  const setForm = (_sale: Sale) => {
-    setSale(_sale);
-    form.setFieldsValue(_sale);
-  }
-
-  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as AutocompleteClients[];
-
+  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as Autocomplete[];
+  const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
+  
   return (
     <Modal
       width={1000}
@@ -214,7 +225,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) =
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onSelect={(value: string, obj: AutocompleteClients | null) => {  
+                onSelect={(value: string, obj: Autocomplete | null) => {  
                   if(obj) {
                     let clinet = clients.find(c => c.esid === obj.value);
                     
@@ -393,6 +404,28 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) =
                 value={sale.paymentAmount} 
                 onChange={(e) => setSale({...sale, paymentAmount: e.target.value})}
               />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={24} md={8}>
+            <Form.Item
+              label="Usuario de proceso"
+              name="processUser"
+            >
+              <AutoComplete
+                allowClear
+                value={sale?.processUser}
+                options={optionsProcessUser} 
+                filterOption={(inputValue, option) =>
+                  option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                }
+                onSelect={(value: string, obj: Autocomplete | null) => {  
+                  if(obj) {
+                    setSale({...sale, processUser: obj.value }) 
+                  }
+                }}
+                placeholder="Buscar usuario"
+                onClear={() => setSale({...sale, processUser: ""})}
+              />              
             </Form.Item>
           </Col>
         </Row>

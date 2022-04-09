@@ -18,7 +18,7 @@ export interface Client {
   esid?: string;
   phone?: string;
   address: string;
-  email?: string;
+  email: string;
   client: string;
   dateBirth: Timestamp | null;
   additionalEmail?: string;
@@ -39,6 +39,7 @@ export interface Sale extends Client {
   referenceNumber?: string;
   concluded: boolean;
   paymentAmount: string;
+  processUser?: string;
 };
 
 export interface FilterSale {
@@ -54,7 +55,7 @@ export interface Cobrador {
   name: string;
 }
 
-export interface AutocompleteClients {
+export interface Autocomplete {
   value: string;
   label: string;
 }

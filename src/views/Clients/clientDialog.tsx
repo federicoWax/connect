@@ -25,6 +25,7 @@ const init_sale: Client = {
   livingPlace: "",
   previousCompany: "",
   notes: "",
+  email: ""
 };
 
 const CliendDialog: FC<Props> = ({open, onClose, propClient, cobradores}) => {

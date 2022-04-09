@@ -1,5 +1,5 @@
 import { Layout } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import MenuComponent from '../Menu';
@@ -8,12 +8,11 @@ const RoterChecker = () => {
   const { user, userFirestore } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-
-  const adminRoutes: string[] = [
+  const [adminRoutes] = useState<string[]>([
     "/usuarios",
     "/cobradores",
     "/clientes",
-  ];
+  ]);
 
   useEffect(() => {
     if(!user && location.pathname !== "/login") {
@@ -26,7 +25,7 @@ const RoterChecker = () => {
     if(user && (location.pathname === '/login' || location.pathname === '/' || inPrivateRoute)) {
       navigate('/ventas');
     }
-  }, [user, userFirestore, location, navigate]);
+  }, [user, userFirestore, location, navigate, adminRoutes]);
   
   return (
     <Layout style={{minHeight: "100vh"}}>
