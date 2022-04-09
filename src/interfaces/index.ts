@@ -13,28 +13,32 @@ export interface UserFirestore {
   team: string;
 };
 
-export interface Sale {
+export interface Client {
   id?: string;
-  userId?: string;
-  client: string;
-  phone?: string;
-  dateBirth: Timestamp | null;
   esid?: string;
+  phone?: string;
   address: string;
   email?: string;
+  client: string;
+  dateBirth: Timestamp | null;
   additionalEmail?: string;
   additionalPhone?: string;
-  statusSale: "Activación" | "Mensualidad" | "";
   statusLight: "Con luz" | "Sin luz" | "";
-  date: Timestamp | null | moment.Moment;
-  concluded: boolean;
   paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
-  referenceNumber?: string;
   sends: string;
   receives: string;
   livingPlace: "Casa" | "Traila" | "Apartamento" | "";
   previousCompany: string;
   notes: string;
+}
+
+export interface Sale extends Client {
+  userId?: string;
+  date?: Timestamp | null | moment.Moment;
+  statusSale?: "Activación" | "Mensualidad" | "Desconexión";
+  referenceNumber?: string;
+  concluded: boolean;
+  paymentAmount: string;
 };
 
 export interface FilterSale {

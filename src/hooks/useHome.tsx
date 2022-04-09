@@ -3,7 +3,7 @@ import { Button, Switch } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy, where, DocumentData, Query } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
-import { Cobrador, FilterSale, Sale, UserFirestore } from "../interfaces";
+import { Client, Cobrador, FilterSale, Sale, UserFirestore } from "../interfaces";
 import { del, update } from '../services/firebase';
 import { dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +42,8 @@ const useUsers = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [users, setUsers] = useState<UserFirestore[]>([]);
   const [cobradores, setCobradores] = useState<Cobrador[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+
   const [filter, setFilter] = useState<FilterSale>({
     concluded: false,
     startDate: null,
@@ -51,9 +53,13 @@ const useUsers = () => {
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuery(filter));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
+  const [queryClients] = useState<Query<DocumentData>>(query(collection(db, "clients"), orderBy("client")));
+
   const [snapshotSale, loadingSales] = useOnSnapshot(querySales); 
   const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 
   const [snapshotCobradores, loadingCobradores] = useOnSnapshot(queryCobradores); 
+  const [snapshotClients, loadingClients] = useOnSnapshot(queryClients); 
+
   const columns = [
     {
       title: 'Vendedor',
@@ -145,37 +151,49 @@ const useUsers = () => {
     setSales(snapshotSale.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]);
     setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
     setCobradores(snapshotCobradores.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
+    setClients(snapshotClients.docs.map(doc => ({...doc.data(), id: doc.id })) as Client[]);
 
     return () => {
       mounted = false;
     }
-  }, [snapshotSale, snapshotUsers, snapshotCobradores, loadingSales, loadingUsers, loadingCobradores]);
+  }, [snapshotSale, snapshotUsers, snapshotCobradores, snapshotClients, loadingSales, loadingUsers, loadingCobradores, loadingClients]);
 
   const downloadExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Reporte de ventas');
 
     worksheet.columns = [
-      { header: 'Vendedor', key: 'seller' },
-      { header: 'Correo Vendedor', key: 'emailSeller' },
-      { header: 'Equipo', key: 'team' },
-      { header: 'Cliente', key: 'client' },
-      { header: 'Fecha / Hora', key: 'date' },
-      { header: 'Teléfono', key: 'phone' },
-      { header: 'Teléfono adicional', key: 'additionalPhone' },
-      { header: 'ESID', key: 'esid' },
-      { header: 'Dirreción', key: 'address' },
-      { header: 'Correo electrónico', key: 'email' },
-      { header: 'Correo electrónico adicional', key: 'additionalEmail' },
-      { header: 'Estatus de venta', key: 'statusSale' },
+      { header: 'Vendedor', key: 'seller', width: 32 },
+      { header: 'Correo Vendedor', key: 'emailSeller',  width: 32  },
+      { header: 'Equipo', key: 'team'  },
+      { header: 'Cliente', key: 'client',  width: 32  },
+      { header: 'Fecha / Hora', key: 'date',  width: 22  },
+      { header: 'Teléfono', key: 'phone',  width: 16  },
+      { header: 'Teléfono adicional', key: 'additionalPhone',  width: 16  },
+      { header: 'ESID', key: 'esid',  width: 32  },
+      { header: 'Direción', key: 'address',  width: 40  },
+      { header: 'Correo electrónico', key: 'email',  width: 32  },
+      { header: 'Correo electrónico adicional', key: 'additionalEmail',  width: 32  },
+      { header: 'Estatus de venta', key: 'statusSale', width: 16 },
       { header: 'Estatus luz', key: 'statusLight' },
-      { header: 'Método de pago', key: 'paymentMethod' },
-      { header: 'Número de referencia', key: 'referenceNumber' },
-      { header: 'Recibe', key: 'sends' },
-      { header: 'Envia', key: 'receives' },
-      { header: 'Vivienda', key: 'livingPlace' },
-      { header: 'Compañia anterior', key: 'previousCompany' },
+      { header: 'Método de pago', key: 'paymentMethod', width: 16 },
+      { header: 'Número de referencia', key: 'referenceNumber',  width: 22  },
+      { header: 'Recibe', key: 'sends',  width: 32  },
+      { header: 'Envia', key: 'receives',  width: 32  },
+      { header: 'Vivienda', key: 'livingPlace',  width: 16  },
+      { header: 'Compañia anterior', key: 'previousCompany',  width: 32  },
+      { header: 'Cantidad de cobro', key: 'paymentAmount',  width: 22 },
+      { header: 'Comición', key: 'comicion' },
     ];
+
+    const columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U"];
+    //"V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD" , "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ"];
+
+    columns.forEach(column => {
+      worksheet.getCell(column + '1').font = {
+        bold: true
+      };
+    })
 
     const _sales = sales.map(sale => ({
       ...sale, 
@@ -185,6 +203,8 @@ const useUsers = () => {
       receives: cobradores.find(cobrador => cobrador.id === sale.receives)?.name || "",
       date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
       statusSale: sale.concluded ? "Concluida" : "Pendiente",
+      paymentAmount: `$${Number(sale?.paymentAmount || 0).toFixed(2)}`,
+      comicion: "$20.00",
     }));
 
     worksheet.addRows(_sales);
@@ -201,7 +221,7 @@ const useUsers = () => {
     a.click();
   }
 
-  return { loadingUsers, loadingSales, users, sales, columns, sale, open, setOpen, setSale, filter, setFilter, cobradores, downloadExcel };
+  return { loadingUsers, loadingSales, users, sales, clients, columns, sale, open, setOpen, setSale, filter, setFilter, cobradores, downloadExcel };
 }
 
 export default useUsers;

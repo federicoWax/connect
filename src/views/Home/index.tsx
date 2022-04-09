@@ -9,8 +9,9 @@ const { RangePicker } = DatePicker;
 
 const Home = () => {
   const { userFirestore } = useAuth();
-  const { loadingUsers, loadingSales, sales, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel } = useHome();
+  const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel } = useHome();
 
+  //Falta estrucutrar la vista en mas componentes
   return (
     <div>
       <h1>Ventas: { sales.length }</h1>
@@ -41,26 +42,30 @@ const Home = () => {
               onChange={(dates) => {
                 const startDate = dates ? dates[0] as moment.Moment : null;
                 const endDate = dates ? dates[1] as moment.Moment : null;
-                
+
                 if(startDate) {
-                  startDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+                  startDate.set({ hour: 0, minute: 0, second: 0 });
                 } 
 
                 if(endDate) {
-                  endDate.set({ hour: 24, minute: 59, second: 59, millisecond: 59 });
+                  endDate.set({ hour: 23, minute: 59, second: 59 });
                 }
 
-                if(startDate && endDate) {
-                  const diffMonths = endDate.diff(startDate, 'years', true);
-
-                  if(diffMonths > 1) {
-                    message.error("No se puede seleccionar un rango mayor a un año");
-                    setFilter({ ...filter, startDate: null, endDate: null });
-                    return;
-                  }
+                if(userFirestore?.role === "Administrador") {
+                  setFilter({ ...filter, startDate, endDate });
+                  return;
                 }
 
-                setFilter({ ...filter, startDate, endDate });
+                if(!startDate || !endDate) {
+                  return;
+                }
+
+                const diff= endDate.diff(startDate, 'years', true);
+
+                if(diff > 1) {
+                  message.error("No se puede seleccionar un rango mayor a un año");
+                  setFilter({ ...filter, startDate: null, endDate: null });
+                }
               }}
               showTime={false}
               placeholder={["Fecha inicio", "Fecha fin"]}
@@ -94,6 +99,7 @@ const Home = () => {
         onClose={() => setOpen(false)}
         propSale={sale}
         cobradores={cobradores}
+        clients={clients}
       />
     </div>
   )

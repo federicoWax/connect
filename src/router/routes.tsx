@@ -1,3 +1,4 @@
+import Clients from '../views/Clients';
 import Cobradores from '../views/Cobradores';
 import Home from '../views/Home';
 import Login from '../views/Login';
@@ -13,6 +14,11 @@ const routes = [
     key: 'home',
     path: '/ventas',
     element: <Home />,
+  },
+  {
+    key: 'clientes',
+    path: '/clientes',
+    element: <Clients />,
   },
   {
     key: 'cobradores',
