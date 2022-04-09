@@ -1,8 +1,9 @@
-import { Button, Col, Row, Select, Table, DatePicker, message } from "antd";
+import { Button, Col, Row, Select, Table, DatePicker, message, AutoComplete } from "antd";
 import moment from "moment";
 import HomeDialog from "./homeDialog";
 import useHome from "../../hooks/useHome";
 import { useAuth } from "../../context/AuthContext";
+import { AutocompleteClients } from "../../interfaces";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -10,6 +11,8 @@ const { RangePicker } = DatePicker;
 const Home = () => {
   const { userFirestore } = useAuth();
   const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel } = useHome();
+
+  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as AutocompleteClients[];
 
   //Falta estrucutrar la vista en mas componentes
   return (
@@ -74,7 +77,12 @@ const Home = () => {
         {
           ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
             <label>Vendedores</label>
-            <Select loading={loadingUsers} value={filter.userId} onChange={value => setFilter({ ...filter, userId: value })}>
+            <Select 
+              loading={loadingUsers} 
+              value={filter.userId} 
+              onChange={value => setFilter({ ...filter, userId: value })}
+              allowClear
+            >
             <Option value="">{"Todos los vendedores"}</Option>
             {
               users.map(user => (
@@ -84,6 +92,24 @@ const Home = () => {
             </Select>
           </Col>
         }
+        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+          <label>Clientes</label>
+          <AutoComplete
+            allowClear
+            value={filter.esid}
+            options={optionsAuotComplete} 
+            filterOption={(inputValue, option) =>
+              option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+            }
+            onSelect={(value: string, obj: AutocompleteClients | null) => {  
+              if(obj) {
+                setFilter({ ...filter, esid: obj.value });
+              }
+            }}
+            placeholder="Buscar ESID"
+            onClear={() => setFilter({...filter, esid: ""})}
+          />              
+        </Col>
       </Row>
       <br />
       <Table

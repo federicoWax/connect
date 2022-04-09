@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
 import moment from "moment";
-import { Client, Cobrador, Sale } from "../../interfaces";
+import { AutocompleteClients, Client, Cobrador, Sale } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, update } from "../../services/firebase";
 
@@ -32,11 +32,6 @@ const init_sale: Sale = {
   notes: "",
   paymentAmount: "",
 };
-
-interface Autocomplete {
-  value: string;
-  label: string;
-}
 
 const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) => {
   const [saving, setSaving] = useState<boolean>(false);
@@ -130,7 +125,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) =
     form.setFieldsValue(_sale);
   }
 
-  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as Autocomplete[];
+  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as AutocompleteClients[];
 
   return (
     <Modal
@@ -219,7 +214,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients}) =
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onSelect={(value: string, obj: Autocomplete | null) => {  
+                onSelect={(value: string, obj: AutocompleteClients | null) => {  
                   if(obj) {
                     let clinet = clients.find(c => c.esid === obj.value);
                     

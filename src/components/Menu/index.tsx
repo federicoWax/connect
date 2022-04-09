@@ -32,18 +32,19 @@ const MenuComponent = () => {
         <Menu.Item onClick={() => navigate("/ventas")} key="/ventas" icon={<DollarOutlined /> }>
           Ventas
         </Menu.Item>
-        <Menu.Item onClick={() => navigate("/clientes")} key="/clientes" icon={<MdAccountBox /> }>
-          Clientes
-        </Menu.Item>
         {
-          userFirestore?.role  === "Administrador" && <Menu.Item onClick={() => navigate("/cobradores")} key="/cobradores" icon={<UnorderedListOutlined />}>
-            Cobradores
-          </Menu.Item>
-        }
-        {
-          userFirestore?.role  === "Administrador" && <Menu.Item onClick={() => navigate("/usuarios")} key="/usuarios" icon={<MdGroup /> }>
-            Usuarios
-          </Menu.Item>
+          userFirestore?.role  === "Administrador" && 
+          <>
+            <Menu.Item onClick={() => navigate("/clientes")} key="/clientes" icon={<MdAccountBox /> }>
+              Clientes
+            </Menu.Item>
+            <Menu.Item onClick={() => navigate("/cobradores")} key="/cobradores" icon={<UnorderedListOutlined />}>
+              Cobradores
+            </Menu.Item>
+            <Menu.Item onClick={() => navigate("/usuarios")} key="/usuarios" icon={<MdGroup /> }>
+              Usuarios
+            </Menu.Item>
+          </>
         }
         <SubMenu key="sub1" icon={<UserOutlined />} title="Cuenta">
           <Menu.Item key="4" icon={<BiDoorOpen />} onClick={signOut}>Cerrar sesión</Menu.Item>

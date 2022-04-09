@@ -46,9 +46,15 @@ export interface FilterSale {
   startDate: null | moment.Moment;
   endDate: null | moment.Moment;
   userId?: string;
+  esid?: string;
 };
 
 export interface Cobrador {
   id?: string;
   name: string;
+}
+
+export interface AutocompleteClients {
+  value: string;
+  label: string;
 }

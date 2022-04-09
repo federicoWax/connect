@@ -19,7 +19,7 @@ EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
 
 const getQuery = (filter: FilterSale) => {
-  const { startDate, endDate, concluded, userId } = filter;
+  const { startDate, endDate, concluded, userId, esid } = filter;
 
   let Query = query(
     collection(db, "sales"), 
@@ -31,6 +31,9 @@ const getQuery = (filter: FilterSale) => {
   
   if(userId) 
     Query = query(Query, where('userId', '==', userId));
+
+  if(esid)
+    Query = query(Query, where('esid', '==', esid));
 
   return Query;
 }

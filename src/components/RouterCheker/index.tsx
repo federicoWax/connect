@@ -11,7 +11,8 @@ const RoterChecker = () => {
 
   const adminRoutes: string[] = [
     "/usuarios",
-    "/cobradores"
+    "/cobradores",
+    "/clientes",
   ];
 
   useEffect(() => {
