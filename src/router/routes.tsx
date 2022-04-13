@@ -1,3 +1,4 @@
+import Campaigns from '../views/Campaigns';
 import Clients from '../views/Clients';
 import Cobradores from '../views/Cobradores';
 import Home from '../views/Home';
@@ -8,27 +9,32 @@ const routes = [
   {
     key: 'login',
     path: '/login',
-    element: <Login />,
+    element: <Login />
   },
   {
     key: 'home',
     path: '/ventas',
-    element: <Home />,
+    element: <Home />
   },
   {
     key: 'clientes',
     path: '/clientes',
-    element: <Clients />,
+    element: <Clients />
   },
   {
     key: 'cobradores',
     path: '/cobradores',
-    element: <Cobradores />,
+    element: <Cobradores />
+  },
+  {
+    key: '/campanas',
+    path: '/campanas',
+    element: <Campaigns />
   },
   {
     key: 'users',
     path: '/usuarios',
-    element: <Users />,
+    element: <Users />
   }
 ];
 

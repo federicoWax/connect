@@ -10,9 +10,10 @@ const { RangePicker } = DatePicker;
 
 const Home = () => {
   const { userFirestore } = useAuth();
-  const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel } = useHome();
+  const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel, campaigns } = useHome();
 
   const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as Autocomplete[];
+  const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
 
   //Falta estrucutrar la vista en mas componentes
   return (
@@ -38,42 +39,43 @@ const Home = () => {
             <Option value={true}>Concluidas</Option>
           </Select>
         </Col>
-        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-          <label>Rango de fechas</label>
-            <RangePicker  
-              value={[filter.startDate, filter.endDate]}
-              onChange={(dates) => {
-                const startDate = dates ? dates[0] as moment.Moment : null;
-                const endDate = dates ? dates[1] as moment.Moment : null;
+        {
+          filter.concluded && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+            <label>Rango de fechas</label>
+              <RangePicker  
+                value={[filter.startDate, filter.endDate]}
+                onChange={(dates) => {
+                  const startDate = dates ? dates[0] as moment.Moment : null;
+                  const endDate = dates ? dates[1] as moment.Moment : null;
 
-                if(startDate) {
+                  if(userFirestore?.role === "Administrador") {
+                    setFilter({ ...filter, startDate, endDate });
+                    return;
+                  }
+
+                  if(!startDate || !endDate) {
+                    setFilter({ ...filter, startDate, endDate });
+                    return;
+                  }
+
                   startDate.set({ hour: 0, minute: 0, second: 0 });
-                } 
-
-                if(endDate) {
                   endDate.set({ hour: 23, minute: 59, second: 59 });
-                }
 
-                if(userFirestore?.role === "Administrador") {
+                  const diff = endDate.diff(startDate, 'years', true);
+
+                  if(diff > 1) {
+                    message.error("No se puede seleccionar un rango mayor a un año");
+                    setFilter({ ...filter, startDate: null, endDate: null });
+                    return;
+                  }
+
                   setFilter({ ...filter, startDate, endDate });
-                  return;
-                }
-
-                if(!startDate || !endDate) {
-                  return;
-                }
-
-                const diff= endDate.diff(startDate, 'years', true);
-
-                if(diff > 1) {
-                  message.error("No se puede seleccionar un rango mayor a un año");
-                  setFilter({ ...filter, startDate: null, endDate: null });
-                }
-              }}
-              showTime={false}
-              placeholder={["Fecha inicio", "Fecha fin"]}
-            />
-        </Col>
+                }}
+                showTime={false}
+                placeholder={["Fecha inicio", "Fecha fin"]}
+              />
+          </Col>
+        }
         {
           ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
             <label>Vendedores</label>
@@ -92,6 +94,24 @@ const Home = () => {
             </Select>
           </Col>
         }
+        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+          <label>Procesos</label>
+          <AutoComplete
+            allowClear
+            value={sale?.processUser}
+            options={optionsProcessUser} 
+            filterOption={(inputValue, option) =>
+              option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+            }
+            onSelect={(value: string, obj: Autocomplete | null) => {  
+              if(obj) {
+                setFilter({...filter, processUser: obj.value }) 
+              }
+            }}
+            placeholder="Buscar usuario proceso"
+            onClear={() => setFilter({...filter, processUser: ""})}
+          />  
+        </Col>
         <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
           <label>Clientes</label>
           <AutoComplete
@@ -127,6 +147,7 @@ const Home = () => {
         cobradores={cobradores}
         clients={clients}
         users={users}
+        campaigns={campaigns}
       />
     </div>
   )

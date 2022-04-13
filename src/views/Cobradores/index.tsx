@@ -2,7 +2,7 @@ import { Button, Table } from "antd";
 import CobradorDialog from "./cobradorDialog";
 import useCobrador from "../../hooks/useCobrador";
 
-const Cobrador = () => {
+const Cobradores = () => {
   const { loadingCobradores, cobradores, columns, open, cobrador, setOpen } = useCobrador();
 
   return (
@@ -32,4 +32,4 @@ const Cobrador = () => {
   )
 }
 
-export default Cobrador;
+export default Cobradores;

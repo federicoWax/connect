@@ -1,10 +1,11 @@
 import { FC, useEffect, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
-import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
+import { collection, DocumentData, getDocs, getFirestore, orderBy, Query, query, Timestamp, where } from "firebase/firestore";
 import moment from "moment";
-import { Autocomplete, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
+import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, update } from "../../services/firebase";
+import useOnSnapshot from "../../hooks/useOnSnapshot";
 
 const db = getFirestore();
 const { Option } = Select;
@@ -16,6 +17,7 @@ interface Props {
   cobradores: Cobrador[];
   clients: Client[];
   users: UserFirestore[];
+  campaigns: Campaign[];
 };
 
 const init_sale: Sale = {
@@ -32,18 +34,21 @@ const init_sale: Sale = {
   previousCompany: "",
   notes: "",
   paymentAmount: "",
-  email: ""
+  email: "",
+  campaign: "dVfLotqwqWwSu6u1zowQ"
 };
 
-const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, users}) => {
+const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, users, campaigns}) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [searchESID, setSearchESID] = useState<string>("");
   const [sale, setSale] = useState<Sale>(init_sale);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
   const [form] = Form.useForm();
   const { user } = useAuth();
 
   const setForm = (_sale: Sale) => {
     setSale(_sale);
+    form.resetFields();
     form.setFieldsValue(_sale);
   }
 
@@ -57,12 +62,9 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
         setSearchESID(propSale.esid);
       }
       
+      setPaymentAmount(propSale.paymentAmount);
       setForm(propSale);
-      return;
     }
-
-    setSale(init_sale);
-    form.resetFields();
   }, [form, propSale, cobradores]);
 
   const save = async () => {
@@ -75,6 +77,10 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
 
     if(!id) {
       _sale.userId = user?.uid;
+      _sale.date = Timestamp.now();
+    }
+    
+    if(id && paymentAmount !== _sale.paymentAmount) {
       _sale.date = Timestamp.now();
     }
 
@@ -103,7 +109,8 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
           receives: _sale.receives,
           livingPlace: _sale.livingPlace,
           previousCompany: _sale.previousCompany,
-          notes: _sale.notes
+          notes: _sale.notes,
+          campaign: _sale.campaign
         };
 
         for(const key in client) {
@@ -131,8 +138,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
 
   const resetForm = () => {
     onClose();
-    setSale(init_sale);
-    form.resetFields();
+    setForm(init_sale);
   }
 
   const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as Autocomplete[];
@@ -423,10 +429,29 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                     setSale({...sale, processUser: obj.value }) 
                   }
                 }}
-                placeholder="Buscar usuario"
+                placeholder="Buscar usuario proceso"
                 onClear={() => setSale({...sale, processUser: ""})}
               />              
             </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={10} style={{marginTop: 10}}>
+          <Col xs={24} sm={24} md={8}>
+            <Form.Item
+              label="Campaña"
+              name="campaign"
+            >
+              <Select
+                onChange={(value) => setSale({...sale, campaign: value})}
+                value={sale.campaign} 
+              >
+              {
+                campaigns.map(campaign => (
+                  <Option key={campaign.id} value={campaign.id}>{campaign.name}</Option>
+                ))
+              }
+              </Select>
+            </Form.Item>      
           </Col>
         </Row>
         <Row>

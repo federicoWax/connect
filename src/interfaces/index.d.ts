@@ -30,6 +30,7 @@ export interface Client {
   livingPlace: "Casa" | "Traila" | "Apartamento" | "";
   previousCompany: string;
   notes: string;
+  campaign: string;
 }
 
 export interface Sale extends Client {
@@ -48,11 +49,16 @@ export interface FilterSale {
   endDate: null | moment.Moment;
   userId?: string;
   esid?: string;
+  processUser?: string;
 };
 
 export interface Cobrador {
   id?: string;
   name: string;
+}
+
+export interface Campaign extends Cobrador {
+
 }
 
 export interface Autocomplete {
