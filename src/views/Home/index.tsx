@@ -12,7 +12,7 @@ const Home = () => {
   const { userFirestore } = useAuth();
   const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel, campaigns } = useHome();
 
-  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as Autocomplete[];
+  const optionsAuotComplete = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
 
   //Falta estrucutrar la vista en mas componentes
@@ -88,7 +88,7 @@ const Home = () => {
             <Option value="">{"Todos los vendedores"}</Option>
             {
               users.map(user => (
-                <Option key={user.id} value={user.id}>{user.name}</Option>
+                <Option key={user.id} value={user.id}>{user.name + " - " + user.email}</Option>
               )) 
             }
             </Select>
@@ -112,25 +112,32 @@ const Home = () => {
             onClear={() => setFilter({...filter, processUser: ""})}
           />  
         </Col>
-        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-          <label>Clientes</label>
-          <AutoComplete
-            allowClear
-            value={filter.esid}
-            options={optionsAuotComplete} 
-            filterOption={(inputValue, option) =>
-              option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-            }
-            onSelect={(value: string, obj: Autocomplete | null) => {  
-              if(obj) {
-                setFilter({ ...filter, esid: obj.value });
-              }
-            }}
-            placeholder="Buscar ESID"
-            onClear={() => setFilter({...filter, esid: ""})}
-          />              
-        </Col>
       </Row>
+      {
+         userFirestore?.role === "Administrador" && <>
+          <br />
+          <Row gutter={20}>
+            <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+              <label>Clientes</label>
+              <AutoComplete
+                allowClear
+                value={filter.esid}
+                options={optionsAuotComplete} 
+                filterOption={(inputValue, option) =>
+                  option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+                }
+                onSelect={(value: string, obj: Autocomplete | null) => {  
+                  if(obj) {
+                    setFilter({...filter, esid: obj.value});
+                  }
+                }}
+                placeholder="Buscar ESID"
+                onClear={() => setFilter({...filter, esid: ""})}
+              />              
+            </Col>
+          </Row>
+        </>
+      }
       <br />
       <Table
         id=""

@@ -19,9 +19,6 @@ const init_sale: Client = {
   dateBirth: null,
   address: "",
   statusLight: "",
-  paymentMethod: "",
-  sends: "",
-  receives: "",
   livingPlace: "",
   previousCompany: "",
   notes: "",
@@ -36,10 +33,6 @@ const CliendDialog: FC<Props> = ({open, onClose, propClient, cobradores}) => {
 
   useEffect(() => {
     if(propClient) {
-      if(!cobradores.some(c => c.id === propClient.receives)) {
-        propClient.receives = "";
-      }
-
       form.setFieldsValue(propClient);
       setClient(propClient);
     }
@@ -237,21 +230,6 @@ const CliendDialog: FC<Props> = ({open, onClose, propClient, cobradores}) => {
           </Col>
           <Col xs={24} sm={24} md={8}>
             <Form.Item
-              label="Método de pago"
-              name="paymentMethod"
-            >
-              <Select value={client.paymentMethod} onChange={value => setClient({...client, paymentMethod: value })}>
-                <Option value="BARRI">BARRI</Option>
-                <Option value="Western union">Western union</Option>
-                <Option value="Ria">Ria</Option>
-                <Option value="Dolex">Dolex</Option>
-                <Option value="Zelle">Zelle</Option>
-                <Option value="Cashapp">Cashapp</Option>
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
               label="Vivienda"
               name="livingPlace"
               rules={[{ required: true, message: 'Vivienda requerida.' }]}
@@ -260,38 +238,6 @@ const CliendDialog: FC<Props> = ({open, onClose, propClient, cobradores}) => {
                 <Option value="Casa">Casa</Option>
                 <Option value="Traila">Traila</Option>
                 <Option value="Apartamento">Apartamento</Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={10} style={{marginTop: 10}}>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Envia"
-              name="sends"
-            >
-              <Input 
-                type="text"
-                value={client.sends} 
-                onChange={(e) => setClient({...client, sends: e.target.value})}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Recibe"
-              name="receives"
-            >
-              <Select
-                onChange={(value) => setClient({...client, receives: value})}
-                value={client.receives} 
-              >
-                <Option key="" value="">Sin receptor</Option>
-                {
-                  cobradores.map(cobrador => (
-                    <Option key={cobrador.id} value={cobrador.id}>{cobrador.name}</Option>
-                  ))
-                }
               </Select>
             </Form.Item>
           </Col>

@@ -1,11 +1,10 @@
 import { FC, useEffect, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
-import { collection, DocumentData, getDocs, getFirestore, orderBy, Query, query, Timestamp, where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
 import moment from "moment";
 import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, update } from "../../services/firebase";
-import useOnSnapshot from "../../hooks/useOnSnapshot";
 
 const db = getFirestore();
 const { Option } = Select;
@@ -35,10 +34,11 @@ const init_sale: Sale = {
   notes: "",
   paymentAmount: "",
   email: "",
-  campaign: "dVfLotqwqWwSu6u1zowQ"
+  campaign: "dVfLotqwqWwSu6u1zowQ",
 };
 
 const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, users, campaigns}) => {
+  const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [searchESID, setSearchESID] = useState<string>("");
   const [sale, setSale] = useState<Sale>(init_sale);
@@ -51,21 +51,26 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     form.resetFields();
     form.setFieldsValue(_sale);
   }
+  
+  useEffect(() => {
+    setLoading(true);
+  }, [open]);
+
+  console.log(loading);
 
   useEffect(() => {
-    if(propSale) {
-      if(!cobradores.some(c => c.id === propSale.receives)) {
-        propSale.receives = "";
-      }
+    if(!loading) return;
 
+    if(propSale && form) {
       if(propSale.esid) {
         setSearchESID(propSale.esid);
       }
-      
+
       setPaymentAmount(propSale.paymentAmount);
       setForm(propSale);
+      setLoading(false);
     }
-  }, [form, propSale, cobradores]);
+  }, [form, propSale, cobradores, loading]);
 
   const save = async () => {
     if(saving) return;
@@ -104,9 +109,6 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
           additionalEmail: _sale.additionalEmail,
           additionalPhone: _sale.additionalPhone,
           statusLight: _sale.statusLight,
-          paymentMethod: _sale.paymentMethod,
-          sends: _sale.sends,
-          receives: _sale.receives,
           livingPlace: _sale.livingPlace,
           previousCompany: _sale.previousCompany,
           notes: _sale.notes,
@@ -141,7 +143,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     setForm(init_sale);
   }
 
-  const optionsAuotComplete = clients.map((c) => ({value: c.esid, label: c.esid + " - " + c.client})) as Autocomplete[];
+  const optionsAuotComplete = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
   
   return (
@@ -236,8 +238,11 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                     let clinet = clients.find(c => c.esid === obj.value);
                     
                     delete clinet?.id;
+                    delete clinet?.receives;
+                    delete clinet?.sends;
+                    delete clinet?.paymentMethod;
 
-                    let _sale = {...sale, ...clinet} as Sale;
+                    const _sale = {...sale, ...clinet} as Sale;
                     
                     setForm(_sale);
                   }
@@ -367,7 +372,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 <Option key="" value="">Sin receptor</Option>
                 {
                   cobradores.map(cobrador => (
-                    <Option key={cobrador.id} value={cobrador.id}>{cobrador.name}</Option>
+                    <Option key={cobrador.id} value={cobrador.name}>{cobrador.name}</Option>
                   ))
                 }
               </Select>

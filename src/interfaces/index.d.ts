@@ -24,13 +24,13 @@ export interface Client {
   additionalEmail?: string;
   additionalPhone?: string;
   statusLight: "Con luz" | "Sin luz" | "";
-  paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
-  sends: string;
-  receives: string;
   livingPlace: "Casa" | "Traila" | "Apartamento" | "";
   previousCompany: string;
   notes: string;
   campaign: string;
+  receives?: string;
+  sends?: string;
+  paymentMethod?: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
 }
 
 export interface Sale extends Client {
@@ -41,6 +41,9 @@ export interface Sale extends Client {
   concluded: boolean;
   paymentAmount: string;
   processUser?: string;
+  paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
+  sends: string;
+  receives: string;
 };
 
 export interface FilterSale {
