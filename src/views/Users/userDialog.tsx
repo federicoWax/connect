@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { Modal, Row, Col, Form, Input, Select, message } from 'antd';
 import { UserFirestore } from '../../interfaces';
 import { post } from '../../services/http';
-import { getFirestore, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 
 interface Props {
   open: boolean;

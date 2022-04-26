@@ -56,8 +56,6 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     setLoading(true);
   }, [open]);
 
-  console.log(loading);
-
   useEffect(() => {
     if(!loading) return;
 

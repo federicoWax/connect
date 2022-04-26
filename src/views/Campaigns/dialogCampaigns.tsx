@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { Col, Form, Input, message, Modal, Row } from "antd";
-import { Campaign, Cobrador } from "../../interfaces";
+import { Campaign } from "../../interfaces";
 import { add, update } from "../../services/firebase";
 
 interface Props {

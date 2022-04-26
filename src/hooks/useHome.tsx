@@ -75,6 +75,12 @@ const useUsers = () => {
 
   const columns = [
     {
+      title: 'Cliente',
+      key: 'client',
+      dataIndex: 'client',
+      render: (text: string) => text
+    },
+    {
       title: 'Vendedor',
       key: 'seller',
       render: (record: Sale) => {
@@ -82,35 +88,35 @@ const useUsers = () => {
         return (
           <>
             <div> Nombre:  { user?.name }</div>
-            <div> Correo: { user?.email }</div>
-            <div> Equipo: { user?.team }</div>
+            <div> Correo: { user?.email }</div>            
           </>
         )
       }
     },
     {
-      title: 'Proceso',
-      key: 'processUser',
+      title: 'Campaña',
+      key: 'campaign',
+      dataIndex: 'campaign',
+      render: (text: string) => campaigns.find(c => c.id === text)?.name
+    },
+    {
+      title: 'Equipo',
+      key: 'team',
       render: (record: Sale) => {
-        const user = users.find(user =>  user.email === record.processUser);
-        return (
-          <>
-            <div> Nombre:  { user?.name }</div>
-            <div> Correo: { user?.email }</div>
-            <div> Equipo: { user?.team }</div>
-          </>
-        )
+        const user = users.find(user =>  user.id === record.userId);
+        return user?.team;            
       }
-    },
-    {
-      title: 'Fecha / Hora',
-      key: 'date',
-      render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Estatus venta',
       key: 'statusSale',
       dataIndex: 'statusSale',
+      render: (text: string) => text
+    },
+    {
+      title: 'Estatus luz',
+      key: 'statusLight',
+      dataIndex: 'statusLight',
       render: (text: string) => text
     },
     {
@@ -136,31 +142,23 @@ const useUsers = () => {
       render: (text: string) => text
     },
     {
-      title: 'Cliente',
-      key: 'client',
-      dataIndex: 'client',
-      render: (text: string) => text
+      title: 'Proceso',
+      key: 'processUser',
+      render: (record: Sale) => {
+        const user = users.find(user =>  user.email === record.processUser);
+        return (
+          user?.email && <>
+            <div> Nombre:  { user?.name }</div>
+            <div> Correo: { user?.email }</div>
+            <div> Equipo: { user?.team }</div>
+          </>
+        )
+      }
     },
     {
-      title: 'Estatus luz',
-      key: 'statusLight',
-      dataIndex: 'statusLight',
-      render: (text: string) => text
-    },
-    {
-      title: 'Eliminar',
-      key: 'delete',
-      render: (record: Sale) => (
-        <Button 
-          shape="circle" 
-          icon={<DeleteOutlined />}
-          onClick={() => {
-            const deleteUser = () => del("sales", record.id as string);
-  
-            dialogDeleteDoc(deleteUser);
-          }}
-        />
-      )
+      title: 'Fecha / Hora',
+      key: 'date',
+      render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Editar',
@@ -176,6 +174,21 @@ const useUsers = () => {
         />
       )
     },
+    {
+      title: 'Eliminar',
+      key: 'delete',
+      render: (record: Sale) => (
+        <Button 
+          shape="circle" 
+          icon={<DeleteOutlined />}
+          onClick={() => {
+            const deleteUser = () => del("sales", record.id as string);
+  
+            dialogDeleteDoc(deleteUser);
+          }}
+        />
+      )
+    }
   ];
 
   useEffect(() => {
@@ -221,8 +234,8 @@ const useUsers = () => {
       { header: 'ESTATUS LUZ', key: 'statusLight' },
       { header: 'MÉTODO DE PAGO', key: 'paymentMethod', width: 16 },
       { header: 'NÚMERO DE REFERENCIA', key: 'referenceNumber',  width: 22  },
-      { header: 'RECIBE', key: 'sends',  width: 32  },
-      { header: 'ENVIA', key: 'receives',  width: 32  },
+      { header: 'RECIBE', key: 'receives',  width: 32  },
+      { header: 'ENVIA', key: 'sends',  width: 32  },
       { header: 'VIVIENDA', key: 'livingPlace',  width: 16  },
       { header: 'COMPAÑIA ANTERIOR', key: 'previousCompany',  width: 32  },
       { header: 'CANTIDAD DE COBRO', key: 'paymentAmount',  width: 22 },
@@ -250,21 +263,23 @@ const useUsers = () => {
       team: users.find(user => user.id === sale.userId)?.team.toUpperCase(),
       client: sale.client.toUpperCase(),
       dateBirth: moment(sale.dateBirth?.toDate()).format("DD/MM/YYYY"),
-      address: sale.address?.toUpperCase(),
-      email: sale.email?.toUpperCase(),
+      address: sale.address.toUpperCase(),
+      email: sale.email.toUpperCase(),
       additionalEmail: sale.additionalEmail?.toUpperCase(),
       statusSale: sale.statusSale?.toUpperCase(),
-      statusLight: sale.statusLight?.toUpperCase(),
-      paymentMethod: sale.paymentMethod?.toUpperCase(),
-      sends: sale.sends?.toUpperCase(),
-      receives: cobradores.find(cobrador => cobrador.id === sale.receives)?.name.toUpperCase() || "",
-      livingPlace: sale.livingPlace?.toUpperCase(),
-      previousCompany: sale.previousCompany?.toUpperCase(),
+      statusLight: sale.statusLight.toUpperCase(),
+      paymentMethod: sale.paymentMethod.toUpperCase(),
+      sends: sale.sends.toUpperCase(),
+      receives: sale.receives.toUpperCase(),
+      livingPlace: sale.livingPlace.toUpperCase(),
+      previousCompany: sale.previousCompany.toUpperCase(),
       paymentAmount: `$${Number(sale?.paymentAmount || 0).toFixed(2)}`,
       comision: "$20.00",
       campaign: campaigns.find(campaign => campaign.id === sale.campaign)?.name.toUpperCase(),
-      notes: sale.notes?.toUpperCase(),
+      notes: sale.notes.toUpperCase(),
     }));
+
+    console.log(_sales)
 
     worksheet.addRows(_sales);
 
