@@ -1,4 +1,5 @@
-import { Button, Col, Row, Select, Table, DatePicker, message, AutoComplete } from "antd";
+import { useState } from "react";
+import { Button, Col, Row, Select, Table, DatePicker, message, AutoComplete, Input } from "antd";
 import moment from "moment";
 import HomeDialog from "./homeDialog";
 import useHome from "../../hooks/useHome";
@@ -9,8 +10,9 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const Home = () => {
+  const [searchESID, setSearchESID] = useState<string>("");
   const { userFirestore } = useAuth();
-  const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel, campaigns } = useHome();
+  const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel, campaigns, onSearchClients } = useHome();
 
   const optionsAuotComplete = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
@@ -120,7 +122,7 @@ const Home = () => {
             <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
               <label>Clientes</label>
               <AutoComplete
-                allowClear
+                onSearch={setSearchESID}
                 value={filter.esid}
                 options={optionsAuotComplete} 
                 filterOption={(inputValue, option) =>
@@ -133,7 +135,15 @@ const Home = () => {
                 }}
                 placeholder="Buscar ESID"
                 onClear={() => setFilter({...filter, esid: ""})}
-              />              
+              >
+                <Input.Search 
+                  allowClear
+                  size="middle" 
+                  placeholder="Buscar ESID" 
+                  enterButton
+                  onSearch={() => onSearchClients(searchESID)} 
+                />
+              </AutoComplete>              
             </Col>
           </Row>
         </>
@@ -155,6 +165,7 @@ const Home = () => {
         clients={clients}
         users={users}
         campaigns={campaigns}
+        onSearchClients={onSearchClients}
       />
     </div>
   )

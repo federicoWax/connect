@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Switch } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { getFirestore, collection, query, orderBy, where, DocumentData, Query } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, where, DocumentData, Query, limit } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
 import { Campaign, Client, Cobrador, FilterSale, Sale, UserFirestore } from "../interfaces";
 import { del, update } from '../services/firebase';
@@ -13,11 +13,41 @@ import ExcelJS from 'exceljs';
 const db = getFirestore();
 const StartDate = moment();
 const EndDate = moment();
+const columnsWorksheet = [
+  { header: 'VENDEDOR', key: 'seller', width: 32 },
+  { header: 'PROCESO', key: 'processUser', width: 32 },
+  { header: 'FECHA / HORA', key: 'date',  width: 22  },
+  { header: 'CONCLUIDA / PENDIENTE', key: 'status', width: 22 },
+  { header: 'CORREO VENDEDOR', key: 'emailSeller',  width: 32  },
+  { header: 'EQUIPO', key: 'team'  },
+  { header: 'CLIENTE', key: 'client',  width: 32  },
+  { header: 'FECHA DE NACIMIENTO', key: 'dateBirth',  width: 18  },
+  { header: 'TELÉFONO', key: 'phone',  width: 16  },
+  { header: 'TELÉFONO ADICIONAL', key: 'additionalPhone',  width: 16  },
+  { header: 'ESID', key: 'esid',  width: 32  },
+  { header: 'DIRECCIÓN', key: 'address',  width: 40  },
+  { header: 'CORREO ELECTRÓNICO', key: 'email',  width: 32  },
+  { header: 'CORREO ELECTRÓNICO ADICIONAL', key: 'additionalEmail',  width: 32  },
+  { header: 'ESTATUS DE VENTA', key: 'statusSale', width: 16 },
+  { header: 'ESTATUS LUZ', key: 'statusLight' },
+  { header: 'MÉTODO DE PAGO', key: 'paymentMethod', width: 16 },
+  { header: 'NÚMERO DE REFERENCIA', key: 'referenceNumber',  width: 22  },
+  { header: 'RECIBE', key: 'receives',  width: 32  },
+  { header: 'ENVIA', key: 'sends',  width: 32  },
+  { header: 'VIVIENDA', key: 'livingPlace',  width: 16  },
+  { header: 'COMPAÑIA ANTERIOR', key: 'previousCompany',  width: 32  },
+  { header: 'CANTIDAD DE COBRO', key: 'paymentAmount',  width: 22 },
+  { header: 'COMISIÓN', key: 'comision' },
+  { header: 'CAMPAÑA', key: 'campaign', width: 18 },
+  { header: 'NOTAS', key: 'notes' },
+];
+const columnsExcel = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+const limitClients = 10;
 
 StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
-const getQuery = (filter: FilterSale) => {
+const getQuerySales = (filter: FilterSale) => {
   const { startDate, endDate, concluded, userId, esid, processUser } = filter;
 
   let Query = query(
@@ -46,6 +76,16 @@ const getQuery = (filter: FilterSale) => {
   return Query;
 }
 
+const getQueryClients = (searchESID: string) => {
+  let Query = query(collection(db, "clients"));
+
+  searchESID
+    ? Query = query(Query, orderBy("esid"), where('esid', '>=', searchESID))
+    : Query = query(Query, orderBy("client"), limit(limitClients));
+
+  return Query;
+}
+
 const useUsers = () => {
   const { userFirestore, user } = useAuth();
   const [open, setOpen] = useState<boolean>(false);
@@ -61,12 +101,11 @@ const useUsers = () => {
     endDate: null,
     userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid
   });
-  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuery(filter));
+  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
-  const [queryClients] = useState<Query<DocumentData>>(query(collection(db, "clients"), orderBy("client")));
+  const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients(""));
   const [queryCampaigns] = useState<Query<DocumentData>>(query(collection(db, "campaigns"), orderBy("name")));
-
   const [snapshotSale, loadingSales] = useOnSnapshot(querySales); 
   const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 
   const [snapshotCobradores, loadingCobradores] = useOnSnapshot(queryCobradores); 
@@ -192,7 +231,7 @@ const useUsers = () => {
   ];
 
   useEffect(() => {
-    setQuerySales(getQuery(filter));
+    setQuerySales(getQuerySales(filter));
   }, [filter, userFirestore, user]);
       
   useEffect(() => {
@@ -209,45 +248,26 @@ const useUsers = () => {
     return () => {
       mounted = false;
     }
-  }, [snapshotSale, snapshotUsers, snapshotCobradores, snapshotClients, snapshotCampaigns, loadingSales, loadingUsers, loadingCobradores, loadingClients, loadingCampaigns]);
+  }, [
+    snapshotSale, 
+    snapshotUsers, 
+    snapshotCobradores, 
+    snapshotClients, 
+    snapshotCampaigns, 
+    loadingSales, 
+    loadingUsers, 
+    loadingCobradores, 
+    loadingClients, 
+    loadingCampaigns
+  ]);
 
   const downloadExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Reporte de ventas');
 
-    worksheet.columns = [
-      { header: 'VENDEDOR', key: 'seller', width: 32 },
-      { header: 'PROCESO', key: 'processUser', width: 32 },
-      { header: 'FECHA / HORA', key: 'date',  width: 22  },
-      { header: 'CONCLUIDA / PENDIENTE', key: 'status', width: 22 },
-      { header: 'CORREO VENDEDOR', key: 'emailSeller',  width: 32  },
-      { header: 'EQUIPO', key: 'team'  },
-      { header: 'CLIENTE', key: 'client',  width: 32  },
-      { header: 'FECHA DE NACIMIENTO', key: 'dateBirth',  width: 18  },
-      { header: 'TELÉFONO', key: 'phone',  width: 16  },
-      { header: 'TELÉFONO ADICIONAL', key: 'additionalPhone',  width: 16  },
-      { header: 'ESID', key: 'esid',  width: 32  },
-      { header: 'DIRECCIÓN', key: 'address',  width: 40  },
-      { header: 'CORREO ELECTRÓNICO', key: 'email',  width: 32  },
-      { header: 'CORREO ELECTRÓNICO ADICIONAL', key: 'additionalEmail',  width: 32  },
-      { header: 'ESTATUS DE VENTA', key: 'statusSale', width: 16 },
-      { header: 'ESTATUS LUZ', key: 'statusLight' },
-      { header: 'MÉTODO DE PAGO', key: 'paymentMethod', width: 16 },
-      { header: 'NÚMERO DE REFERENCIA', key: 'referenceNumber',  width: 22  },
-      { header: 'RECIBE', key: 'receives',  width: 32  },
-      { header: 'ENVIA', key: 'sends',  width: 32  },
-      { header: 'VIVIENDA', key: 'livingPlace',  width: 16  },
-      { header: 'COMPAÑIA ANTERIOR', key: 'previousCompany',  width: 32  },
-      { header: 'CANTIDAD DE COBRO', key: 'paymentAmount',  width: 22 },
-      { header: 'COMISIÓN', key: 'comision' },
-      { header: 'CAMPAÑA', key: 'campaign', width: 18 },
-      { header: 'NOTAS', key: 'notes' },
-    ];
+    worksheet.columns = columnsWorksheet;
 
-    const columns = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
-    //, "AA", "AB", "AC", "AD" , "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT", "AU", "AV", "AW", "AX", "AY", "AZ"];
-
-    columns.forEach(column => {
+    columnsExcel.forEach(column => {
       worksheet.getCell(column + '1').font = {
         bold: true
       };
@@ -279,23 +299,40 @@ const useUsers = () => {
       notes: sale.notes.toUpperCase(),
     }));
 
-    console.log(_sales)
-
     worksheet.addRows(_sales);
 
     const data =  await workbook.xlsx.writeBuffer();
-    
-    var blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
-      
+    const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
     const a = document.createElement('a');
-    document.body.appendChild(a);
     const url = window.URL.createObjectURL(blob);
+    
+    document.body.appendChild(a);
+
     a.href = url;
     a.download = "Reporte de ventas.xlsx";
     a.click();
   }
 
-  return { loadingUsers, loadingSales, users, sales, clients, columns, sale, open, setOpen, setSale, filter, setFilter, cobradores, downloadExcel, campaigns };
+  const onSearchClients = (value: string) => setQueryClients(getQueryClients(value));
+
+  return { 
+    loadingUsers, 
+    loadingSales, 
+    users, 
+    sales, 
+    clients, 
+    columns, 
+    sale, 
+    open, 
+    setOpen, 
+    setSale, 
+    filter, 
+    setFilter, 
+    cobradores, 
+    downloadExcel, 
+    campaigns, 
+    onSearchClients 
+  };
 }
 
 export default useUsers;

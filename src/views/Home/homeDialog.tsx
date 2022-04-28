@@ -17,6 +17,7 @@ interface Props {
   clients: Client[];
   users: UserFirestore[];
   campaigns: Campaign[];
+  onSearchClients: (value: string) => void;
 };
 
 const init_sale: Sale = {
@@ -37,7 +38,7 @@ const init_sale: Sale = {
   campaign: "dVfLotqwqWwSu6u1zowQ",
 };
 
-const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, users, campaigns}) => {
+const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, users, campaigns, onSearchClients}) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
   const [searchESID, setSearchESID] = useState<string>("");
@@ -141,7 +142,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     setForm(init_sale);
   }
 
-  const optionsAuotComplete = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
+  const optionsClients = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
   
   return (
@@ -224,10 +225,9 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               rules={[{ required: true, message: 'ESID requerido.' }]}
             >
               <AutoComplete
-                allowClear
-                onSearch={(value) => setSearchESID(value)}
+                onSearch={setSearchESID}
                 value={sale.esid}
-                options={optionsAuotComplete} 
+                options={optionsClients} 
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
@@ -245,9 +245,16 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                     setForm(_sale);
                   }
                 }}
-                placeholder="Buscar ESID"
                 onClear={() => setSale({...sale, esid: ""})}
-              />              
+              >
+                <Input.Search 
+                  allowClear
+                  size="middle" 
+                  placeholder="Buscar ESID" 
+                  enterButton
+                  onSearch={() => onSearchClients(searchESID)} 
+                />
+              </AutoComplete>
             </Form.Item>
             { sale.esid && <div style={{marginBottom: -10}}>{ clients.find(c => c.esid === sale.esid)?.client }</div> }
           </Col>
