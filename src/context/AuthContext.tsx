@@ -8,6 +8,7 @@ import { getDocById } from "../services/firebase";
 interface UserFirestore {
   email: string;
   role: Rols;
+  team: string;
 }
 
 const AuthContext = createContext<{ user: User | null, userFirestore: UserFirestore | null }>({

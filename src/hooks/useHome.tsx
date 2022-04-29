@@ -136,7 +136,12 @@ const useUsers = () => {
       title: 'Vendedor',
       key: 'seller',
       render: (record: Sale) => {
+        if(record?.team) {
+          return record.team;
+        }
+
         const user = users.find(user =>  user.id === record.userId);
+
         return (
           <>
             <div> Nombre:  { user?.name }</div>

@@ -45,7 +45,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
   const [sale, setSale] = useState<Sale>(init_sale);
   const [paymentAmount, setPaymentAmount] = useState<string>("");
   const [form] = Form.useForm();
-  const { user } = useAuth();
+  const { user, userFirestore } = useAuth();
 
   const setForm = (_sale: Sale) => {
     setSale(_sale);
@@ -80,6 +80,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     const id = _sale.id;
 
     if(!id) {
+      _sale.team = userFirestore?.team;
       _sale.userId = user?.uid;
       _sale.date = Timestamp.now();
     }

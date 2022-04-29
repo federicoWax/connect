@@ -44,6 +44,7 @@ export interface Sale extends Client {
   paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
   sends: string;
   receives: string;
+  team?: string;
 };
 
 export interface FilterSale {
