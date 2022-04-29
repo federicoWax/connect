@@ -47,12 +47,13 @@ export interface Sale extends Client {
 };
 
 export interface FilterSale {
-  concluded: boolean;
+  concluded: boolean | null;
   startDate: null | moment.Moment;
   endDate: null | moment.Moment;
   userId?: string;
   esid?: string;
   processUser?: string;
+  statusPayment: Boolean | null;
 };
 
 export interface Cobrador {

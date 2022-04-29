@@ -35,14 +35,15 @@ const Home = () => {
       <br />
       <Row gutter={20}>
         <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-          <label>Concluidas / Pendientes</label>
+          <label>Concluidas / Pendientes / Todas</label>
           <Select value={filter.concluded} onChange={value => setFilter({ ...filter, concluded: value })}>
             <Option value={false}>Pendientes</Option>
             <Option value={true}>Concluidas</Option>
+            <Option value={null}>Todas</Option>
           </Select>
         </Col>
         {
-          filter.concluded && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+          filter.concluded || filter.concluded === null && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
             <label>Rango de fechas</label>
               <RangePicker  
                 value={[filter.startDate, filter.endDate]}
@@ -115,39 +116,45 @@ const Home = () => {
           />  
         </Col>
       </Row>
-      {
-         userFirestore?.role === "Administrador" && <>
-          <br />
-          <Row gutter={20}>
-            <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-              <label>Clientes</label>
-              <AutoComplete
-                onSearch={setSearchESID}
-                value={filter.esid}
-                options={optionsAuotComplete} 
-                filterOption={(inputValue, option) =>
-                  option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+        <br />
+        <Row gutter={20}>
+        {
+          userFirestore?.role === "Administrador" && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+            <label>Clientes</label>
+            <AutoComplete
+              onSearch={setSearchESID}
+              value={filter.esid}
+              options={optionsAuotComplete} 
+              filterOption={(inputValue, option) =>
+                option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
+              }
+              onSelect={(value: string, obj: Autocomplete | null) => {  
+                if(obj) {
+                  setFilter({...filter, esid: obj.value});
                 }
-                onSelect={(value: string, obj: Autocomplete | null) => {  
-                  if(obj) {
-                    setFilter({...filter, esid: obj.value});
-                  }
-                }}
-                placeholder="Buscar ESID"
-                onClear={() => setFilter({...filter, esid: ""})}
-              >
-                <Input.Search 
-                  allowClear
-                  size="middle" 
-                  placeholder="Buscar ESID" 
-                  enterButton
-                  onSearch={() => onSearchClients(searchESID)} 
-                />
-              </AutoComplete>              
-            </Col>
-          </Row>
-        </>
-      }
+              }}
+              placeholder="Buscar ESID"
+              onClear={() => setFilter({...filter, esid: ""})}
+            >
+              <Input.Search 
+                allowClear
+                size="middle" 
+                placeholder="Buscar ESID" 
+                enterButton
+                onSearch={() => onSearchClients(searchESID)} 
+              />
+            </AutoComplete>              
+          </Col>
+        }
+        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+          <label>Estatus pago</label>
+          <Select value={filter.statusPayment} onChange={value => setFilter({ ...filter, statusPayment: value })}>
+            <Option value={null}>Todas</Option>
+            <Option value={true}>Pagadas</Option>
+            <Option value={false}>No pagadas</Option>
+          </Select>
+        </Col>
+      </Row>
       <br />
       <Table
         id=""

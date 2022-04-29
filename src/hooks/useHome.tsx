@@ -48,15 +48,25 @@ StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
 const getQuerySales = (filter: FilterSale) => {
-  const { startDate, endDate, concluded, userId, esid, processUser } = filter;
+  const { startDate, endDate, concluded, userId, esid, processUser, statusPayment } = filter;
 
   let Query = query(
     collection(db, "sales"), 
-    orderBy('date'), 
-    where('concluded', '==', concluded),
   )
 
-  if(filter.concluded) {
+  if(statusPayment !== null) {
+    Query = query(Query, where('paymentAmount', statusPayment ? "!=" : "==", ""));
+    
+    if(statusPayment) {
+      Query = query(Query, orderBy("paymentAmount"));
+    }
+  }
+
+  if(concluded !== null) {
+    Query = query(Query, where('concluded', '==', concluded));
+  }
+
+  if(concluded || concluded === null) {
     Query = query(
       Query,
       where("date", ">=", startDate ? startDate.toDate() : StartDate.toDate()),
@@ -72,6 +82,8 @@ const getQuerySales = (filter: FilterSale) => {
 
   if(processUser) 
     Query = query(Query, where('processUser', '==', processUser));
+
+  Query = query(Query, orderBy("date"));  
 
   return Query;
 }
@@ -99,7 +111,8 @@ const useUsers = () => {
     concluded: false,
     startDate: null,
     endDate: null,
-    userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid
+    userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid,
+    statusPayment: null
   });
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
@@ -232,7 +245,7 @@ const useUsers = () => {
 
   useEffect(() => {
     setQuerySales(getQuerySales(filter));
-  }, [filter, userFirestore, user]);
+  }, [filter]);
       
   useEffect(() => {
     let mounted = true;
@@ -288,7 +301,7 @@ const useUsers = () => {
       additionalEmail: sale.additionalEmail?.toUpperCase(),
       statusSale: sale.statusSale?.toUpperCase(),
       statusLight: sale.statusLight.toUpperCase(),
-      paymentMethod: sale.paymentMethod.toUpperCase(),
+      paymentMethod: sale.paymentMethod?.toUpperCase(),
       sends: sale.sends.toUpperCase(),
       receives: sale.receives.toUpperCase(),
       livingPlace: sale.livingPlace.toUpperCase(),
