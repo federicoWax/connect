@@ -55,6 +55,9 @@ export interface FilterSale {
   esid?: string;
   processUser?: string;
   statusPayment: Boolean | null;
+  campaignId: string;
+  teamId: string;
+  statusLight: "Con luz" | "Sin luz" | "";
 };
 
 export interface Cobrador {

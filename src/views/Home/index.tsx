@@ -12,10 +12,14 @@ const { RangePicker } = DatePicker;
 const Home = () => {
   const [searchESID, setSearchESID] = useState<string>("");
   const { userFirestore } = useAuth();
-  const { loadingUsers, loadingSales, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel, campaigns, onSearchClients } = useHome();
+  let { loadingUsers, loadingSales, loadingCampaigns, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel, campaigns, onSearchClients } = useHome();
 
   const optionsAuotComplete = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
+
+  if(filter.statusPayment !== null) {
+    sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
+  }
 
   //Falta estrucutrar la vista en mas componentes
   return (
@@ -43,7 +47,7 @@ const Home = () => {
           </Select>
         </Col>
         {
-          filter.concluded || filter.concluded === null && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+          (filter.concluded || filter.concluded === null) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
             <label>Rango de fechas</label>
               <RangePicker  
                 value={[filter.startDate, filter.endDate]}
@@ -116,8 +120,8 @@ const Home = () => {
           />  
         </Col>
       </Row>
-        <br />
-        <Row gutter={20}>
+      <br />
+      <Row gutter={20}>
         {
           userFirestore?.role === "Administrador" && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
             <label>Clientes</label>
@@ -146,12 +150,56 @@ const Home = () => {
             </AutoComplete>              
           </Col>
         }
-        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+       <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
           <label>Estatus pago</label>
-          <Select value={filter.statusPayment} onChange={value => setFilter({ ...filter, statusPayment: value })}>
+          <Select 
+            allowClear
+            value={filter.statusPayment} 
+            onChange={value => setFilter({ ...filter, statusPayment: value })}
+          >
             <Option value={null}>Todas</Option>
             <Option value={true}>Pagadas</Option>
             <Option value={false}>No pagadas</Option>
+          </Select>
+        </Col>
+        <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
+          <label>Campañas</label>
+          <Select 
+            loading={loadingCampaigns} 
+            value={filter.campaignId}  
+            onChange={value => setFilter({ ...filter, campaignId: value })}
+            allowClear
+          >
+          <Option value="">Todas las campañas</Option>
+          {
+            campaigns.map(c => (
+              <Option key={c.id} value={c.id}>{c.name}</Option>
+            )) 
+          }
+          </Select>
+        </Col>
+        <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
+          <label>Equipos</label>
+          <Select 
+            allowClear
+            value={filter.teamId} 
+            onChange={value => setFilter({...filter, teamId: value})}
+          >
+            <Option value="">Todos los equipos</Option>
+            <Option value="CMG">CMG</Option>
+            <Option value="USALES">USALES</Option>
+          </Select>
+        </Col>
+        <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
+          <label>Estatus de servicio</label>
+          <Select 
+            allowClear
+            value={filter.statusLight} 
+            onChange={value => setFilter({...filter, statusLight: value })}
+          >
+            <Option value="">Todas</Option>
+            <Option value="Con luz">Con luz</Option>
+            <Option value="Sin luz">Sin luz</Option>
           </Select>
         </Col>
       </Row>

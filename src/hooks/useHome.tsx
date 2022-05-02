@@ -48,22 +48,14 @@ StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
 const getQuerySales = (filter: FilterSale) => {
-  const { startDate, endDate, concluded, userId, esid, processUser, statusPayment } = filter;
+  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight } = filter;
 
   let Query = query(
     collection(db, "sales"), 
   )
 
-  if(statusPayment !== null) {
-    Query = query(Query, where('paymentAmount', statusPayment ? "!=" : "==", ""));
-    
-    if(statusPayment) {
-      Query = query(Query, orderBy("paymentAmount"));
-    }
-  }
-
   if(concluded !== null) {
-    Query = query(Query, where('concluded', '==', concluded));
+    Query = query(Query, where('concluded', '==', concluded), orderBy("date"));
   }
 
   if(concluded || concluded === null) {
@@ -73,6 +65,8 @@ const getQuerySales = (filter: FilterSale) => {
       where("date", "<=", endDate ? endDate.toDate() : EndDate.toDate())
     )
   }
+
+  console.log(userId)
   
   if(userId) 
     Query = query(Query, where('userId', '==', userId));
@@ -82,8 +76,16 @@ const getQuerySales = (filter: FilterSale) => {
 
   if(processUser) 
     Query = query(Query, where('processUser', '==', processUser));
-
-  Query = query(Query, orderBy("date"));  
+  
+  if(campaignId) 
+    Query = query(Query, where('campaign', '==', campaignId));
+  
+  if(teamId) 
+    Query = query(Query, where('team', '==', teamId));
+  
+  if(statusLight) {
+    Query = query(Query, where('statusLight', '==', statusLight));
+  }
 
   return Query;
 }
@@ -112,7 +114,10 @@ const useUsers = () => {
     startDate: null,
     endDate: null,
     userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid,
-    statusPayment: null
+    statusPayment: null,
+    campaignId: "",
+    teamId: "",
+    statusLight: "",
   });
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
@@ -126,6 +131,12 @@ const useUsers = () => {
   const [snapshotCampaigns, loadingCampaigns] = useOnSnapshot(queryCampaigns); 
 
   const columns = [
+  /*   {
+      title: 'Pago',
+      key: 'paymentAmount',
+      dataIndex: 'paymentAmount',
+      render: (text: string) => text
+    }, */
     {
       title: 'Cliente',
       key: 'client',
@@ -136,16 +147,13 @@ const useUsers = () => {
       title: 'Vendedor',
       key: 'seller',
       render: (record: Sale) => {
-        if(record?.team) {
-          return record.team;
-        }
-
         const user = users.find(user =>  user.id === record.userId);
 
         return (
           <>
             <div> Nombre:  { user?.name }</div>
-            <div> Correo: { user?.email }</div>            
+            <div> Correo: { user?.email }</div>    
+            <div> Equipo: { record?.team || user?.team  }</div>        
           </>
         )
       }
@@ -160,6 +168,10 @@ const useUsers = () => {
       title: 'Equipo',
       key: 'team',
       render: (record: Sale) => {
+        if(record.team) {
+          return record.team;
+        }
+
         const user = users.find(user =>  user.id === record.userId);
         return user?.team;            
       }
@@ -185,8 +197,8 @@ const useUsers = () => {
           <br />
           {
             ["Administrador", "Procesos"].includes(userFirestore?.role as string) && userFirestore?.email === record.processUser && <Switch 
-            checked={record.concluded}
-            onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
+              checked={record.concluded}
+              onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
             />
           }
         </>
@@ -336,6 +348,7 @@ const useUsers = () => {
   return { 
     loadingUsers, 
     loadingSales, 
+    loadingCampaigns,
     users, 
     sales, 
     clients, 
