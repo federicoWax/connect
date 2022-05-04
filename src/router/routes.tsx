@@ -1,9 +1,11 @@
-import Campaigns from '../views/Campaigns';
-import Clients from '../views/Clients';
-import Cobradores from '../views/Cobradores';
-import Home from '../views/Home';
-import Login from '../views/Login';
-import Users from '../views/Users';
+import { lazy } from "react";
+
+const Campaigns = lazy(() => import('../views/Campaigns'));
+const Clients = lazy(() => import('../views/Clients'));
+const Cobradores = lazy(() => import('../views/Cobradores'));
+const Home = lazy(() => import('../views/Home'));
+const Login = lazy(() => import('../views/Login'));
+const Users = lazy(() => import('../views/Users'));
 
 const routes = [
   {

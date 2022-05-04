@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, createContext, FC } from "react";
 import { User, onIdTokenChanged } from "firebase/auth";
-import FullLoader from "../components/FullLoader/FullLoader";
+import FullLoader from "../components/FullLoader";
 import { auth } from "../firebase";
 import { Rols } from "../types";
 import { getDocById } from "../services/firebase";

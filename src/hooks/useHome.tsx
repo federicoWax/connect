@@ -66,8 +66,6 @@ const getQuerySales = (filter: FilterSale) => {
     )
   }
 
-  console.log(userId)
-  
   if(userId) 
     Query = query(Query, where('userId', '==', userId));
 
