@@ -188,6 +188,8 @@ const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
                   <Select value={user.team} onChange={value => setUser({...user, team: value})}>
                     <Option value="CMG">CMG</Option>
                     <Option value="USALES">USALES</Option>
+                    <Option value="SELECT">SELECT</Option>
+                    <Option value="ECONOBIL">ECONOBIL</Option>
                   </Select>
                 </Form.Item>
               </Col>

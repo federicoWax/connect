@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Switch } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { getFirestore, collection, query, orderBy, where, DocumentData, Query, limit } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, where, DocumentData, Query, limit, Timestamp } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
 import { Campaign, Client, Cobrador, FilterSale, Sale, UserFirestore } from "../interfaces";
 import { del, update } from '../services/firebase';
@@ -198,7 +198,7 @@ const useUsers = () => {
           {
             ["Administrador", "Procesos"].includes(userFirestore?.role as string) && userFirestore?.email === record.processUser && <Switch 
               checked={record.concluded}
-              onChange={async (checket) => await update("sales", record.id as string, {concluded: checket})}
+              onChange={async (checket) => await update("sales", record.id as string, {concluded: checket, dateConclued: checket ? Timestamp.now() : null})}
             />
           }
         </>
@@ -225,9 +225,19 @@ const useUsers = () => {
       }
     },
     {
-      title: 'Fecha / Hora',
+      title: 'Fecha / Hora creada',
       key: 'date',
       render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+    },
+    {
+      title: 'Fecha / Hora pago',
+      key: 'date',
+      render: (record: Sale) => record.datePayment && <div>{moment(record.datePayment?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+    },
+    {
+      title: 'Fecha / Hora concluida',
+      key: 'date',
+      render: (record: Sale) => record.dateConclued && <div>{moment(record.dateConclued?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Editar',

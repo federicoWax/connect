@@ -7,7 +7,7 @@ const Campaigns = () => {
   
   return (
     <div>
-      <h1>Camapañas</h1>
+      <h1>Campañas</h1>
       <Button
         style={{ float: "right", marginBottom: 10 }}
         type="primary"

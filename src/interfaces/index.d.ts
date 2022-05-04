@@ -36,6 +36,8 @@ export interface Client {
 export interface Sale extends Client {
   userId?: string;
   date?: Timestamp | null | moment.Moment;
+  datePayment?: Timestamp | null | moment.Moment;
+  dateConclued?: Timestamp | null | moment.Moment;
   statusSale?: "Activación" | "Mensualidad" | "Desconexión";
   referenceNumber?: string;
   concluded: boolean;

@@ -86,7 +86,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     }
     
     if(id && paymentAmount !== _sale.paymentAmount) {
-      _sale.date = Timestamp.now();
+      _sale.datePayment = Timestamp.now();
     }
 
     delete _sale.id;
@@ -316,7 +316,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
         <Row gutter={10} style={{marginTop: 10}}>
           <Col xs={24} sm={24} md={8}>
             <Form.Item
-              label="Estatus de luz"
+              label="Estatus de servicio"
               name="statusLight"
             >
               <Select value={sale.statusLight} onChange={value => setSale({...sale, statusLight: value })}>
