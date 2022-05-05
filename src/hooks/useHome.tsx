@@ -102,7 +102,7 @@ const useUsers = () => {
   const { userFirestore, user } = useAuth();
   const [open, setOpen] = useState<boolean>(false);
   const [sale, setSale] = useState<Sale | null>(null);
-  const [sales, setSales] = useState<Sale[]>([]);
+  let [sales, setSales] = useState<Sale[]>([]);
   const [users, setUsers] = useState<UserFirestore[]>([]);
   const [cobradores, setCobradores] = useState<Cobrador[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -129,12 +129,6 @@ const useUsers = () => {
   const [snapshotCampaigns, loadingCampaigns] = useOnSnapshot(queryCampaigns); 
 
   const columns = [
-  /*   {
-      title: 'Pago',
-      key: 'paymentAmount',
-      dataIndex: 'paymentAmount',
-      render: (text: string) => text
-    }, */
     {
       title: 'Cliente',
       key: 'client',
@@ -311,7 +305,11 @@ const useUsers = () => {
       };
     })
 
-    const _sales = sales.map(sale => ({
+    if(filter.statusPayment !== null) {
+      sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
+    }
+
+    let _sales = sales.map(sale => ({
       ...sale,
       seller: users.find(user => user.id === sale.userId)?.name.toUpperCase(),
       processUser: sale.processUser?.toUpperCase(),
