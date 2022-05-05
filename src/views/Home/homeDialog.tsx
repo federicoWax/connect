@@ -435,9 +435,13 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onSelect={(value: string, obj: Autocomplete | null) => {  
-                  if(obj) {
-                    setSale({...sale, processUser: obj.value }) 
+                onChange={async (value: string) => {  
+                  if(value) {
+                    setSale({...sale, processUser: value});
+                  }
+
+                  if(sale.id) {
+                    await update("sales", sale.id, { processUser: value || null });
                   }
                 }}
                 placeholder="Buscar usuario proceso"

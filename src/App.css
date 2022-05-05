@@ -1,1 +1,12 @@
 @import '~antd/dist/antd.css';
+
+/* input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+} 
+
+input[type=number] {
+  -moz-appearance:textfield !important;
+}
