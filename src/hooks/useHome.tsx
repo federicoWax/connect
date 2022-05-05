@@ -16,7 +16,9 @@ const EndDate = moment();
 const columnsWorksheet = [
   { header: 'VENDEDOR', key: 'seller', width: 32 },
   { header: 'PROCESO', key: 'processUser', width: 32 },
-  { header: 'FECHA / HORA', key: 'date',  width: 22  },
+  { header: 'FECHA / HORA CREADA', key: 'date',  width: 22  },
+  { header: 'FECHA / HORA PAGO', key: 'datePayment',  width: 22  },
+  { header: 'FECHA / HORA CONCLUIDA', key: 'dateConclued',  width: 22  },
   { header: 'CONCLUIDA / PENDIENTE', key: 'status', width: 22 },
   { header: 'CORREO VENDEDOR', key: 'emailSeller',  width: 32  },
   { header: 'EQUIPO', key: 'team'  },
@@ -223,12 +225,12 @@ const useUsers = () => {
     },
     {
       title: 'Fecha / Hora pago',
-      key: 'date',
+      key: 'datePayment',
       render: (record: Sale) => record.datePayment && <div>{moment(record.datePayment?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Fecha / Hora concluida',
-      key: 'date',
+      key: 'dateConclued',
       render: (record: Sale) => record.dateConclued && <div>{moment(record.dateConclued?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
@@ -314,6 +316,8 @@ const useUsers = () => {
       seller: users.find(user => user.id === sale.userId)?.name.toUpperCase(),
       processUser: sale.processUser?.toUpperCase(),
       date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
+      datePayment: sale.datePayment ? moment(sale.datePayment?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
+      dateConclued: sale.dateConclued ? moment(sale.dateConclued?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
       status: sale.concluded ? "Concluida" : "Pendiente".toUpperCase(),
       emailSeller: users.find(user => user.id === sale.userId)?.email.toUpperCase(),
       team: users.find(user => user.id === sale.userId)?.team.toUpperCase(),

@@ -94,7 +94,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
 
     delete _sale.id;
 
-    if(searchESID && _sale.esid !== searchESID) {
+    if(!_sale.esid && searchESID && _sale.esid !== searchESID) {
       _sale.esid = searchESID;
     }
 
@@ -230,7 +230,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onChange={(value: string) => {  
+                onSelect={(value: string) => {  
                   if(value) {
                     let clinet = clients.find(c => c.esid === value);
                     
@@ -242,8 +242,6 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                     const _sale = {...sale, ...clinet} as Sale;
                     
                     setForm(_sale);
-                  } else {
-                    setForm({...sale, esid: value});
                   }
                 }}
                 onClear={() => setSale({...sale, esid: ""})}

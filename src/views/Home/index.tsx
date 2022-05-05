@@ -170,7 +170,7 @@ const Home = () => {
             </AutoComplete>              
           </Col>
         }
-       <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
+        <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
           <label>Estatus pago</label>
           <Select 
             allowClear
@@ -187,7 +187,7 @@ const Home = () => {
           <Select 
             loading={loadingCampaigns} 
             value={filter.campaignId}  
-            onChange={value => setFilter({ ...filter, campaignId: value })}
+            onChange={value => setFilter({...filter, campaignId: value})}
             allowClear
           >
           <Option value="">Todas las campañas</Option>
