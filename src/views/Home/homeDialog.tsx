@@ -60,15 +60,18 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
   useEffect(() => {
     if(!loading) return;
 
-    if(propSale && form) {
+    if(propSale) {
       if(propSale.esid) {
         setSearchESID(propSale.esid);
       }
 
       setPaymentAmount(propSale.paymentAmount);
       setForm(propSale);
-      setLoading(false);
-    }
+    } else {
+      setForm(init_sale);
+    } 
+
+    setLoading(false);
   }, [form, propSale, cobradores, loading]);
 
   const save = async () => {
@@ -134,13 +137,8 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
       setSaving(false);
     } finally {
       setSaving(false);
-      resetForm();
+      onClose();
     }
-  }
-
-  const resetForm = () => {
-    onClose();
-    setForm(init_sale);
   }
 
   const optionsClients = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
@@ -153,7 +151,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
       destroyOnClose={true}
       confirmLoading={saving}
       visible={open}
-      onCancel={resetForm}
+      onCancel={onClose}
       onOk={() => {
         form.validateFields()
           .then(save)
@@ -232,9 +230,9 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onSelect={(value: string, obj: Autocomplete | null) => {  
-                  if(obj) {
-                    let clinet = clients.find(c => c.esid === obj.value);
+                onChange={(value: string) => {  
+                  if(value) {
+                    let clinet = clients.find(c => c.esid === value);
                     
                     delete clinet?.id;
                     delete clinet?.receives;
@@ -244,12 +242,13 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                     const _sale = {...sale, ...clinet} as Sale;
                     
                     setForm(_sale);
+                  } else {
+                    setForm({...sale, esid: value});
                   }
                 }}
                 onClear={() => setSale({...sale, esid: ""})}
               >
                 <Input.Search 
-                  allowClear
                   size="middle" 
                   placeholder="Buscar ESID" 
                   enterButton
@@ -335,7 +334,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 <Option value="Western union">Western union</Option>
                 <Option value="Ria">Ria</Option>
                 <Option value="Dolex">Dolex</Option>
-                <Option value="Zelle">Zelle</Option>
+                <Option value="Zelle">Zelle</Option>x
                 <Option value="Cashapp">Cashapp</Option>
               </Select>
             </Form.Item>
@@ -436,12 +435,10 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
                 onChange={async (value: string) => {  
-                  if(value) {
-                    setSale({...sale, processUser: value});
-                  }
+                  setSale({...sale, processUser: value});
 
                   if(sale.id) {
-                    await update("sales", sale.id, { processUser: value || null });
+                    await update("sales", sale.id, { processUser: value });
                   }
                 }}
                 placeholder="Buscar usuario proceso"

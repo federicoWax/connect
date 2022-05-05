@@ -12,7 +12,25 @@ const { RangePicker } = DatePicker;
 const Home = () => {
   const [searchESID, setSearchESID] = useState<string>("");
   const { userFirestore } = useAuth();
-  let { loadingUsers, loadingSales, loadingCampaigns, sales, clients, columns, open, sale, setOpen, filter, setFilter, users, cobradores, downloadExcel, campaigns, onSearchClients } = useHome();
+  let { 
+    loadingUsers, 
+    loadingSales, 
+    loadingCampaigns, 
+    sales, 
+    clients, 
+    columns, 
+    open, 
+    sale, 
+    setSale,
+    setOpen, 
+    filter, 
+    setFilter, 
+    users, 
+    cobradores, 
+    downloadExcel, 
+    campaigns, 
+    onSearchClients 
+  } = useHome();
 
   const optionsAuotComplete = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
@@ -28,7 +46,10 @@ const Home = () => {
       <Button
         style={{ float: "right", marginBottom: 10 }}
         type="primary"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setSale(null);
+          setOpen(true);
+        }}
       >
         Agregar venta
       </Button>
@@ -141,7 +162,6 @@ const Home = () => {
               onClear={() => setFilter({...filter, esid: ""})}
             >
               <Input.Search 
-                allowClear
                 size="middle" 
                 placeholder="Buscar ESID" 
                 enterButton
