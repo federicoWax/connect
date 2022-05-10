@@ -16,8 +16,10 @@ const Home = () => {
     loadingUsers, 
     loadingSales, 
     loadingCampaigns, 
+    loadingTeams,
     sales, 
     clients, 
+    teams,
     columns, 
     open, 
     sale, 
@@ -201,13 +203,17 @@ const Home = () => {
         <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
           <label>Equipos</label>
           <Select 
+            loading={loadingTeams}
             allowClear
             value={filter.teamId} 
             onChange={value => setFilter({...filter, teamId: value})}
           >
             <Option value="">Todos los equipos</Option>
-            <Option value="CMG">CMG</Option>
-            <Option value="USALES">USALES</Option>
+            {
+              teams.map(t => (
+                <Option key={t.id} value={t.name}>{t.name}</Option>
+              ))
+            }
           </Select>
         </Col>
         <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>

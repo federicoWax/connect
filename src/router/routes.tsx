@@ -6,6 +6,7 @@ const Cobradores = lazy(() => import('../views/Cobradores'));
 const Home = lazy(() => import('../views/Home'));
 const Login = lazy(() => import('../views/Login'));
 const Users = lazy(() => import('../views/Users'));
+const Teams = lazy(() => import('../views/Teams'));
 
 const routes = [
   {
@@ -37,6 +38,11 @@ const routes = [
     key: 'users',
     path: '/usuarios',
     element: <Users />
+  },
+  {
+    key: 'teams',
+    path: '/equipos',
+    element: <Teams />
   }
 ];
 

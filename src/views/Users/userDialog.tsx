@@ -1,13 +1,14 @@
 import { FC, useEffect, useState } from 'react';
 import { Modal, Row, Col, Form, Input, Select, message } from 'antd';
-import { UserFirestore } from '../../interfaces';
+import { Team, UserFirestore } from '../../interfaces';
 import { post } from '../../services/http';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, query, where, DocumentData, Query } from 'firebase/firestore';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   propUser: UserFirestore | null;
+  teams: Team[];
 };
 
 const db = getFirestore();
@@ -21,10 +22,10 @@ const init_user: UserFirestore = {
   passwordConfirm: '',
   phone: '',
   city: '',
-  team: ''
+  team: '',
 };
 
-const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
+const UserDialog: FC<Props> = ({open, onClose, propUser, teams}) => {
   const [user, setUser] = useState<UserFirestore>(init_user);
   const [saving, setSaving] = useState<boolean>(false);
   const [form] = Form.useForm();
@@ -186,10 +187,11 @@ const UserDialog: FC<Props> = ({open, onClose, propUser}) => {
                   rules={[{ required: true, message: 'Equipo requerido.' }]}
                 >
                   <Select value={user.team} onChange={value => setUser({...user, team: value})}>
-                    <Option value="CMG">CMG</Option>
-                    <Option value="USALES">USALES</Option>
-                    <Option value="SELECT">SELECT</Option>
-                    <Option value="ECONOBIL">ECONOBIL</Option>
+                  {
+                    teams.map(t => (
+                      <Option key={t.id} value={t.name}>{t.name}</Option>
+                    ))
+                  }
                   </Select>
                 </Form.Item>
               </Col>

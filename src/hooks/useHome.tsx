@@ -3,12 +3,13 @@ import { Button, Switch } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy, where, DocumentData, Query, limit, Timestamp } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
-import { Campaign, Client, Cobrador, FilterSale, Sale, UserFirestore } from "../interfaces";
+import { Campaign, Client, Cobrador, FilterSale, Sale, Team, UserFirestore } from "../interfaces";
 import { del, update } from '../services/firebase';
 import { dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
 import moment from 'moment';
 import ExcelJS from 'exceljs';
+import useCollection from './useCollection';
 
 const db = getFirestore();
 const StartDate = moment();
@@ -109,6 +110,7 @@ const useUsers = () => {
   const [cobradores, setCobradores] = useState<Cobrador[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [filter, setFilter] = useState<FilterSale>({
     concluded: false,
     startDate: null,
@@ -124,11 +126,14 @@ const useUsers = () => {
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
   const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients(""));
   const [queryCampaigns] = useState<Query<DocumentData>>(query(collection(db, "campaigns"), orderBy("name")));
-  const [snapshotSale, loadingSales] = useOnSnapshot(querySales); 
-  const [snapshotUsers, loadingUsers] = useOnSnapshot(queryUsers); 
-  const [snapshotCobradores, loadingCobradores] = useOnSnapshot(queryCobradores); 
-  const [snapshotClients, loadingClients] = useOnSnapshot(queryClients); 
-  const [snapshotCampaigns, loadingCampaigns] = useOnSnapshot(queryCampaigns); 
+  const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy("name")));
+
+  const [snapshotSales, loadingSales] = useOnSnapshot(querySales); 
+  const [snapshotUsers, loadingUsers] = useCollection(queryUsers); 
+  const [snapshotCobradores, loadingCobradores] = useCollection(queryCobradores); 
+  const [snapshotClients, loadingClients] = useCollection(queryClients); 
+  const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns); 
+  const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
 
   const columns = [
     {
@@ -271,28 +276,31 @@ const useUsers = () => {
   useEffect(() => {
     let mounted = true;
 
-    if(loadingUsers || loadingSales || loadingCobradores || !mounted) return;
+    if(loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
 
-    setSales(snapshotSale.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]);
+    setSales(snapshotSales.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]);
     setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
     setCobradores(snapshotCobradores.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
     setClients(snapshotClients.docs.map(doc => ({...doc.data(), id: doc.id })) as Client[]);
     setCampaigns(snapshotCampaigns.docs.map(doc => ({...doc.data(), id: doc.id })) as Campaign[]);
+    setTeams(snapshotTeams.docs.map(doc => ({...doc.data(), id: doc.id })) as Team[]);
 
     return () => {
       mounted = false;
     }
   }, [
-    snapshotSale, 
+    snapshotSales, 
     snapshotUsers, 
     snapshotCobradores, 
     snapshotClients, 
-    snapshotCampaigns, 
+    snapshotCampaigns,
+    snapshotTeams,
     loadingSales, 
     loadingUsers, 
     loadingCobradores, 
     loadingClients, 
-    loadingCampaigns
+    loadingCampaigns,
+    loadingTeams
   ]);
 
   const downloadExcel = async () => {
@@ -359,9 +367,11 @@ const useUsers = () => {
     loadingUsers, 
     loadingSales, 
     loadingCampaigns,
+    loadingTeams,
     users, 
     sales, 
     clients, 
+    teams,
     columns, 
     sale, 
     open, 

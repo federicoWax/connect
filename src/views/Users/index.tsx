@@ -3,7 +3,7 @@ import UserDialog from "./userDialog";
 import useUsers from "../../hooks/useUsers";
 
 const Users = () => {
-  const { loading, users, columns, open, user, setOpen } = useUsers();
+  const { loading, users, columns, open, user, setOpen, teams } = useUsers();
 
   return (
     <div>
@@ -26,6 +26,7 @@ const Users = () => {
         open={open}
         onClose={() => setOpen(false)}
         propUser={user}
+        teams={teams}
       />
     </div>
   )

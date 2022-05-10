@@ -71,6 +71,9 @@ export interface Campaign extends Cobrador {
 
 }
 
+export interface Team extends Cobrador {
+}
+
 export interface Autocomplete {
   value: string;
   label: string;

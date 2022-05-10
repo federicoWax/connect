@@ -1,47 +1,43 @@
 import { FC, useEffect, useState } from "react";
 import { Col, Form, Input, message, Modal, Row } from "antd";
-import { Cobrador } from "../../interfaces";
+import { Team } from "../../interfaces";
 import { add, update } from "../../services/firebase";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  propColaborador: Cobrador | null;
+  propTeam: Team | null;
 };
 
-const init_cobrador: Cobrador = {
+const init_team: Team = {
   name: ""
 };
 
-const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
+const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
   const [saving, setSaving] = useState<boolean>(false);
-  const [cobrador, setCobrador] = useState<Cobrador>(init_cobrador);
+  const [team, setTeam] = useState<Team>(init_team);
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if(propColaborador) {
-      form.setFieldsValue(propColaborador);
-      setCobrador(propColaborador);
-
-      return;
+    if(propTeam) {
+      form.setFieldsValue(propTeam);
+      setTeam(propTeam);
     }
-
-    form.setFieldsValue(init_cobrador);
-  }, [form, propColaborador]);
+  }, [form, propTeam]);
 
   const save = async () => {
     if(saving) return;
 
     setSaving(true);
 
-    const id = cobrador.id;
-    let _cobrador = {...cobrador};     
-    delete _cobrador.id;
+    const id = team.id;
+    let _team = {...team};     
+    delete _team.id;
 
     try {
-      id ? await update("cobradores", id, _cobrador ) : await add('cobradores', _cobrador);
+      id ? await update("teams", id, _team ) : await add('teams', _team);
 
-      message.success("Cobrador guardado con exito!");
+      message.success("Equipo guardado con exito!");
     } catch (error) {
       console.log(error);
       setSaving(false);
@@ -53,7 +49,7 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
 
   const resetForm = () => {
     form.resetFields();
-    setCobrador(init_cobrador);
+    setTeam(init_team);
     onClose();
   }
 
@@ -69,7 +65,7 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
           .then(save)
           .catch(() => {});
       }}
-      title={cobrador.id ? "Editar cobrador" : "Agregar cobrador"}
+      title={team.id ? "Editar equipo" : "Agregar equipo"}
       cancelText="Cancelar"
       okText="Guardar"
     >
@@ -86,8 +82,8 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
               rules={[{ required: true, message: 'Nombre requerido.' }]}
             >
               <Input
-                value={cobrador.name} 
-                onChange={(e) => setCobrador({...cobrador, name: e.target.value})}
+                value={team.name} 
+                onChange={(e) => setTeam({...team, name: e.target.value})}
               />
             </Form.Item>
           </Col>
@@ -97,4 +93,4 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
   )
 }
 
-export default CobradorDialog;
+export default TeamDialog;

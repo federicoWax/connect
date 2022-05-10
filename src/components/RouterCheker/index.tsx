@@ -12,6 +12,8 @@ const RoterChecker = () => {
     "/usuarios",
     "/cobradores",
     "/clientes",
+    "/campanas",
+    "/equipos"
   ]);
 
   useEffect(() => {

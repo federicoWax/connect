@@ -3,7 +3,7 @@ import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy, DocumentData, Query } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
-import { UserFirestore } from "../interfaces";
+import { Team, UserFirestore } from "../interfaces";
 import { post } from '../services/http';
 import { dialogDeleteDoc } from '../utils';
 
@@ -79,10 +79,13 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<UserFirestore |
 
 const useUsers = () => {
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
+  const [queryTeams, setQueryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy('name')));
+  const [snapshot, loading] = useOnSnapshot(queryUsers);
+  const [snapshotTeams, loadingTeams] = useOnSnapshot(queryTeams);
   const [open, setOpen] = useState<boolean>(false);
   const [user, setUser] = useState<UserFirestore | null>(null);
   const [users, setUsers] = useState<UserFirestore[]>([]);
-  const [snapshot, loading] = useOnSnapshot(queryUsers);
+  const [teams, setTeams] = useState<Team[]>([]);
   const columns = getColumns(setUser, setOpen);
 
   useEffect(() => {
@@ -91,13 +94,14 @@ const useUsers = () => {
     if(loading || !mounted) return;
 
     setUsers(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
+    setTeams(snapshotTeams.docs.map(doc => ({...doc.data(), id: doc.id})) as Team[]);
 
     return () => {
       mounted = false;
     }
-  }, [snapshot, loading]);
+  }, [snapshot, snapshotTeams, loading, loadingTeams]);
 
-  return { loading, users, columns, open, user, setOpen, setUser };
+  return { loading, users, columns, open, user, setOpen, setUser, loadingTeams, teams };
 }
 
 export default useUsers;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UserOutlined, DollarOutlined, UnorderedListOutlined, ProfileOutlined } from '@ant-design/icons';
+import { UserOutlined, DollarOutlined, UnorderedListOutlined, ProfileOutlined, AppstoreAddOutlined } from '@ant-design/icons';
 import { MdAccountBox, MdGroup } from 'react-icons/md';
 import { BiDoorOpen } from 'react-icons/bi';
 import { Layout, Menu } from "antd";
@@ -46,6 +46,9 @@ const MenuComponent = () => {
             </Menu.Item>
             <Menu.Item onClick={() => navigate("/usuarios")} key="/usuarios" icon={<MdGroup /> }>
               Usuarios
+            </Menu.Item>
+            <Menu.Item onClick={() => navigate("/equipos")} key="/equipos" icon={<AppstoreAddOutlined /> }>
+              Equipos
             </Menu.Item>
           </>
         }
