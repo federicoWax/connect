@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { UserOutlined, DollarOutlined, UnorderedListOutlined, ProfileOutlined, AppstoreAddOutlined } from '@ant-design/icons';
-import { MdAccountBox, MdGroup } from 'react-icons/md';
+import { MdAccountBox, MdGroup, MdLocationCity } from 'react-icons/md';
 import { BiDoorOpen } from 'react-icons/bi';
 import { Layout, Menu } from "antd";
 import { auth } from "../../firebase";
@@ -49,6 +49,9 @@ const MenuComponent = () => {
             </Menu.Item>
             <Menu.Item onClick={() => navigate("/equipos")} key="/equipos" icon={<AppstoreAddOutlined /> }>
               Equipos
+            </Menu.Item>
+            <Menu.Item onClick={() => navigate("/sucursales")} key="/sucursales" icon={<MdLocationCity /> }>
+              Sucursales
             </Menu.Item>
           </>
         }

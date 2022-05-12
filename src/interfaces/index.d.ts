@@ -67,13 +67,20 @@ export interface Cobrador {
   name: string;
 }
 
-export interface Campaign extends Cobrador {
+export interface Campaign extends Cobrador {}
 
+export interface Team extends Cobrador {}
+
+interface Center {
+  lat: number;
+  lng: number;
 }
-
-export interface Team extends Cobrador {
+export interface Branch {
+  id?: string;
+  name: string;
+  center?: Center;
+  population?: number;
 }
-
 export interface Autocomplete {
   value: string;
   label: string;

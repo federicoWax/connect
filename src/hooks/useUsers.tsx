@@ -79,7 +79,7 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<UserFirestore |
 
 const useUsers = () => {
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
-  const [queryTeams, setQueryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy('name')));
+  const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy('name')));
   const [snapshot, loading] = useOnSnapshot(queryUsers);
   const [snapshotTeams, loadingTeams] = useOnSnapshot(queryTeams);
   const [open, setOpen] = useState<boolean>(false);
@@ -91,7 +91,7 @@ const useUsers = () => {
   useEffect(() => {
     let mounted = true;
 
-    if(loading || !mounted) return;
+    if(loading || loadingTeams || !mounted) return;
 
     setUsers(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
     setTeams(snapshotTeams.docs.map(doc => ({...doc.data(), id: doc.id})) as Team[]);

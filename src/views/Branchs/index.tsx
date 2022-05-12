@@ -1,42 +1,42 @@
 import { Button, Input, Table } from "antd";
-import useTeams from "../../hooks/useTeams";
-import TeamDialog from "./teamDialog";
+import useBranchs from "../../hooks/useBranchs";
+import TeamDialog from "./branchDialog";
 
-const Teams = () => {
-  const { loadingTeams, teams, columns, open, team, setOpen, search, setSearch } = useTeams();
+const Branchs = () => {
+  const { loadingBranchs, branchs, columns, open, branch, setOpen, search, setSearch } = useBranchs();
 
   return (
     <div>
-      <h1>Equipos</h1>
+      <h1>Sucursales</h1>
       <Button
         style={{ float: "right", marginBottom: 10 }}
         type="primary"
         onClick={() => setOpen(true)}
       >
-        Agregar equipo
+        Agregar Sucursal
       </Button>
       <Input placeholder="Buscar por Nombre" value={search} onChange={(e) => setSearch(e.target.value)} />
       <br />
       <br />
       <Table
         style={{ overflowX: "auto", backgroundColor: "white" }}
-        loading={loadingTeams}
+        loading={loadingBranchs}
         columns={columns}
         pagination={false}
         dataSource={
-          teams
+          branchs
             .filter(c => c.name.toString().toLowerCase().includes(search.toLowerCase()))
             .map(c => ({ ...c, key: c.id }))
         } 
-        locale={{ emptyText: "Sin equipos..." }}
+        locale={{ emptyText: "Sin Sucursales..." }}
       />
       <TeamDialog
         open={open}
         onClose={() => setOpen(false)}
-        propTeam={team}
+        propBranch={branch}
       />
     </div>
   )
 }
 
-export default Teams;
+export default Branchs;

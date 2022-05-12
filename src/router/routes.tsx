@@ -7,6 +7,7 @@ const Home = lazy(() => import('../views/Home'));
 const Login = lazy(() => import('../views/Login'));
 const Users = lazy(() => import('../views/Users'));
 const Teams = lazy(() => import('../views/Teams'));
+const Branchs = lazy(() => import('../views/Branchs'));
 
 const routes = [
   {
@@ -43,6 +44,11 @@ const routes = [
     key: 'teams',
     path: '/equipos',
     element: <Teams />
+  },
+  {
+    key: 'branchs',
+    path: '/sucursales',
+    element: <Branchs />
   }
 ];
 
