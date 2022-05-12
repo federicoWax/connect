@@ -1,14 +1,15 @@
-import { FC, useEffect, useState, memo } from "react";
+import { FC, useState, memo } from "react";
 import { Col, Form, Input, message, Modal, Row } from "antd";
-import { Branch, Team } from "../../interfaces";
+import { Branch } from "../../interfaces";
 import { add, update } from "../../services/firebase";
-
+import GoogleMapReact from "google-map-react";
 interface Props {
   open: boolean;
   onClose: () => void;
   propBranch: Branch | null;
 };
 
+const apiKey = "AIzaSyDAL0TdQNyLykbqiwBQInlazWDwcX9Edns";
 const initBranch: Branch = {
   name: ""
 };
@@ -17,13 +18,6 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [branch, setBranch] = useState<Branch>(initBranch);
   const [form] = Form.useForm();
-
-  useEffect(() => {
-    if(propBranch) {
-      form.setFieldsValue(propBranch);
-      setBranch(propBranch);
-    }
-  }, [form, propBranch]);
 
   const save = async () => {
     if(saving) return;
@@ -52,6 +46,8 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
     form.resetFields();
     setBranch(initBranch);
   }
+
+  const AnyReactComponent = ({ text } : any) => <div>{text}</div>;
 
   return (
    <Modal
@@ -86,6 +82,23 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
                 onChange={(e) => setBranch({...branch, name: e.target.value})}
               />
             </Form.Item>
+          </Col>
+          <Col xs={24} sm={24} md={24} style={{height: 300}}>
+            <GoogleMapReact
+              bootstrapURLKeys={{key: apiKey}}
+              defaultCenter={{
+                lat: 59.95,
+                lng: 30.33
+              }}
+              defaultZoom={11}
+              yesIWantToUseGoogleMapApiInternals
+            >
+              <AnyReactComponent
+                lat={59.955413}
+                lng={30.337844}
+                text="My Marker"
+              />
+            </GoogleMapReact>
           </Col>
         </Row>
       </Form>

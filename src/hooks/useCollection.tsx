@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DocumentData, getDocs, orderBy, Query, QuerySnapshot } from 'firebase/firestore';
+import { DocumentData, getDocs, Query, QuerySnapshot } from 'firebase/firestore';
 
 const useOnSnapshot = (query: Query<DocumentData>): [QuerySnapshot<DocumentData>, boolean]  => {
   const [loading, setLoading] = useState<boolean>(true);
