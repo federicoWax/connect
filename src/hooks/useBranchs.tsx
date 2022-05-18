@@ -14,7 +14,7 @@ const getColumns = (
   setOpen: React.Dispatch<React.SetStateAction<boolean>>, 
 ) => [
   {
-    title: 'Equipo',
+    title: 'Sucursal',
     key: 'name',
     dataIndex: 'name',
     render: (text: string) => text

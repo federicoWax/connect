@@ -92,6 +92,9 @@ export interface Assistence {
   id?: string;
   date: Timestamp;
   userId: string;
+  name?: string;
+  email?: string;
+  team?: string;
 }
 
 export interface Position {

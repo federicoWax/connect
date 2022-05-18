@@ -50,7 +50,7 @@ const limitClients = 10;
 StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
-const getQuerySales = (filter: FilterSale, userFirestore: UserFirestore) => {
+const getQuerySales = (filter: FilterSale) => {
   const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
 
   let Query = query(
@@ -122,7 +122,7 @@ const useUsers = () => {
     statusLight: "",
     typeDate: "date",
   });
-  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter, userFirestore as UserFirestore));
+  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
   const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients(""));
@@ -135,7 +135,6 @@ const useUsers = () => {
   const [snapshotClients, loadingClients] = useCollection(queryClients); 
   const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns); 
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
-
 
   const columns = [
     {
@@ -272,7 +271,7 @@ const useUsers = () => {
   ];
 
   useEffect(() => {
-    setQuerySales(getQuerySales(filter, userFirestore as UserFirestore));
+    setQuerySales(getQuerySales(filter));
   }, [filter, userFirestore]);
       
   useEffect(() => {

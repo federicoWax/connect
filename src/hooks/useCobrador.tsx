@@ -6,6 +6,7 @@ import useOnSnapshot from "./useOnSnapshot";
 import { Cobrador } from "../interfaces";
 import { del } from '../services/firebase';
 import { dialogDeleteDoc } from '../utils';
+
 const db = getFirestore();
 
 const getColumns = (

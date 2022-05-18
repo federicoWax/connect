@@ -1,4 +1,5 @@
 import { lazy } from "react";
+import Assists from "../views/assists";
 
 const Campaigns = lazy(() => import('../views/Campaigns'));
 const Clients = lazy(() => import('../views/Clients'));
@@ -49,6 +50,11 @@ const routes = [
     key: 'branchs',
     path: '/sucursales',
     element: <Branchs />
+  },
+  {
+    key: 'assists',
+    path: '/asistencias',
+    element: <Assists />
   }
 ];
 

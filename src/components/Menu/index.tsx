@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { UserOutlined, DollarOutlined, UnorderedListOutlined, ProfileOutlined, AppstoreAddOutlined, SettingOutlined } from '@ant-design/icons';
+import { 
+  UserOutlined, DollarOutlined, UnorderedListOutlined, 
+  ProfileOutlined, AppstoreAddOutlined, SettingOutlined,
+  ScheduleOutlined
+} from '@ant-design/icons';
 import { MdAccountBox, MdGroup, MdLocationCity } from 'react-icons/md';
 import { BiDoorOpen } from 'react-icons/bi';
 import { Layout, Menu } from "antd";
@@ -74,6 +78,9 @@ const MenuComponent = () => {
             </Menu.Item>
             <Menu.Item onClick={() => navigate("/sucursales")} key="/sucursales" icon={<MdLocationCity /> }>
               Sucursales
+            </Menu.Item>
+            <Menu.Item onClick={() => navigate("/asistencias")} key="/asistencias" icon={<ScheduleOutlined /> }>
+              Asistencias
             </Menu.Item>
           </>
         }
