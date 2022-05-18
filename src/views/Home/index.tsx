@@ -61,7 +61,7 @@ const Home = () => {
       <br />
       <br />
       <Row gutter={20}>
-        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+        <Col xs={24} sm={24} md={3} style={{ display: "grid" }}>
           <label>Concluidas / Pendientes / Todas</label>
           <Select value={filter.concluded} onChange={value => setFilter({ ...filter, concluded: value })}>
             <Option value={false}>Pendientes</Option>
@@ -70,41 +70,51 @@ const Home = () => {
           </Select>
         </Col>
         {
-          (filter.concluded || filter.concluded === null) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-            <label>Rango de fechas</label>
-              <RangePicker  
-                value={[filter.startDate, filter.endDate]}
-                onChange={(dates) => {
-                  const startDate = dates ? dates[0] as moment.Moment : null;
-                  const endDate = dates ? dates[1] as moment.Moment : null;
+          (filter.concluded || filter.concluded === null) && <>
+            <Col xs={24} sm={24} md={3} style={{ display: "grid" }}>
+              <label>Tipo de fecha para rango</label>
+              <Select value={filter.typeDate} onChange={value => setFilter({ ...filter, typeDate: value })}>
+                <Option value="date">Fecha/Hora creada</Option>
+                <Option value="datePayment">Fecha/Hora pago</Option>
+                <Option value="dateConclued">Fecha/Hora concluida</Option>
+              </Select>
+            </Col>
+            <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+              <label>Rango de fechas</label>
+                <RangePicker  
+                  value={[filter.startDate, filter.endDate]}
+                  onChange={(dates) => {
+                    const startDate = dates ? dates[0] as moment.Moment : null;
+                    const endDate = dates ? dates[1] as moment.Moment : null;
 
-                  if(userFirestore?.role === "Administrador") {
+                    if(userFirestore?.role === "Administrador") {
+                      setFilter({ ...filter, startDate, endDate });
+                      return;
+                    }
+
+                    if(!startDate || !endDate) {
+                      setFilter({ ...filter, startDate, endDate });
+                      return;
+                    }
+
+                    startDate.set({ hour: 0, minute: 0, second: 0 });
+                    endDate.set({ hour: 23, minute: 59, second: 59 });
+
+                    const diff = endDate.diff(startDate, 'years', true);
+
+                    if(diff > 1) {
+                      message.error("No se puede seleccionar un rango mayor a un año");
+                      setFilter({ ...filter, startDate: null, endDate: null });
+                      return;
+                    }
+
                     setFilter({ ...filter, startDate, endDate });
-                    return;
-                  }
-
-                  if(!startDate || !endDate) {
-                    setFilter({ ...filter, startDate, endDate });
-                    return;
-                  }
-
-                  startDate.set({ hour: 0, minute: 0, second: 0 });
-                  endDate.set({ hour: 23, minute: 59, second: 59 });
-
-                  const diff = endDate.diff(startDate, 'years', true);
-
-                  if(diff > 1) {
-                    message.error("No se puede seleccionar un rango mayor a un año");
-                    setFilter({ ...filter, startDate: null, endDate: null });
-                    return;
-                  }
-
-                  setFilter({ ...filter, startDate, endDate });
-                }}
-                showTime={false}
-                placeholder={["Fecha inicio", "Fecha fin"]}
-              />
-          </Col>
+                  }}
+                  showTime={false}
+                  placeholder={["Fecha inicio", "Fecha fin"]}
+                />
+            </Col>
+          </>
         }
         {
           ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
@@ -124,24 +134,26 @@ const Home = () => {
             </Select>
           </Col>
         }
-        <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-          <label>Procesos</label>
-          <AutoComplete
-            allowClear
-            value={sale?.processUser}
-            options={optionsProcessUser} 
-            filterOption={(inputValue, option) =>
-              option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-            }
-            onSelect={(value: string, obj: Autocomplete | null) => {  
-              if(obj) {
-                setFilter({...filter, processUser: obj.value }) 
+        {
+          ["Administrador", "Vendedor"].includes(userFirestore?.role as string) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+            <label>Procesos</label>
+            <AutoComplete
+              allowClear
+              value={sale?.processUser}
+              options={optionsProcessUser} 
+              filterOption={(inputValue, option) =>
+                option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
               }
-            }}
-            placeholder="Buscar usuario proceso"
-            onClear={() => setFilter({...filter, processUser: ""})}
-          />  
-        </Col>
+              onSelect={(value: string, obj: Autocomplete | null) => {  
+                if(obj) {
+                  setFilter({...filter, processUser: obj.value }) 
+                }
+              }}
+              placeholder="Buscar usuario proceso"
+              onClear={() => setFilter({...filter, processUser: ""})}
+            />  
+          </Col>
+        }
       </Row>
       <br />
       <Row gutter={20}>

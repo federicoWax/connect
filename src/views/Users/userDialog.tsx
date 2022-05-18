@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { Modal, Row, Col, Form, Input, Select, message } from 'antd';
-import { Team, UserFirestore } from '../../interfaces';
+import { Branch, Team, UserFirestore } from '../../interfaces';
 import { post } from '../../services/http';
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
 
@@ -9,6 +9,7 @@ interface Props {
   onClose: () => void;
   propUser: UserFirestore | null;
   teams: Team[];
+  branchs: Branch[];
 };
 
 const db = getFirestore();
@@ -23,9 +24,10 @@ const init_user: UserFirestore = {
   phone: '',
   city: '',
   team: '',
+  branch: ''
 };
 
-const UserDialog: FC<Props> = ({open, onClose, propUser, teams}) => {
+const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
   const [user, setUser] = useState<UserFirestore>(init_user);
   const [saving, setSaving] = useState<boolean>(false);
   const [form] = Form.useForm();
@@ -190,6 +192,21 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams}) => {
                   {
                     teams.map(t => (
                       <Option key={t.id} value={t.name}>{t.name}</Option>
+                    ))
+                  }
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={12}>
+                <Form.Item
+                  label="Sucursal"
+                  name="branch"
+                  rules={[{ required: true, message: 'Sucursal requerida.' }]}
+                >
+                  <Select value={user.branch} onChange={value => setUser({...user, branch: value})}>
+                  {
+                    branchs.map(t => (
+                      <Option key={t.id} value={t.id}>{t.name}</Option>
                     ))
                   }
                   </Select>

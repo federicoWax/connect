@@ -50,22 +50,22 @@ const limitClients = 10;
 StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
-const getQuerySales = (filter: FilterSale) => {
-  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight } = filter;
+const getQuerySales = (filter: FilterSale, userFirestore: UserFirestore) => {
+  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
 
   let Query = query(
     collection(db, "sales"), 
   )
 
   if(concluded !== null) {
-    Query = query(Query, where('concluded', '==', concluded), orderBy("date"));
+    Query = query(Query, where('concluded', '==', concluded), orderBy(typeDate));
   }
 
   if(concluded || concluded === null) {
     Query = query(
       Query,
-      where("date", ">=", startDate ? startDate.toDate() : StartDate.toDate()),
-      where("date", "<=", endDate ? endDate.toDate() : EndDate.toDate())
+      where(typeDate, ">=", startDate ? startDate.toDate() : StartDate.toDate()),
+      where(typeDate, "<=", endDate ? endDate.toDate() : EndDate.toDate())
     )
   }
 
@@ -115,13 +115,14 @@ const useUsers = () => {
     concluded: false,
     startDate: null,
     endDate: null,
-    userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid,
+    userId: ["Administrador"].includes(userFirestore?.role as string) ? "" : user?.uid,
     statusPayment: null,
     campaignId: "",
     teamId: "",
     statusLight: "",
+    typeDate: "date",
   });
-  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter));
+  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter, userFirestore as UserFirestore));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
   const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients(""));
@@ -134,6 +135,7 @@ const useUsers = () => {
   const [snapshotClients, loadingClients] = useCollection(queryClients); 
   const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns); 
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
+
 
   const columns = [
     {
@@ -270,15 +272,22 @@ const useUsers = () => {
   ];
 
   useEffect(() => {
-    setQuerySales(getQuerySales(filter));
-  }, [filter]);
+    setQuerySales(getQuerySales(filter, userFirestore as UserFirestore));
+  }, [filter, userFirestore]);
       
   useEffect(() => {
     let mounted = true;
 
     if(loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
 
-    setSales(snapshotSales.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]);
+    let _sales = snapshotSales.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]
+
+
+    if(userFirestore?.role === "Procesos") {
+      _sales = _sales.filter(sale => sale.userId === user?.uid || sale.processUser === userFirestore?.email || !sale.processUser);
+    }
+
+    setSales(_sales);
     setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
     setCobradores(snapshotCobradores.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
     setClients(snapshotClients.docs.map(doc => ({...doc.data(), id: doc.id })) as Client[]);
@@ -300,7 +309,9 @@ const useUsers = () => {
     loadingCobradores, 
     loadingClients, 
     loadingCampaigns,
-    loadingTeams
+    loadingTeams,
+    userFirestore,
+    user
   ]);
 
   const downloadExcel = async () => {
@@ -332,7 +343,7 @@ const useUsers = () => {
       client: sale.client.toUpperCase(),
       dateBirth: moment(sale.dateBirth?.toDate()).format("DD/MM/YYYY"),
       address: sale.address.toUpperCase(),
-      email: sale.email.toUpperCase(),
+      email: sale.email?.toUpperCase(),
       additionalEmail: sale.additionalEmail?.toUpperCase(),
       statusSale: sale.statusSale?.toUpperCase(),
       statusLight: sale.statusLight.toUpperCase(),
@@ -346,6 +357,7 @@ const useUsers = () => {
       campaign: campaigns.find(campaign => campaign.id === sale.campaign)?.name.toUpperCase(),
       notes: sale.notes.toUpperCase(),
     }));
+
 
     worksheet.addRows(_sales);
 

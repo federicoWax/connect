@@ -9,6 +9,7 @@ interface UserFirestore {
   email: string;
   role: Rols;
   team: string;
+  branch: string;
 }
 
 const AuthContext = createContext<{ user: User | null, userFirestore: UserFirestore | null }>({

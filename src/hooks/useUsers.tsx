@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy, DocumentData, Query } from 'firebase/firestore';
-import useOnSnapshot from "../hooks/useOnSnapshot";
-import { Team, UserFirestore } from "../interfaces";
+import { Branch, Team, UserFirestore } from "../interfaces";
 import { post } from '../services/http';
 import { dialogDeleteDoc } from '../utils';
+import useCollection from './useCollection';
+import useOnSnapshot from './useOnSnapshot';
 
 const db = getFirestore();
 
@@ -80,28 +81,32 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<UserFirestore |
 const useUsers = () => {
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy('name')));
+  const [queryBranchs] = useState<Query<DocumentData>>(query(collection(db, "branchs"), orderBy('name')));
   const [snapshot, loading] = useOnSnapshot(queryUsers);
-  const [snapshotTeams, loadingTeams] = useOnSnapshot(queryTeams);
+  const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
+  const [snapshotBranchs, loadingBranchs] = useCollection(queryBranchs);
   const [open, setOpen] = useState<boolean>(false);
   const [user, setUser] = useState<UserFirestore | null>(null);
   const [users, setUsers] = useState<UserFirestore[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [branchs, setBranchs] = useState<Branch[]>([]);
   const columns = getColumns(setUser, setOpen);
 
   useEffect(() => {
     let mounted = true;
 
-    if(loading || loadingTeams || !mounted) return;
+    if(loading || loadingTeams || loadingBranchs || !mounted) return;
 
     setUsers(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
     setTeams(snapshotTeams.docs.map(doc => ({...doc.data(), id: doc.id})) as Team[]);
+    setBranchs(snapshotBranchs.docs.map(doc => ({...doc.data(), id: doc.id})) as Branch[]);
 
     return () => {
       mounted = false;
     }
-  }, [snapshot, snapshotTeams, loading, loadingTeams]);
+  }, [snapshot, snapshotTeams, snapshotBranchs, loading, loadingTeams, loadingBranchs]);
 
-  return { loading, users, columns, open, user, setOpen, setUser, loadingTeams, teams };
+  return { loading, users, columns, open, user, setOpen, setUser, loadingTeams, loadingBranchs, teams, branchs };
 }
 
 export default useUsers;

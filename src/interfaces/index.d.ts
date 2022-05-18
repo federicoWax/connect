@@ -11,6 +11,7 @@ export interface UserFirestore {
   phone: string;
   city: string;
   team: string;
+  branch: string;
 };
 
 export interface Client {
@@ -60,6 +61,7 @@ export interface FilterSale {
   campaignId: string;
   teamId: string;
   statusLight: "Con luz" | "Sin luz" | "";
+  typeDate: "datePayment" | "date" | "dateConclued";
 };
 
 export interface Cobrador {
@@ -71,17 +73,28 @@ export interface Campaign extends Cobrador {}
 
 export interface Team extends Cobrador {}
 
-interface Center {
+export interface Center {
   lat: number;
   lng: number;
 }
 export interface Branch {
   id?: string;
   name: string;
-  center?: Center;
-  population?: number;
+  center?: Position;
+  radius?: number;
 }
 export interface Autocomplete {
   value: string;
   label: string;
+}
+
+export interface Assistence {
+  id?: string;
+  date: Timestamp;
+  userId: string;
+}
+
+export interface Position {
+  lat: number;
+  lng: number;
 }
