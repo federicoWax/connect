@@ -95,9 +95,15 @@ export interface Assistence {
   name?: string;
   email?: string;
   team?: string;
+  typeRegister?:" ENTRADA" | "SALIDA A COMIDA" | "ENTRADA DE COMIDA" | "SALIDA",
 }
 
 export interface Position {
   lat: number;
   lng: number;
+}
+
+export interface FilterAssists {  
+  startDate: null | moment.Moment;
+  endDate: null | moment.Moment;
 }

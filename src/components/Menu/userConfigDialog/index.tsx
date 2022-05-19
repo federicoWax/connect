@@ -1,11 +1,11 @@
 import { FC, memo, useEffect, useState } from 'react'
-import { Button, Card, message, Modal, Row, Spin } from 'antd';
+import { Button, Card, Col, message, Modal, Row, Spin } from 'antd';
 import moment from 'moment';
 import { useAuth } from '../../../context/AuthContext';
 import { collection, getDocs, getFirestore, query, Timestamp, where } from 'firebase/firestore';
 import { CheckOutlined, CheckCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Branch, Position } from '../../../interfaces';
-import { getDocById, add } from '../../../services/firebase';
+import { add } from '../../../services/firebase';
 
 interface Props {
   open: boolean;
@@ -13,9 +13,23 @@ interface Props {
   branch: Branch | null;
 };
 
+interface TypeRegisters {
+  0: string;
+  1: string;
+  2: string;
+  3: string;
+}
+
+const typeRegisters: TypeRegisters = {
+  0: "ENTRADA",
+  1: "SALIDA A COMIDA",
+  2: "ENTRADA DE COMIDA",
+  3: "SALIDA",
+};
+
 const db = getFirestore();
-const currentDate = moment();
-currentDate.set({ hour:0, minute:0, second:0, millisecond:0});
+const StartDate = moment().set({ hour:0, minute:0, second:0});
+const EndDate = moment().set({ hour:23, minute:59, second:59});
 
 const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
   const [loading, setLoading] = useState(false);
@@ -23,6 +37,7 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
   const [loadingPosition, setLoadingPosition] = useState(false);
   const [withAssistance, setWithAssistance] = useState(false);
   const [position, setPosition] = useState<Position>();
+  const [countRegisters, setCountRegisters] = useState<number>(0);
   const { user, userFirestore } = useAuth();
   
   const getPosition = async () => {
@@ -42,10 +57,14 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
         try {
           setLoading(true);
 
-          const assistance = await getDocs(query(collection(db, "assists"), where("userId", "==", user?.uid), where("date", "==", currentDate.toDate())));
+          const assistance = await getDocs(query(collection(db, "assists"), where("userId", "==", user?.uid), where("date", ">=", StartDate.toDate()), where("date", "<=", EndDate.toDate())));
           const _position = await getPosition();
-  
-          setWithAssistance(!assistance.empty);
+
+          if(userFirestore?.team === "CMG") {
+            setCountRegisters(assistance.docs.length);
+          } 
+
+          setWithAssistance(userFirestore?.team === "CMG" ? assistance.docs.length === 4 : !assistance.empty);
           setPosition(_position);
         } catch (error) {
           console.log(error);
@@ -66,6 +85,7 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
       return;
     }
 
+
     if(!position) {
       message.error("No se pudo obtener tu ubicación.");
       return;
@@ -79,9 +99,9 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
       const { lat: userLat, lng: userLng } = position;
 
       if(((lat-userLng)**2 + (lng-userLat)**2) <= radius **2) {
-        await add("assists", { userId: user?.uid, date: Timestamp.fromDate(currentDate.toDate()) });
+        await add("assists", { userId: user?.uid, date: Timestamp.now(), typeRegister: typeRegisters[countRegisters as keyof TypeRegisters] });
         
-        message.success("Aasistencia guardada con exito.");
+        message.success("Registro guardada con exito.");
         
         onClose();
         
@@ -101,8 +121,10 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
 
     await getPosition();
   }
+
   return (
     <Modal
+      width={600}
       forceRender 
       destroyOnClose
       confirmLoading={saving}
@@ -133,26 +155,30 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
                 <CheckCircleOutlined style={{fontSize: 40, color: "green"}} />
               </>
             :
-              <>
-                <Button 
-                  icon={<CheckOutlined />} 
-                  type="primary" 
-                  onClick={saveAssistance}
-                  loading={saving}
-                >
-                  CHECAR ASISTENCIA
-                </Button>
-                &nbsp;
-                &nbsp;
-                <Button 
-                  icon={<ReloadOutlined />} 
-                  type="primary" 
-                  onClick={reloadPosition}
-                  loading={loadingPosition}
-                >
-                  RECARGAR MI UBICACIÓN
-                </Button>
-              </>
+              <Row gutter={10}>
+                <Col md={12} sm={24} xs={24}>
+                  <Button 
+                    icon={<CheckOutlined />} 
+                    type="primary" 
+                    onClick={saveAssistance}
+                    loading={saving}
+                  >
+                    CHECAR {typeRegisters[countRegisters as keyof TypeRegisters]}
+                  </Button>
+                </Col>
+                <br />
+                <br />
+                <Col md={12} sm={24} xs={24}>
+                  <Button 
+                    icon={<ReloadOutlined />} 
+                    type="primary" 
+                    onClick={reloadPosition}
+                    loading={loadingPosition}
+                  >
+                    RECARGAR MI UBICACIÓN
+                  </Button>
+                </Col>
+              </Row>
         }
         </Card>
       </div>

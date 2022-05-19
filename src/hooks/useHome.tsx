@@ -272,7 +272,7 @@ const useUsers = () => {
 
   useEffect(() => {
     setQuerySales(getQuerySales(filter));
-  }, [filter, userFirestore]);
+  }, [filter]);
       
   useEffect(() => {
     let mounted = true;

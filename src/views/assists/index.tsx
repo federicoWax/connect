@@ -1,15 +1,42 @@
-import { DatePicker, Input, Table } from "antd";
+import { DatePicker, Input, message, Table } from "antd";
 import useAssists from "../../hooks/useAssists";
 
+const { RangePicker } = DatePicker;
+
 const Assists = () => {
-  const { loadingAssists, assists, columns, search, setSearch, date, onChangeDate } = useAssists();
+  const { loadingAssists, assists, columns, search, setSearch, filter, setFilter } = useAssists();
 
   return (
     <div>
       <h1>Asistencias</h1>
-      
-      <div>Fecha</div>
-      <DatePicker value={date} onChange={onChangeDate} />
+      <div>Rango de fechas</div>
+      <RangePicker  
+        value={[filter.startDate, filter.endDate]}
+        onChange={(dates) => {
+          const startDate = dates ? dates[0] as moment.Moment : null;
+          const endDate = dates ? dates[1] as moment.Moment : null;
+
+          if(!startDate || !endDate) {
+            setFilter({ ...filter, startDate, endDate });
+            return;
+          }
+
+          startDate.set({ hour: 0, minute: 0, second: 0 });
+          endDate.set({ hour: 23, minute: 59, second: 59 });
+
+          const diff = endDate.diff(startDate, 'years', true);
+
+          if(diff > 1) {
+            message.error("No se puede seleccionar un rango mayor a un año");
+            setFilter({ ...filter, startDate: null, endDate: null });
+            return;
+          }
+
+          setFilter({ ...filter, startDate, endDate });
+        }}
+        showTime={false}
+        placeholder={["Fecha inicio", "Fecha fin"]}
+      />
       <br />
       <br />
       <Input placeholder="Buscar por Nombre o Correo" value={search} onChange={(e) => setSearch(e.target.value)} />
