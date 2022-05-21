@@ -1,20 +1,24 @@
 import { Button, Input, Table } from "antd";
+import { useAuth } from "../../context/AuthContext";
 import useClients from "../../hooks/useClients";
 import ClientDialog from "./clientDialog";
 
 const Clients = () => {
   const { loadingClients, clients, columns, open, client, setOpen, cobradores, search, setSearch } = useClients();
+  const { userFirestore } = useAuth();
 
   return (
     <div>
       <h1>Clientes</h1>
-      <Button
-        style={{ float: "right", marginBottom: 10 }}
-        type="primary"
-        onClick={() => setOpen(true)}
-      >
-        Agregar cliente
-      </Button>
+      {
+        (userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === "Clientes" && p.write)) && <Button
+          style={{ float: "right", marginBottom: 10 }}
+          type="primary"
+          onClick={() => setOpen(true)}
+        >
+          Agregar cliente
+        </Button>
+      }
       <Input placeholder="Buscar por ESID o Cliente" value={search} onChange={(e) => setSearch(e.target.value)} />
       <br />
       <br />

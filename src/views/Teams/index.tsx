@@ -1,21 +1,25 @@
 import { Button, Input, Table } from "antd";
+import { useAuth } from "../../context/AuthContext";
 import useTeams from "../../hooks/useTeams";
 import PermissionsDialog from "./permissionsDialog";
 import TeamDialog from "./teamDialog";
 
 const Teams = () => {
   const { loadingTeams, teams, columns, open, team, setOpen, search, setSearch, openPermissions, setOpenPermissions } = useTeams();
+  const { userFirestore } = useAuth();
 
   return (
     <div>
       <h1>Equipos</h1>
-      <Button
-        style={{ float: "right", marginBottom: 10 }}
-        type="primary"
-        onClick={() => setOpen(true)}
-      >
-        Agregar equipo
-      </Button>
+      {
+        (userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === "Equipos" && p.write)) && <Button
+          style={{ float: "right", marginBottom: 10 }}
+          type="primary"
+          onClick={() => setOpen(true)}
+        >
+          Agregar equipo
+        </Button>
+      }
       <Input placeholder="Buscar por Nombre" value={search} onChange={(e) => setSearch(e.target.value)} />
       <br />
       <br />

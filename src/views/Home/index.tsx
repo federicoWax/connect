@@ -45,16 +45,19 @@ const Home = () => {
   return (
     <div>
       <h1>Ventas: { sales.length }</h1>
-      <Button
-        style={{ float: "right", marginBottom: 10 }}
-        type="primary"
-        onClick={() => {
-          setSale(null);
-          setOpen(true);
-        }}
-      >
-        Agregar venta
-      </Button>
+      {
+        (userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === "Ventas" && p.write)) && <Button
+          style={{ float: "right", marginBottom: 10 }}
+          type="primary"
+          onClick={() => {
+            setSale(null);
+            setOpen(true);
+          }}
+        >
+          Agregar venta
+        </Button>
+      }
+      
       <Button type="primary" onClick={downloadExcel}>
         Descargar Reporte
       </Button>
