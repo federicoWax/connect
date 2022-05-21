@@ -64,8 +64,8 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   if(concluded || concluded === null) {
     Query = query(
       Query,
-      where(typeDate, ">=", startDate ? startDate.toDate() : StartDate.toDate()),
-      where(typeDate, "<=", endDate ? endDate.toDate() : EndDate.toDate())
+      where(typeDate, ">=", startDate ? startDate.set({ hour:0, minute:0, second:0, millisecond:0}).toDate() : StartDate.toDate()),
+      where(typeDate, "<=", endDate ? endDate.set({ hour:24, minute:59, second:59, millisecond:59}).toDate() : EndDate.toDate())
     )
   }
 
@@ -221,8 +221,6 @@ const useUsers = () => {
         return (
           user?.email && <>
             <div> Nombre:  { user?.name }</div>
-            <div> Correo: { user?.email }</div>
-            <div> Equipo: { user?.team }</div>
           </>
         )
       }
@@ -335,7 +333,7 @@ const useUsers = () => {
     let _sales = sales.map(sale => ({
       ...sale,
       seller: users.find(user => user.id === sale.userId)?.name.toUpperCase(),
-      processUser: sale.processUser?.toUpperCase(),
+      processUser: users.find(user => user.email === sale.processUser)?.name.toUpperCase(),
       date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
       datePayment: sale.datePayment ? moment(sale.datePayment?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
       dateConclued: sale.dateConclued ? moment(sale.dateConclued?.toDate()).format("DD/MM/YYYY hh:mm a") : "",

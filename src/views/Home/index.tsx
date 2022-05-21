@@ -41,6 +41,8 @@ const Home = () => {
     sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
   }
 
+  console.log(searchESID)
+
   //Falta estrucutrar la vista en mas componentes
   return (
     <div>
