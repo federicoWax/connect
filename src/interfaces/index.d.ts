@@ -1,6 +1,19 @@
 import { Rols } from "../types";
 import { Timestamp } from "firebase/firestore";
 
+export interface Permission {
+  module: string;
+  route: string;
+  read: boolean;
+  write: boolean;
+}
+export interface UserFirestoreAuth {
+  email: string;
+  role: Rols;
+  team: string;
+  branch: string;
+  permissions: Permission[];
+}
 export interface UserFirestore {
   id?: string;
   email: string;
@@ -71,7 +84,9 @@ export interface Cobrador {
 
 export interface Campaign extends Cobrador {}
 
-export interface Team extends Cobrador {}
+export interface Team extends Cobrador {
+  permissions?: Permission[];
+}
 
 export interface Center {
   lat: number;

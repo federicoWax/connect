@@ -3,10 +3,17 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { Assistence, FilterAssists, Sale, UserFirestore } from "../interfaces";
 import useOnSnapshot from "./useOnSnapshot";
+import ExcelJS from 'exceljs';
 
 const db = getFirestore();
 const StartDate = moment().set({ hour:0, minute:0, second:0});
 const EndDate = moment().set({ hour:23, minute:59, second:59});
+const columnsExcel = ["A", "B", "C"];
+const columnsWorksheet = [
+  { header: 'USUARIO', key: 'user', width: 32 },
+  { header: 'FECHA', key: 'date', width: 32 },
+  { header: 'TIPO DE REGISTRO', key: 'typeRegister', width: 32 },
+]
 
 const getQueryAssists = (filter: FilterAssists) => {
   const { startDate, endDate } = filter;
@@ -77,7 +84,40 @@ const useAssists = () => {
     }
   ];
 
-  return { loadingAssists, assists, columns, search, setSearch, filter, setFilter }
+  const downloadExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Reporte de ventas');
+
+    worksheet.columns = columnsWorksheet;
+
+    columnsExcel.forEach(column => {
+      worksheet.getCell(column + '1').font = {
+        bold: true
+      };
+    })
+
+    const _assists = assists.map(a => ({
+      ...a,
+      user: a.name?.toUpperCase(),
+      date: moment(a.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
+      typeRegister: a.typeRegister?.toUpperCase()
+    }));
+
+    worksheet.addRows(_assists);
+
+    const data =  await workbook.xlsx.writeBuffer();
+    const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const a = document.createElement('a');
+    const url = window.URL.createObjectURL(blob);
+    
+    document.body.appendChild(a);
+
+    a.href = url;
+    a.download = "Reporte de ventas.xlsx";
+    a.click();
+  }
+
+  return { loadingAssists, assists, columns, search, setSearch, filter, setFilter, downloadExcel }
 }
 
 export default useAssists;

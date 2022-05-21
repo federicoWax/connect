@@ -17,6 +17,49 @@ import { Branch } from "../../interfaces";
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 
+const menuItems = [
+  {
+    label: "Ventas",
+    route: "/ventas",
+    icon: <DollarOutlined />,
+  },
+  {
+    label: "Clientes",
+    route: "/clientes",
+    icon: <MdAccountBox />,
+  },
+  {
+    label: "Cobradores",
+    route: "/cobradores",
+    icon: <UnorderedListOutlined />
+  },
+  {
+    label: "Campañas",
+    route: "/campanas",
+    icon: <ProfileOutlined />
+  },
+  {
+    label: "Usuarios",
+    route: "/usuarios",
+    icon: <MdGroup /> 
+  },
+  {
+    label: "Equipos",
+    route: "/equipos",
+    icon: <UserOutlined />
+  },
+  {
+    label: "Sucursales",
+    route: "/sucursales",
+    icon: <MdLocationCity /> 
+  },
+  {
+    label: "Asistencias",
+    route: "/asistencias",
+    icon: <ScheduleOutlined /> 
+  },
+];
+
 const MenuComponent = () => {
   const [collapsed, setCollapsed] = useState<boolean | undefined>(true);
   const [open, setOpen] = useState<boolean>(false);
@@ -39,15 +82,21 @@ const MenuComponent = () => {
   const onCollapse = (collapsed: boolean | undefined) => setCollapsed(collapsed);
   
   const signOut = async () => await auth.signOut();
-  
+
+  if(!userFirestore) return null;
+
   return (
     <Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
       <div style={{color: "white", padding: 8, textAlign: "center"}}>
-        <br />
-        <SettingOutlined 
-          style={{fontSize: 20, cursor: "pointer"}}
-          onClick={() => setOpen(true)}
-        />
+        {
+          userFirestore.team === "CMG" && <>
+            <br />
+            <SettingOutlined 
+              style={{fontSize: 20, cursor: "pointer"}}
+              onClick={() => setOpen(true)}
+            />
+          </>
+        }
         <br />
         <div style={{textOverflow: "ellipsis", overflow: "hidden"}}>{userFirestore?.email}</div>
         <div style={{textOverflow: "ellipsis", overflow: "hidden"}}>{userFirestore?.role}</div>
@@ -55,34 +104,14 @@ const MenuComponent = () => {
         <div >{branch?.name}</div>
       </div>
       <Menu theme="dark" selectedKeys={[location.pathname]} mode="inline">
-        <Menu.Item onClick={() => navigate("/ventas")} key="/ventas" icon={<DollarOutlined /> }>
-          Ventas
-        </Menu.Item>
         {
-          userFirestore?.role  === "Administrador" && 
-          <>
-            <Menu.Item onClick={() => navigate("/clientes")} key="/clientes" icon={<MdAccountBox /> }>
-              Clientes
-            </Menu.Item>
-            <Menu.Item onClick={() => navigate("/cobradores")} key="/cobradores" icon={<UnorderedListOutlined />}>
-              Cobradores
-            </Menu.Item>
-            <Menu.Item onClick={() => navigate("/campanas")} key="/campanas" icon={<ProfileOutlined />}>
-              Campañas
-            </Menu.Item>
-            <Menu.Item onClick={() => navigate("/usuarios")} key="/usuarios" icon={<MdGroup /> }>
-              Usuarios
-            </Menu.Item>
-            <Menu.Item onClick={() => navigate("/equipos")} key="/equipos" icon={<AppstoreAddOutlined /> }>
-              Equipos
-            </Menu.Item>
-            <Menu.Item onClick={() => navigate("/sucursales")} key="/sucursales" icon={<MdLocationCity /> }>
-              Sucursales
-            </Menu.Item>
-            <Menu.Item onClick={() => navigate("/asistencias")} key="/asistencias" icon={<ScheduleOutlined /> }>
-              Asistencias
-            </Menu.Item>
-          </>
+          menuItems
+            .filter(item => userFirestore?.role === "Administrador" || userFirestore.permissions.some(p => p.module === item.label && (p.write || p.read)))
+            .map(item => (
+              <Menu.Item key={item.route} onClick={() => navigate(item.route)} icon={item.icon}>
+                {item.label}
+              </Menu.Item>
+            ))
         }
         <SubMenu key="sub1" icon={<UserOutlined />} title="Cuenta">
           <Menu.Item key="4" icon={<BiDoorOpen />} onClick={signOut}>Cerrar sesión</Menu.Item>

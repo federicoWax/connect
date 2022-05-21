@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import Assists from "../views/assists";
+import Assists from "../views/Assists";
 
 const Campaigns = lazy(() => import('../views/Campaigns'));
 const Clients = lazy(() => import('../views/Clients'));
@@ -10,7 +10,7 @@ const Users = lazy(() => import('../views/Users'));
 const Teams = lazy(() => import('../views/Teams'));
 const Branchs = lazy(() => import('../views/Branchs'));
 
-const routes = [
+export const routes = [
   {
     key: 'login',
     path: '/login',

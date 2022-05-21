@@ -86,6 +86,10 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
       _sale.team = userFirestore?.team;
       _sale.userId = user?.uid;
       _sale.date = Timestamp.now();
+
+      if(_sale.paymentAmount) {
+        _sale.datePayment = Timestamp.now();
+      }
     }
     
     if(id && paymentAmount !== _sale.paymentAmount) {
@@ -412,6 +416,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
             <Form.Item
               label="Cantidad de cobro"
               name="paymentAmount"
+              rules={sale.statusSale === "Mensualidad" ? [{ required: true, message: 'Cantidad de cobro requerida.' }] : []}
             >
               <Input 
                 type="number"

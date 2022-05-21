@@ -1,9 +1,10 @@
 import { Button, Input, Table } from "antd";
 import useTeams from "../../hooks/useTeams";
+import PermissionsDialog from "./permissionsDialog";
 import TeamDialog from "./teamDialog";
 
 const Teams = () => {
-  const { loadingTeams, teams, columns, open, team, setOpen, search, setSearch } = useTeams();
+  const { loadingTeams, teams, columns, open, team, setOpen, search, setSearch, openPermissions, setOpenPermissions } = useTeams();
 
   return (
     <div>
@@ -33,6 +34,11 @@ const Teams = () => {
       <TeamDialog
         open={open}
         onClose={() => setOpen(false)}
+        propTeam={team}
+      />
+      <PermissionsDialog
+        open={openPermissions}
+        onClose={() => setOpenPermissions(false)}
         propTeam={team}
       />
     </div>

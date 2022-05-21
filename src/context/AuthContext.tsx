@@ -2,32 +2,31 @@ import { useEffect, useState, useContext, createContext, FC } from "react";
 import { User, onIdTokenChanged } from "firebase/auth";
 import FullLoader from "../components/FullLoader";
 import { auth } from "../firebase";
-import { Rols } from "../types";
 import { getDocById } from "../services/firebase";
+import { Team, UserFirestoreAuth } from "../interfaces";
+import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 
-interface UserFirestore {
-  email: string;
-  role: Rols;
-  team: string;
-  branch: string;
-}
-
-const AuthContext = createContext<{ user: User | null, userFirestore: UserFirestore | null }>({
+const db = getFirestore();
+const AuthContext = createContext<{ user: User | null, userFirestore: UserFirestoreAuth | null }>({
   user: null,
   userFirestore: null
 });
 
 const AuthProvider: FC = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [userFirestore, setUserFirestore] = useState<UserFirestore | null>(null);
+  const [userFirestore, setUserFirestore] = useState<UserFirestoreAuth | null>(null);
   const [loading, setLoading] = useState<Boolean>(true);
 
   useEffect(() => {
     const uns = onIdTokenChanged(auth, async (user: User | null) => {
       if(user) {
         const userDoc = await getDocById("users", user.uid);
+        const userData = userDoc.data() as UserFirestoreAuth;
 
-        setUserFirestore(userDoc.data() as UserFirestore);
+        const teamDocs = await getDocs(query(collection(db, "teams"), where("name", "==", userData.team)));
+        const teamData = teamDocs.docs[0].data() as Team;
+
+        setUserFirestore({...userData, permissions: teamData?.permissions || []});
       } else {
         setUserFirestore(null);
       }

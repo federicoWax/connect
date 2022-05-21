@@ -1,14 +1,19 @@
-import { DatePicker, Input, message, Table } from "antd";
+import { Button, DatePicker, Input, message, Table } from "antd";
 import useAssists from "../../hooks/useAssists";
 
 const { RangePicker } = DatePicker;
 
 const Assists = () => {
-  const { loadingAssists, assists, columns, search, setSearch, filter, setFilter } = useAssists();
+  const { loadingAssists, assists, columns, search, setSearch, filter, setFilter, downloadExcel } = useAssists();
 
   return (
     <div>
       <h1>Asistencias</h1>
+      <Button type="primary" onClick={downloadExcel}>
+        Descargar Reporte
+      </Button>
+      <br/>
+      <br/>
       <div>Rango de fechas</div>
       <RangePicker  
         value={[filter.startDate, filter.endDate]}

@@ -8,14 +8,20 @@ const RoterChecker = () => {
   const { user, userFirestore } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [adminRoutes] = useState<string[]>([
-    "/usuarios",
-    "/cobradores",
-    "/clientes",
-    "/campanas",
-    "/equipos",
-    "/sucursales"
-  ]);
+  const [userRoutes, setUserRoutes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if(userFirestore) {
+      if(userFirestore.role === "Administrador") {
+        setUserRoutes(userFirestore.permissions.map(p => p.route));
+      } else {
+        setUserRoutes(userFirestore.permissions.filter(p => p.write || p.write).map(p => p.route));
+      }
+
+      setLoading(false);
+    }
+  }, [userFirestore]);
 
   useEffect(() => {
     if(!user && location.pathname !== "/login") {
@@ -23,13 +29,13 @@ const RoterChecker = () => {
       return;
     }
 
-    const inPrivateRoute = adminRoutes.includes(location.pathname) && userFirestore && userFirestore.role !== "Administrador";
+    const inPrivateRoute = !userRoutes.some(r => location.pathname.includes(r))
 
-    if(user && (location.pathname === '/login' || location.pathname === '/' || inPrivateRoute)) {
+    if(!loading && user && (location.pathname === '/login' || location.pathname === '/' || inPrivateRoute)) {
       navigate('/ventas');
     }
-  }, [user, userFirestore, location, navigate, adminRoutes]);
-  
+  }, [user, location, navigate, loading, userRoutes]);
+
   return (
     <Layout style={{minHeight: "100vh"}}>
       { user && <MenuComponent /> }

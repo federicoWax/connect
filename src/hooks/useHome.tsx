@@ -3,7 +3,7 @@ import { Button, Switch } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy, where, DocumentData, Query, limit, Timestamp } from 'firebase/firestore';
 import useOnSnapshot from "../hooks/useOnSnapshot";
-import { Campaign, Client, Cobrador, FilterSale, Sale, Team, UserFirestore } from "../interfaces";
+import { Campaign, Client, Cobrador, FilterSale, Sale, Team, UserFirestore, UserFirestoreAuth } from "../interfaces";
 import { del, update } from '../services/firebase';
 import { dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
@@ -50,7 +50,7 @@ const limitClients = 10;
 StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
-const getQuerySales = (filter: FilterSale) => {
+const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {
   const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
 
   let Query = query(
@@ -81,8 +81,11 @@ const getQuerySales = (filter: FilterSale) => {
   if(campaignId) 
     Query = query(Query, where('campaign', '==', campaignId));
   
-  if(teamId) 
+  if(userFirestore?.role === "Procesos" && userFirestore?.team === "SELECT") {
+    Query = query(Query, where('team', '==', "SELECT"));
+  } else if(teamId) {
     Query = query(Query, where('team', '==', teamId));
+  }
   
   if(statusLight) {
     Query = query(Query, where('statusLight', '==', statusLight));
@@ -115,14 +118,14 @@ const useUsers = () => {
     concluded: false,
     startDate: null,
     endDate: null,
-    userId: ["Administrador"].includes(userFirestore?.role as string) ? "" : user?.uid,
+    userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid,
     statusPayment: null,
     campaignId: "",
     teamId: "",
     statusLight: "",
     typeDate: "date",
   });
-  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter));
+  const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter, userFirestore as UserFirestoreAuth));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
   const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients(""));
@@ -271,8 +274,9 @@ const useUsers = () => {
   ];
 
   useEffect(() => {
-    setQuerySales(getQuerySales(filter));
-  }, [filter]);
+    if(!userFirestore) return;
+    setQuerySales(getQuerySales(filter, userFirestore));
+  }, [filter, userFirestore]);
       
   useEffect(() => {
     let mounted = true;
@@ -281,8 +285,7 @@ const useUsers = () => {
 
     let _sales = snapshotSales.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]
 
-
-    if(userFirestore?.role === "Procesos") {
+    if(userFirestore?.role === "Procesos" && userFirestore?.team === "SELECT") {
       _sales = _sales.filter(sale => sale.userId === user?.uid || sale.processUser === userFirestore?.email || !sale.processUser);
     }
 
@@ -356,7 +359,6 @@ const useUsers = () => {
       campaign: campaigns.find(campaign => campaign.id === sale.campaign)?.name.toUpperCase(),
       notes: sale.notes.toUpperCase(),
     }));
-
 
     worksheet.addRows(_sales);
 

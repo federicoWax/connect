@@ -52,19 +52,20 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
   }
 
   useEffect(() => {
-    if(open && user && !loading) {
+    if(open && user) {
       const getUserAsistance = async () => {
         try {
           setLoading(true);
 
           const assistance = await getDocs(query(collection(db, "assists"), where("userId", "==", user?.uid), where("date", ">=", StartDate.toDate()), where("date", "<=", EndDate.toDate())));
           const _position = await getPosition();
+          const countAssists = assistance.docs.length;
 
           if(userFirestore?.team === "CMG") {
-            setCountRegisters(assistance.docs.length);
+            setCountRegisters(countAssists);
           } 
 
-          setWithAssistance(userFirestore?.team === "CMG" ? assistance.docs.length === 4 : !assistance.empty);
+          setWithAssistance(countAssists === 4);
           setPosition(_position);
         } catch (error) {
           console.log(error);
@@ -84,7 +85,6 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
       message.error("No tienes una sucursal con ubicación asignada.");
       return;
     }
-
 
     if(!position) {
       message.error("No se pudo obtener tu ubicación.");
