@@ -41,7 +41,7 @@ const Home = () => {
     sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
   }
 
-  console.log(searchESID)
+  const hideInputSelers = userFirestore?.role === "Procesos" && (filter.concluded === null || filter.concluded);
 
   //Falta estrucutrar la vista en mas componentes
   return (
@@ -59,10 +59,12 @@ const Home = () => {
           Agregar venta
         </Button>
       }
-      
-      <Button type="primary" onClick={downloadExcel}>
-        Descargar Reporte
-      </Button>
+      {
+        ((userFirestore?.role === "Procesos" && filter.concluded) || ["Administrador", "Vendedor"].includes(userFirestore?.role as string)) && 
+        <Button type="primary" onClick={downloadExcel}>
+          Descargar Reporte
+        </Button>
+      }
       <br />
       <br />
       <Row gutter={20}>
@@ -122,7 +124,7 @@ const Home = () => {
           </>
         }
         {
-          ["Administrador", "Procesos"].includes(userFirestore?.role as string) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+          (!hideInputSelers && ["Administrador", "Procesos"].includes(userFirestore?.role as string)) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
             <label>Vendedores</label>
             <Select 
               loading={loadingUsers} 
@@ -163,7 +165,8 @@ const Home = () => {
       <br />
       <Row gutter={20}>
         {
-          userFirestore?.role === "Administrador" && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+          userFirestore?.role === "Administrador" && <>
+          <Col xs={24} sm={24} md={5} style={{ display: "grid" }}>
             <label>Clientes</label>
             <AutoComplete
               onSearch={setSearchESID}
@@ -172,10 +175,8 @@ const Home = () => {
               filterOption={(inputValue, option) =>
                 option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
               }
-              onSelect={(value: string, obj: Autocomplete | null) => {  
-                if(obj) {
-                  setFilter({...filter, esid: obj.value});
-                }
+              onChange={(value: string) => {  
+                  setFilter({...filter, esid: value});
               }}
               placeholder="Buscar ESID"
               onClear={() => setFilter({...filter, esid: ""})}
@@ -188,8 +189,19 @@ const Home = () => {
               />
             </AutoComplete>              
           </Col>
+          <Col xs={24} sm={24} md={2} style={{ display: "grid" }}>
+            <label>Teléfono</label>
+            <Input
+              type="number"
+              value={filter.phone}
+              onChange={e => setFilter({ ...filter, phone: e.target.value })}
+              placeholder="Teléfono"
+            />
+          </Col>
+          </>
         }
-        <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
+         
+        <Col xs={24} sm={24} md={2} style={{ display: "grid" }}>
           <label>Estatus pago</label>
           <Select 
             allowClear
@@ -212,31 +224,27 @@ const Home = () => {
           <Option value="">Todas las campañas</Option>
           {
             campaigns.map(c => (
-              <Option key={c.id} value={c.id}>{c.name}</Option>
+              <Option value={c.id}>{c.name}</Option>
             )) 
           }
           </Select>
         </Col>
-        {
-          userFirestore?.role !== "Procesos" && userFirestore?.team !== "SELECT" && 
-          <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
-            <label>Equipos</label>
-            <Select 
-              loading={loadingTeams}
-              allowClear
-              value={filter.teamId} 
-              onChange={value => setFilter({...filter, teamId: value})}
-            >
-              <Option value="">Todos los equipos</Option>
-              {
-                teams.map(t => (
-                  <Option key={t.id} value={t.name}>{t.name}</Option>
-                ))
-              }
-            </Select>
-          </Col>
-        }
-       
+        <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
+          <label>Equipos</label>
+          <Select 
+            loading={loadingTeams}
+            allowClear
+            value={filter.teamId} 
+            onChange={value => setFilter({...filter, teamId: value})}
+          >
+            <Option value="">Todos los equipos</Option>
+            {
+              teams.map(t => (
+                <Option key={t.id} value={t.name}>{t.name}</Option>
+              ))
+            }
+          </Select>
+        </Col>
         <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
           <label>Estatus de servicio</label>
           <Select 

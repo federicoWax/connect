@@ -21,7 +21,7 @@ const AuthProvider: FC = ({ children }) => {
     const uns = onIdTokenChanged(auth, async (user: User | null) => {
       if(user) {
         const userDoc = await getDocById("users", user.uid);
-        const userData = userDoc.data() as UserFirestoreAuth;
+        const userData = {...userDoc.data(), id: userDoc.id} as UserFirestoreAuth;
 
         const teamDocs = await getDocs(query(collection(db, "teams"), where("name", "==", userData.team)));
         const teamData = teamDocs.docs[0].data() as Team;

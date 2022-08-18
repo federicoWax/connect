@@ -147,6 +147,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
 
   const optionsClients = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
+  const hideInputs = userFirestore?.role === "Procesos" && sale.id && sale.userId !== user?.uid; 
   
   return (
     <Modal
@@ -183,29 +184,34 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={24} md={8}>
-            <div>Fecha de nacimiento</div>
-            <DatePicker
-              clearIcon={null}
-              value={moment(sale.dateBirth === null ? undefined : sale.dateBirth?.toDate())}
-              onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
-              style={{width: "100%", marginTop: 8}}
-              placeholder="Fecha de nacimiento"
-            />
-          </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Teléfono"
-              name="phone"
-              rules={[{ required: true, message: 'Teléfono de 10 digitos requerido.', len: 10 }]}
-            >
-              <Input 
-                type="number"
-                value={sale.phone} 
-                onChange={(e) => setSale({...sale, phone: e.target.value})}
+          {
+            !hideInputs && <Col xs={24} sm={24} md={8}>
+              <div>Fecha de nacimiento</div>
+              <DatePicker
+                clearIcon={null}
+                value={moment(sale.dateBirth === null ? undefined : sale.dateBirth?.toDate())}
+                onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
+                style={{width: "100%", marginTop: 8}}
+                placeholder="Fecha de nacimiento"
               />
-            </Form.Item>
-          </Col>
+            </Col>
+          }
+          {
+            !hideInputs && <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Teléfono"
+                name="phone"
+                rules={[{ required: true, message: 'Teléfono de 10 digitos requerido.', len: 10 }]}
+              >
+                <Input 
+                  type="number"
+                  onWheel={(e) => e.currentTarget.blur()}
+                  value={sale.phone} 
+                  onChange={(e) => setSale({...sale, phone: e.target.value})}
+                />
+              </Form.Item>
+            </Col>
+          }
         </Row>
         <Row gutter={10} style={{marginTop: 10}}>
           <Col xs={24} sm={24} md={8}>
@@ -215,6 +221,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               rules={[{ required: true, message: 'Teléfono adicional de 10 digitos requerido.', len: 10 }]}
             >
               <Input 
+                onWheel={(e) => e.currentTarget.blur()}
                 type="number"
                 value={sale.additionalPhone} 
                 onChange={(e) => setSale({...sale, additionalPhone: e.target.value})}
@@ -275,19 +282,21 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
           </Col>
         </Row>
         <Row gutter={10} style={{marginTop: 10}}>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Correo electrónico"
-              name="email"
-              rules={[{ message: 'Correo electrinico válido requerido.', type: 'email' }]}  
-            >
-              <Input 
-                type="email"
-                value={sale.email} 
-                onChange={(e) => setSale({...sale, email: e.target.value})}
-              />
-            </Form.Item>
-          </Col>
+          {
+            !hideInputs && <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Correo electrónico"
+                name="email"
+                rules={[{ message: 'Correo electrinico válido requerido.', type: 'email' }]}  
+              >
+                <Input 
+                  type="email"
+                  value={sale.email} 
+                  onChange={(e) => setSale({...sale, email: e.target.value})}
+                />
+              </Form.Item>
+            </Col>
+          } 
           <Col xs={24} sm={24} md={8}>
             <Form.Item
               label="Correo electrónico adicional"
@@ -310,6 +319,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 <Option value="Activación">Activación</Option>
                 <Option value="Mensualidad">Mensualidad</Option>
                 <Option value="Desconexión">Desconexión</Option>
+                <Option value="Devolución">Devolución</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -326,79 +336,85 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               </Select>
             </Form.Item>
           </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Método de pago"
-              name="paymentMethod"
-            >
-              <Select value={sale.paymentMethod} onChange={value => setSale({...sale, paymentMethod: value })}>
-                <Option value="BARRI">BARRI</Option>
-                <Option value="Western union">Western union</Option>
-                <Option value="Ria">Ria</Option>
-                <Option value="Dolex">Dolex</Option>
-                <Option value="Zelle">Zelle</Option>x
-                <Option value="Cashapp">Cashapp</Option>
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Número de referencia"
-              name="referenceNumber"
-            >
-              <Input 
-                type="text"
-                value={sale.referenceNumber} 
-                onChange={(e) => setSale({...sale, referenceNumber: e.target.value})}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row gutter={10} style={{marginTop: 10}}>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Envia"
-              name="sends"
-            >
-              <Input 
-                type="text"
-                value={sale.sends} 
-                onChange={(e) => setSale({...sale, sends: e.target.value})}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Recibe"
-              name="receives"
-            >
-              <Select
-                onChange={(value) => setSale({...sale, receives: value})}
-                value={sale.receives} 
+          {
+            !hideInputs && <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Método de pago"
+                name="paymentMethod"
               >
-                <Option key="" value="">Sin receptor</Option>
-                {
-                  cobradores.map(cobrador => (
-                    <Option key={cobrador.id} value={cobrador.name}>{cobrador.name}</Option>
-                  ))
-                }
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Vivienda"
-              name="livingPlace"
-              rules={[{ required: true, message: 'Vivienda requerida.' }]}
-            >
-              <Select value={sale.livingPlace} onChange={value => setSale({...sale, livingPlace: value })}>
-                <Option value="Casa">Casa</Option>
-                <Option value="Traila">Traila</Option>
-                <Option value="Apartamento">Apartamento</Option>
-              </Select>
-            </Form.Item>
-          </Col>
+                <Select value={sale.paymentMethod} onChange={value => setSale({...sale, paymentMethod: value })}>
+                  <Option value="BARRI">BARRI</Option>
+                  <Option value="Western union">Western union</Option>
+                  <Option value="Ria">Ria</Option>
+                  <Option value="Dolex">Dolex</Option>
+                  <Option value="Zelle">Zelle</Option>x
+                  <Option value="Cashapp">Cashapp</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          }
+          {
+            !hideInputs && <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Número de referencia"
+                name="referenceNumber"
+              >
+                <Input 
+                  type="text"
+                  value={sale.referenceNumber} 
+                  onChange={(e) => setSale({...sale, referenceNumber: e.target.value})}
+                />
+              </Form.Item>
+            </Col>
+          }
         </Row>
+        {
+          !hideInputs && <Row gutter={10} style={{marginTop: 10}}>
+            <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Envia"
+                name="sends"
+              >
+                <Input 
+                  type="text"
+                  value={sale.sends} 
+                  onChange={(e) => setSale({...sale, sends: e.target.value})}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Recibe"
+                name="receives"
+              >
+                <Select
+                  onChange={(value) => setSale({...sale, receives: value})}
+                  value={sale.receives} 
+                >
+                  <Option key="" value="">Sin receptor</Option>
+                  {
+                    cobradores.map(cobrador => (
+                      <Option key={cobrador.id} value={cobrador.name}>{cobrador.name}</Option>
+                    ))
+                  }
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Vivienda"
+                name="livingPlace"
+                rules={[{ required: true, message: 'Vivienda requerida.' }]}
+              >
+                <Select value={sale.livingPlace} onChange={value => setSale({...sale, livingPlace: value })}>
+                  <Option value="Casa">Casa</Option>
+                  <Option value="Traila">Traila</Option>
+                  <Option value="Apartamento">Apartamento</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+        }
         <Row gutter={10} style={{marginTop: 10}}>
           <Col xs={24} sm={24} md={8}>
             <Form.Item
@@ -412,19 +428,22 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Cantidad de cobro"
-              name="paymentAmount"
-              rules={sale.statusSale === "Mensualidad" ? [{ required: true, message: 'Cantidad de cobro requerida.' }] : []}
-            >
-              <Input 
-                type="number"
-                value={sale.paymentAmount} 
-                onChange={(e) => setSale({...sale, paymentAmount: e.target.value})}
-              />
-            </Form.Item>
-          </Col>
+          {
+            !hideInputs && <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Cantidad de cobro"
+                name="paymentAmount"
+                rules={sale.statusSale === "Mensualidad" ? [{ required: true, message: 'Cantidad de cobro requerida.' }] : []}
+              >
+                <Input 
+                  onWheel={(e) => e.currentTarget.blur()}
+                  type="number"
+                  value={sale.paymentAmount} 
+                  onChange={(e) => setSale({...sale, paymentAmount: e.target.value})}
+                />
+              </Form.Item>
+            </Col>
+          }
           <Col xs={24} sm={24} md={8}>
             <Form.Item
               label="Usuario de proceso"
@@ -432,16 +451,17 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
             >
               <AutoComplete
                 allowClear
+                disabled={Boolean(userFirestore?.role !== "Administrador" && sale.processUser && sale.processUser !== userFirestore?.email)}
                 value={sale?.processUser}
                 options={optionsProcessUser} 
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onChange={async (value: string) => {  
+                onSelect={async (value: string) => {  
                   setSale({...sale, processUser: value});
 
                   if(sale.id) {
-                    await update("sales", sale.id, { processUser: value });
+                    await update("sales", sale.id, { processUser: value || "" });
                   }
                 }}
                 placeholder="Buscar usuario proceso"
@@ -476,6 +496,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               name="notes"
             >
               <Input.TextArea
+                rows={6}
                 value={sale.notes} 
                 onChange={(e) => setSale({...sale, notes: e.target.value})}
               />

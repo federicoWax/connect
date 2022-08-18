@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { 
   UserOutlined, DollarOutlined, UnorderedListOutlined, 
-  ProfileOutlined, AppstoreAddOutlined, SettingOutlined,
-  ScheduleOutlined
+  ProfileOutlined, SettingOutlined, ScheduleOutlined
 } from '@ant-design/icons';
 import { MdAccountBox, MdGroup, MdLocationCity } from 'react-icons/md';
 import { BiDoorOpen } from 'react-icons/bi';
@@ -88,15 +87,11 @@ const MenuComponent = () => {
   return (
     <Sider collapsible collapsed={collapsed} onCollapse={onCollapse}>
       <div style={{color: "white", padding: 8, textAlign: "center"}}>
-        {
-          userFirestore.team === "CMG" && <>
-            <br />
-            <SettingOutlined 
-              style={{fontSize: 20, cursor: "pointer"}}
-              onClick={() => setOpen(true)}
-            />
-          </>
-        }
+        <br />
+        <SettingOutlined 
+          style={{fontSize: 20, cursor: "pointer"}}
+          onClick={() => setOpen(true)}
+        />
         <br />
         <div style={{textOverflow: "ellipsis", overflow: "hidden"}}>{userFirestore?.email}</div>
         <div style={{textOverflow: "ellipsis", overflow: "hidden"}}>{userFirestore?.role}</div>

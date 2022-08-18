@@ -8,6 +8,7 @@ export interface Permission {
   write: boolean;
 }
 export interface UserFirestoreAuth {
+  id: string;
   email: string;
   role: Rols;
   team: string;
@@ -52,7 +53,7 @@ export interface Sale extends Client {
   date?: Timestamp | null | moment.Moment;
   datePayment?: Timestamp | null | moment.Moment;
   dateConclued?: Timestamp | null | moment.Moment;
-  statusSale?: "Activación" | "Mensualidad" | "Desconexión";
+  statusSale?: "Activación" | "Mensualidad" | "Desconexión" | "Devolución";
   referenceNumber?: string;
   concluded: boolean;
   paymentAmount: string;
@@ -75,6 +76,7 @@ export interface FilterSale {
   teamId: string;
   statusLight: "Con luz" | "Sin luz" | "";
   typeDate: "datePayment" | "date" | "dateConclued";
+  phone?: string;
 };
 
 export interface Cobrador {

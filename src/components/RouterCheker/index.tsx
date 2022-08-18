@@ -16,7 +16,7 @@ const RoterChecker = () => {
       if(userFirestore.role === "Administrador") {
         setUserRoutes(userFirestore.permissions.map(p => p.route));
       } else {
-        setUserRoutes(userFirestore.permissions.filter(p => p.write || p.write).map(p => p.route));
+        setUserRoutes(userFirestore.permissions.filter(p => p.write || p.read).map(p => p.route));
       }
 
       setLoading(false);

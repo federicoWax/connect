@@ -51,7 +51,7 @@ StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
 const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {
-  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
+  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate, phone } = filter;
 
   let Query = query(
     collection(db, "sales"), 
@@ -69,11 +69,15 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     )
   }
 
-  if(userId) 
+  if(userFirestore?.role === "Procesos" && (concluded === null || concluded)) {
+    Query = query(Query, where('userId', '==', userFirestore.id));
+  } else if(userId) {
     Query = query(Query, where('userId', '==', userId));
-
-  if(esid)
+  }
+  
+  if(esid) {
     Query = query(Query, where('esid', '==', esid));
+  }
 
   if(processUser) 
     Query = query(Query, where('processUser', '==', processUser));
@@ -81,14 +85,16 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   if(campaignId) 
     Query = query(Query, where('campaign', '==', campaignId));
   
-  if(userFirestore?.role === "Procesos" && userFirestore?.team === "SELECT") {
-    Query = query(Query, where('team', '==', "SELECT"));
-  } else if(teamId) {
+  if(teamId) {
     Query = query(Query, where('team', '==', teamId));
   }
   
   if(statusLight) {
     Query = query(Query, where('statusLight', '==', statusLight));
+  }
+
+  if(phone) {
+    Query = query(Query, where('phone', '==', phone));
   }
 
   return Query;
@@ -98,7 +104,7 @@ const getQueryClients = (searchESID: string) => {
   let Query = query(collection(db, "clients"));
 
   searchESID
-    ? Query = query(Query, orderBy("esid"), where('esid', '>=', searchESID))
+    ? Query = query(Query, where('esid', '==', searchESID))
     : Query = query(Query, orderBy("client"), limit(limitClients));
 
   return Query;
@@ -144,6 +150,12 @@ const useUsers = () => {
       title: 'Cliente',
       key: 'client',
       dataIndex: 'client',
+      render: (text: string) => text
+    },
+    {
+      title: 'Teléfono',
+      key: 'phone',
+      dataIndex: 'phone',
       render: (text: string) => text
     },
     {
@@ -220,7 +232,7 @@ const useUsers = () => {
         const user = users.find(user =>  user.email === record.processUser);
         return (
           user?.email && <>
-            <div> Nombre:  { user?.name }</div>
+            <div> { user?.name }</div>
           </>
         )
       }
@@ -273,7 +285,10 @@ const useUsers = () => {
 
   useEffect(() => {
     if(!userFirestore) return;
-    setQuerySales(getQuerySales(filter, userFirestore));
+
+    const query = getQuerySales(filter, userFirestore);
+    console.log(query)
+    setQuerySales(query);
   }, [filter, userFirestore]);
       
   useEffect(() => {
@@ -282,10 +297,6 @@ const useUsers = () => {
     if(loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
 
     let _sales = snapshotSales.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]
-
-    if(userFirestore?.role === "Procesos" && userFirestore?.team === "SELECT") {
-      _sales = _sales.filter(sale => sale.userId === user?.uid || sale.processUser === userFirestore?.email || !sale.processUser);
-    }
 
     setSales(_sales);
     setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
