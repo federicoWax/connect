@@ -41,10 +41,10 @@ const useAssists = () => {
 
   useEffect(() => {
     if(!loadingAssists && !loadingUsers) {
-      const users = snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore [];
+      const users = snapshotUsers?.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore [];
 
       setAssists(
-        snapshotAssists.docs.map(doc => {
+        snapshotAssists?.docs.map(doc => {
           const user = users.find(u => u.id === doc.data().userId);
 
           return ({...doc.data(), ...user, id: doc.id})

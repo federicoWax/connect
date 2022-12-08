@@ -320,6 +320,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 <Option value="Mensualidad">Mensualidad</Option>
                 <Option value="Desconexión">Desconexión</Option>
                 <Option value="Devolución">Devolución</Option>
+                <Option value="Recuperación">Recuperación</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -349,6 +350,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                   <Option value="Dolex">Dolex</Option>
                   <Option value="Zelle">Zelle</Option>x
                   <Option value="Cashapp">Cashapp</Option>
+                  <Option value="MONEY GRAM">MONEY GRAM</Option>
                 </Select>
               </Form.Item>
             </Col>

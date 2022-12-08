@@ -95,8 +95,8 @@ const useClients = () => {
 
     if(loadingClients || loadingCobradores || !mounted) return;
 
-    setClients(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as Client[]);
-    setCobradores(snapshotCobradores.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
+    setClients(snapshotUsers?.docs.map(doc => ({...doc.data(), id: doc.id})) as Client[]);
+    setCobradores(snapshotCobradores?.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
 
     return () => {
       mounted = false;

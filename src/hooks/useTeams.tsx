@@ -81,7 +81,7 @@ const useTeams = () => {
 
     if( loadingTeams || !mounted) return;
 
-    setTeams(snapshotTeams.docs.map(doc => ({...doc.data(), id: doc.id })) as Team[]);
+    setTeams(snapshotTeams?.docs.map(doc => ({...doc.data(), id: doc.id })) as Team[]);
 
     return () => {
       mounted = false;

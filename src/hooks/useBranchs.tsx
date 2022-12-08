@@ -65,7 +65,7 @@ const useBranchs = () => {
 
     if(loadingBranchs || !mounted) return;
 
-    setBranchs(snapshotBranchs.docs.map(doc => ({...doc.data(), id: doc.id })) as Branch[]);
+    setBranchs(snapshotBranchs?.docs.map(doc => ({...doc.data(), id: doc.id })) as Branch[]);
 
     return () => {
       mounted = false;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { Button, Col, Row, Select, Table, DatePicker, message, AutoComplete, Input } from "antd";
 import moment from "moment";
 import HomeDialog from "./homeDialog";
@@ -10,7 +10,6 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const Home = () => {
-  const [searchESID, setSearchESID] = useState<string>("");
   const { userFirestore } = useAuth();
   let { 
     loadingUsers, 
@@ -34,16 +33,25 @@ const Home = () => {
     onSearchClients 
   } = useHome();
 
-  const optionsAuotComplete = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
-  const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
+  const optionsAuotComplete = useMemo(() =>
+    clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client + " - " + c.phone})) as Autocomplete[],
+    [clients]
+  );
+
+  const optionsProcessUser = useMemo(() =>
+    users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[],
+    [users]
+  );
+
+  const hideInputSelers = useMemo(() =>
+    userFirestore?.role === "Procesos" && (filter.concluded === null || filter.concluded),
+    [userFirestore, filter.concluded]
+  );
 
   if(filter.statusPayment !== null) {
     sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
   }
 
-  const hideInputSelers = userFirestore?.role === "Procesos" && (filter.concluded === null || filter.concluded);
-
-  //Falta estrucutrar la vista en mas componentes
   return (
     <div>
       <h1>Ventas: { sales.length }</h1>
@@ -166,42 +174,41 @@ const Home = () => {
       <Row gutter={20}>
         {
           userFirestore?.role === "Administrador" && <>
-          <Col xs={24} sm={24} md={5} style={{ display: "grid" }}>
+          <Col xs={24} sm={24} md={2} style={{ display: "grid" }}>
+            <label>Filtro clientes</label>
+            <Select 
+              allowClear
+              value={filter.fieldsClient} 
+              onChange={value => setFilter({ ...filter, fieldsClient: value })}
+            >
+              <Option value="esid">ESID</Option>
+              <Option value="phone">Teléfono</Option>
+            </Select>
+          </Col>
+          <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
             <label>Clientes</label>
             <AutoComplete
-              onSearch={setSearchESID}
+              onSearch={(searchESID) => onSearchClients(searchESID)} 
               value={filter.esid}
               options={optionsAuotComplete} 
               filterOption={(inputValue, option) =>
                 option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
               }
               onChange={(value: string) => {  
-                  setFilter({...filter, esid: value});
+                setFilter({...filter, esid: value});
               }}
-              placeholder="Buscar ESID"
+              placeholder="Buscar..."
               onClear={() => setFilter({...filter, esid: ""})}
             >
               <Input.Search 
                 size="middle" 
-                placeholder="Buscar ESID" 
                 enterButton
-                onSearch={() => onSearchClients(searchESID)} 
               />
             </AutoComplete>              
           </Col>
-          <Col xs={24} sm={24} md={2} style={{ display: "grid" }}>
-            <label>Teléfono</label>
-            <Input
-              type="number"
-              value={filter.phone}
-              onChange={e => setFilter({ ...filter, phone: e.target.value })}
-              placeholder="Teléfono"
-            />
-          </Col>
           </>
         }
-         
-        <Col xs={24} sm={24} md={2} style={{ display: "grid" }}>
+        <Col xs={24} sm={24} md={4} style={{ display: "grid" }}>
           <label>Estatus pago</label>
           <Select 
             allowClear

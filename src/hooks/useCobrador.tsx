@@ -64,7 +64,7 @@ const useColaboradores = () => {
 
     if( loadingCobradores || !mounted) return;
 
-    setCobradores(snapshotCobrador.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
+    setCobradores(snapshotCobrador?.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
 
     return () => {
       mounted = false;

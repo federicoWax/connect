@@ -51,7 +51,7 @@ StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
 EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
 
 const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {
-  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate, phone } = filter;
+  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
 
   let Query = query(
     collection(db, "sales"), 
@@ -61,7 +61,7 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     Query = query(Query, where('concluded', '==', concluded), orderBy(typeDate));
   }
 
-  if(concluded || concluded === null) {
+  if(((concluded || concluded === null) && !esid) || (esid && startDate && endDate)) {
     Query = query(
       Query,
       where(typeDate, ">=", startDate ? startDate.set({ hour:0, minute:0, second:0, millisecond:0}).toDate() : StartDate.toDate()),
@@ -93,18 +93,14 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     Query = query(Query, where('statusLight', '==', statusLight));
   }
 
-  if(phone) {
-    Query = query(Query, where('phone', '==', phone));
-  }
-
   return Query;
 }
 
-const getQueryClients = (searchESID: string) => {
+const getQueryClients = (searchESID: string, field: string) => {
   let Query = query(collection(db, "clients"));
 
   searchESID
-    ? Query = query(Query, where('esid', '==', searchESID))
+    ? Query = query(Query, where(field, '==', searchESID))
     : Query = query(Query, orderBy("client"), limit(limitClients));
 
   return Query;
@@ -130,11 +126,12 @@ const useUsers = () => {
     teamId: "",
     statusLight: "",
     typeDate: "date",
+    fieldsClient: "esid",
   });
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter, userFirestore as UserFirestoreAuth));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
-  const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients(""));
+  const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients("", filter.fieldsClient));
   const [queryCampaigns] = useState<Query<DocumentData>>(query(collection(db, "campaigns"), orderBy("name")));
   const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy("name")));
 
@@ -296,7 +293,7 @@ const useUsers = () => {
 
     if(loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
 
-    let _sales = snapshotSales.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]
+    let _sales = snapshotSales?.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]
 
     setSales(_sales);
     setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
@@ -383,7 +380,7 @@ const useUsers = () => {
     a.click();
   }
 
-  const onSearchClients = (value: string) => setQueryClients(getQueryClients(value));
+  const onSearchClients = (value: string) => setQueryClients(getQueryClients(value, filter.fieldsClient));
 
   return { 
     loadingUsers, 

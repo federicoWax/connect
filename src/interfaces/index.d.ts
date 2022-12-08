@@ -76,7 +76,7 @@ export interface FilterSale {
   teamId: string;
   statusLight: "Con luz" | "Sin luz" | "";
   typeDate: "datePayment" | "date" | "dateConclued";
-  phone?: string;
+  fieldsClient: "phone" | "esid"
 };
 
 export interface Cobrador {

@@ -97,7 +97,7 @@ const useUsers = () => {
 
     if(loading || loadingTeams || loadingBranchs || !mounted) return;
 
-    setUsers(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
+    setUsers(snapshot?.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
     setTeams(snapshotTeams.docs.map(doc => ({...doc.data(), id: doc.id})) as Team[]);
     setBranchs(snapshotBranchs.docs.map(doc => ({...doc.data(), id: doc.id})) as Branch[]);
 

@@ -64,7 +64,7 @@ const useCampaigns = () => {
 
     if( loadingCampaigns || !mounted) return;
 
-    setCampaignes(snapshotCampaigns.docs.map(doc => ({...doc.data(), id: doc.id })) as Campaign[]);
+    setCampaignes(snapshotCampaigns?.docs.map(doc => ({...doc.data(), id: doc.id })) as Campaign[]);
 
     return () => {
       mounted = false;
