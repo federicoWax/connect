@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { Button, Col, Row, Select, Table, DatePicker, message, AutoComplete, Input } from "antd";
-import moment from "moment";
 import HomeDialog from "./homeDialog";
 import useHome from "../../hooks/useHome";
 import { useAuth } from "../../context/AuthContext";
@@ -96,11 +95,11 @@ const Home = () => {
             </Col>
             <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
               <label>Rango de fechas</label>
-                <RangePicker  
+                {/* <RangePicker  
                   value={[filter.startDate, filter.endDate]}
                   onChange={(dates) => {
-                    const startDate = dates ? dates[0] as moment.Moment : null;
-                    const endDate = dates ? dates[1] as moment.Moment : null;
+                    const startDate = dates ? dates[0] as dayjs.Dayjs : null;
+                    const endDate = dates ? dates[1] as dayjs.Dayjs : null;
 
                     if(userFirestore?.role === "Administrador") {
                       setFilter({ ...filter, startDate, endDate });
@@ -127,7 +126,7 @@ const Home = () => {
                   }}
                   showTime={false}
                   placeholder={["Fecha inicio", "Fecha fin"]}
-                />
+                /> */}
             </Col>
           </>
         }

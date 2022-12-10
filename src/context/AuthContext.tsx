@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, createContext, FC } from "react";
+import { useEffect, useState, useContext, createContext, FC, ReactNode } from "react";
 import { User, onIdTokenChanged } from "firebase/auth";
 import FullLoader from "../components/FullLoader";
 import { auth } from "../firebase";
@@ -6,13 +6,17 @@ import { getDocById } from "../services/firebase";
 import { Team, UserFirestoreAuth } from "../interfaces";
 import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
 
+interface Props {
+  children: ReactNode
+}
+
 const db = getFirestore();
 const AuthContext = createContext<{ user: User | null, userFirestore: UserFirestoreAuth | null }>({
   user: null,
   userFirestore: null
 });
 
-const AuthProvider: FC = ({ children }) => {
+const AuthProvider: FC<Props> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userFirestore, setUserFirestore] = useState<UserFirestoreAuth | null>(null);
   const [loading, setLoading] = useState<Boolean>(true);

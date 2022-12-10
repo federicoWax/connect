@@ -1,5 +1,7 @@
 import { Button, DatePicker, Input, message, Table } from "antd";
 import useAssists from "../../hooks/useAssists";
+import dayjs from "dayjs";
+import { dayjsToEndDay, dayjsToStartDay } from "../../utils";
 
 const { RangePicker } = DatePicker;
 
@@ -18,16 +20,16 @@ const Assists = () => {
       <RangePicker  
         value={[filter.startDate, filter.endDate]}
         onChange={(dates) => {
-          const startDate = dates ? dates[0] as moment.Moment : null;
-          const endDate = dates ? dates[1] as moment.Moment : null;
+          let startDate = dates ? dates[0] as dayjs.Dayjs : null;
+          let endDate = dates ? dates[1] as dayjs.Dayjs : null;
 
           if(!startDate || !endDate) {
             setFilter({ ...filter, startDate, endDate });
             return;
           }
 
-          startDate.set({ hour: 0, minute: 0, second: 0 });
-          endDate.set({ hour: 23, minute: 59, second: 59 });
+          startDate = dayjsToStartDay(startDate);
+          endDate = dayjsToEndDay(endDate);
 
           const diff = endDate.diff(startDate, 'years', true);
 

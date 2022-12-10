@@ -1,5 +1,6 @@
 import { Rols } from "../types";
 import { Timestamp } from "firebase/firestore";
+import dayjs from "dayjs";
 
 export interface Permission {
   module: string;
@@ -50,9 +51,9 @@ export interface Client {
 
 export interface Sale extends Client {
   userId?: string;
-  date?: Timestamp | null | moment.Moment;
-  datePayment?: Timestamp | null | moment.Moment;
-  dateConclued?: Timestamp | null | moment.Moment;
+  date?: Timestamp | null | dayjs.Dayjs;
+  datePayment?: Timestamp | null | dayjs.Dayjs;
+  dateConclued?: Timestamp | null | dayjs.Dayjs;
   statusSale?: "Activación" | "Mensualidad" | "Desconexión" | "Devolución";
   referenceNumber?: string;
   concluded: boolean;
@@ -66,8 +67,8 @@ export interface Sale extends Client {
 
 export interface FilterSale {
   concluded: boolean | null;
-  startDate: null | moment.Moment;
-  endDate: null | moment.Moment;
+  startDate: null | dayjs.Dayjs;
+  endDate: null | dayjs.Dayjs;
   userId?: string;
   esid?: string;
   processUser?: string;
@@ -121,6 +122,6 @@ export interface Position {
 }
 
 export interface FilterAssists {  
-  startDate: null | moment.Moment;
-  endDate: null | moment.Moment;
+  startDate: null | dayjs.Dayjs;
+  endDate: null | dayjs.Dayjs;
 }

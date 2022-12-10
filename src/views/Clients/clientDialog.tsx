@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { getFirestore, collection, getDocs, query, Timestamp, where } from "firebase/firestore";
-import moment from "moment";
+import dayjs from "dayjs";
 import { Client, Cobrador } from "../../interfaces";
 import { add, update } from "../../services/firebase";
 
@@ -115,8 +115,8 @@ const CliendDialog: FC<Props> = ({open, onClose, propClient, cobradores}) => {
             <div>Fecha de nacimiento</div>
             <DatePicker
               clearIcon={null}
-              value={moment(client.dateBirth === null ? undefined : client.dateBirth?.toDate())}
-              onChange={(date) => setClient({...client, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
+              //value={moment(client.dateBirth === null ? undefined : client.dateBirth?.toDate())}
+              //onChange={(date) => setClient({...client, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
               style={{width: "100%", marginTop: 8}}
               placeholder="Fecha de nacimiento"
             />

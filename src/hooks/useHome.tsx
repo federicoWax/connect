@@ -7,7 +7,7 @@ import { Campaign, Client, Cobrador, FilterSale, Sale, Team, UserFirestore, User
 import { del, update } from '../services/firebase';
 import { dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
-import moment from 'moment';
+import dayjs from "dayjs";
 import ExcelJS from 'exceljs';
 import useCollection from './useCollection';
 

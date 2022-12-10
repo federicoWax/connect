@@ -1,11 +1,12 @@
 import { FC, memo, useEffect, useState } from 'react'
 import { Button, Card, Col, message, Modal, Row, Spin } from 'antd';
-import moment from 'moment';
+import dayjs from "dayjs";
 import { useAuth } from '../../../context/AuthContext';
 import { collection, getDocs, getFirestore, query, Timestamp, where } from 'firebase/firestore';
 import { CheckOutlined, CheckCircleOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Branch, Position } from '../../../interfaces';
 import { add } from '../../../services/firebase';
+import { endDateEndDay, startDateStartDay } from '../../../constants';
 
 interface Props {
   open: boolean;
@@ -13,14 +14,9 @@ interface Props {
   branch: Branch | null;
 };
 
-interface TypeRegisters {
-  0: string;
-  1: string;
-  2: string;
-  3: string;
-}
+type TypeRegisters = "ENTRADA" | "SALIDA A COMIDA" | "ENTRADA DE COMIDA" | "SALIDA";
 
-const typeRegisters: TypeRegisters = {
+const typeRegisters: Record<number, TypeRegisters> = {
   0: "ENTRADA",
   1: "SALIDA A COMIDA",
   2: "ENTRADA DE COMIDA",
@@ -28,8 +24,6 @@ const typeRegisters: TypeRegisters = {
 };
 
 const db = getFirestore();
-const StartDate = moment().set({ hour:0, minute:0, second:0});
-const EndDate = moment().set({ hour:23, minute:59, second:59});
 
 const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
   const [loading, setLoading] = useState(false);
@@ -40,7 +34,7 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
   const [countRegisters, setCountRegisters] = useState<number>(0);
   const { user, userFirestore } = useAuth();
   
-  const getPosition = async () => {
+  const getPosition = () => {
     setLoadingPosition(true);
 
     return new Promise<Position>((resolve) => { 
@@ -57,7 +51,7 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
         try {
           setLoading(true);
 
-          const assistance = await getDocs(query(collection(db, "assists"), where("userId", "==", user?.uid), where("date", ">=", StartDate.toDate()), where("date", "<=", EndDate.toDate())));
+          const assistance = await getDocs(query(collection(db, "assists"), where("userId", "==", user?.uid), where("date", ">=", startDateStartDay), where("date", "<=", endDateEndDay)));
           const _position = await getPosition();
           const countAssists = assistance.docs.length;
 
@@ -99,7 +93,7 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
       const { lat: userLat, lng: userLng } = position;
 
       if(((lat-userLng)**2 + (lng-userLat)**2) <= radius **2) {
-        await add("assists", { userId: user?.uid, date: Timestamp.now(), typeRegister: typeRegisters[countRegisters as keyof TypeRegisters] });
+        await add("assists", { userId: user?.uid, date: Timestamp.now(), typeRegister: typeRegisters[countRegisters] });
         
         message.success("Registro guardada con exito.");
         
@@ -139,7 +133,6 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
       <h3>ASISTENCIA</h3>
       <div style={{width: "100%", textAlign: "center", display: "flex"}}>
         <Card>
-
         {
           loading
           ?
@@ -163,7 +156,7 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
                     onClick={saveAssistance}
                     loading={saving}
                   >
-                    CHECAR {typeRegisters[countRegisters as keyof TypeRegisters]}
+                    CHECAR {typeRegisters[countRegisters]}
                   </Button>
                 </Col>
                 <br />

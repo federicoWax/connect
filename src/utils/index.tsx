@@ -1,5 +1,6 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { message, Modal } from "antd";
+import dayjs from "dayjs";
 
 export const dialogDeleteDoc = (fun: () => Promise<unknown>) => {
   Modal.confirm({
@@ -14,3 +15,21 @@ export const dialogDeleteDoc = (fun: () => Promise<unknown>) => {
     },
   });
 }
+
+export const dayjsToStartDay = (dj: dayjs.Dayjs) => {
+  dj.set("hour", 0);
+  dj.set("minute", 0);
+  dj.set("second", 0)
+  dj.set("millisecond", 0);
+
+  return dj;
+} 
+
+export const dayjsToEndDay = (dj: dayjs.Dayjs) => {
+  dj.set("hour", 23);
+  dj.set("minute", 59);
+  dj.set("second", 59)
+  dj.set("millisecond", 59);
+
+  return dj;
+} 

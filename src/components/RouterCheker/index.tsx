@@ -1,7 +1,8 @@
 import { Layout } from 'antd';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import FullLoader from '../FullLoader';
 import MenuComponent from '../Menu';
 
 const RoterChecker = () => {
@@ -40,7 +41,9 @@ const RoterChecker = () => {
     <Layout style={{minHeight: "100vh"}}>
       { user && <MenuComponent /> }
       <Layout.Content style={{padding: 20}}>
-        <Outlet />
+        <Suspense fallback={<FullLoader />}>
+          <Outlet />
+        </Suspense>
       </Layout.Content>
     </Layout>
   )

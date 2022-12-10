@@ -1,13 +1,12 @@
 import { collection, DocumentData, getFirestore, orderBy, query, Query, where } from "firebase/firestore";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Assistence, FilterAssists, Sale, UserFirestore } from "../interfaces";
 import useOnSnapshot from "./useOnSnapshot";
 import ExcelJS from 'exceljs';
+import { endDateEndDay, startDateStartDay } from "../constants";
 
 const db = getFirestore();
-const StartDate = moment().set({ hour:0, minute:0, second:0});
-const EndDate = moment().set({ hour:23, minute:59, second:59});
 const columnsExcel = ["A", "B", "C"];
 const columnsWorksheet = [
   { header: 'USUARIO', key: 'user', width: 32 },
@@ -20,8 +19,8 @@ const getQueryAssists = (filter: FilterAssists) => {
 
   const Query = query(
     collection(db, "assists"), 
-    where("date", ">=", startDate ? startDate.toDate() : StartDate.toDate()),
-    where("date", "<=", endDate ? endDate.toDate() : EndDate.toDate())
+    where("date", ">=", startDate ? startDate.toDate() : startDateStartDay),
+    where("date", "<=", endDate ? endDate.toDate() : endDateEndDay)
   );
   
   return Query;
@@ -74,7 +73,7 @@ const useAssists = () => {
     {
       title: 'Fecha',
       key: 'date',
-      render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+      render: (record: Sale) => <div>{dayjs(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Tipo de registro',
@@ -99,7 +98,7 @@ const useAssists = () => {
     const _assists = assists.map(a => ({
       ...a,
       user: a.name?.toUpperCase(),
-      date: moment(a.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
+      date: dayjs(a.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
       typeRegister: a.typeRegister?.toUpperCase()
     }));
 

@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
-import moment from "moment";
+import dayjs from "dayjs";
 import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, update } from "../../services/firebase";
@@ -189,8 +189,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               <div>Fecha de nacimiento</div>
               <DatePicker
                 clearIcon={null}
-                value={moment(sale.dateBirth === null ? undefined : sale.dateBirth?.toDate())}
-                onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
+                //onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
                 style={{width: "100%", marginTop: 8}}
                 placeholder="Fecha de nacimiento"
               />
