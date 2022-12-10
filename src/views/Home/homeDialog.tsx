@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
 import dayjs from "dayjs";
@@ -47,11 +47,11 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
   const [form] = Form.useForm();
   const { user, userFirestore } = useAuth();
 
-  const setForm = (_sale: Sale) => {
+  const setForm = useCallback((_sale: Sale) => {
     setSale(_sale);
     form.resetFields();
     form.setFieldsValue(_sale);
-  }
+  }, [form])
   
   useEffect(() => {
     setLoading(true);
@@ -72,7 +72,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     } 
 
     setLoading(false);
-  }, [form, propSale, cobradores, loading]);
+  }, [propSale, cobradores, loading, setForm]);
 
   const save = async () => {
     if(saving) return;
@@ -189,7 +189,8 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               <div>Fecha de nacimiento</div>
               <DatePicker
                 clearIcon={null}
-                //onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
+                value={dayjs(sale.dateBirth === null ? undefined : sale.dateBirth?.toDate())}
+                onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
                 style={{width: "100%", marginTop: 8}}
                 placeholder="Fecha de nacimiento"
               />

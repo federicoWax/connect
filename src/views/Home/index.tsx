@@ -4,6 +4,8 @@ import HomeDialog from "./homeDialog";
 import useHome from "../../hooks/useHome";
 import { useAuth } from "../../context/AuthContext";
 import { Autocomplete } from "../../interfaces";
+import dayjs from "dayjs";
+import { dayjsToEndDay, dayjsToStartDay } from "../../utils";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -76,7 +78,7 @@ const Home = () => {
       <br />
       <Row gutter={20}>
         <Col xs={24} sm={24} md={3} style={{ display: "grid" }}>
-          <label>Concluidas / Pendientes / Todas</label>
+          <label>Estatus</label>
           <Select value={filter.concluded} onChange={value => setFilter({ ...filter, concluded: value })}>
             <Option value={false}>Pendientes</Option>
             <Option value={true}>Concluidas</Option>
@@ -95,24 +97,24 @@ const Home = () => {
             </Col>
             <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
               <label>Rango de fechas</label>
-                {/* <RangePicker  
+                <RangePicker  
                   value={[filter.startDate, filter.endDate]}
                   onChange={(dates) => {
-                    const startDate = dates ? dates[0] as dayjs.Dayjs : null;
-                    const endDate = dates ? dates[1] as dayjs.Dayjs : null;
-
-                    if(userFirestore?.role === "Administrador") {
-                      setFilter({ ...filter, startDate, endDate });
-                      return;
-                    }
+                    let startDate = dates ? dates[0] as dayjs.Dayjs : null;
+                    let endDate = dates ? dates[1] as dayjs.Dayjs : null;
 
                     if(!startDate || !endDate) {
                       setFilter({ ...filter, startDate, endDate });
                       return;
                     }
 
-                    startDate.set({ hour: 0, minute: 0, second: 0 });
-                    endDate.set({ hour: 23, minute: 59, second: 59 });
+                    startDate = dayjsToStartDay(startDate);
+                    endDate = dayjsToEndDay(endDate);
+
+                    if(userFirestore?.role === "Administrador") {
+                      setFilter({ ...filter, startDate, endDate });
+                      return;
+                    }
 
                     const diff = endDate.diff(startDate, 'years', true);
 
@@ -126,7 +128,7 @@ const Home = () => {
                   }}
                   showTime={false}
                   placeholder={["Fecha inicio", "Fecha fin"]}
-                /> */}
+                />
             </Col>
           </>
         }

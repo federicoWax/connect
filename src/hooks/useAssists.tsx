@@ -12,7 +12,7 @@ const columnsWorksheet = [
   { header: 'USUARIO', key: 'user', width: 32 },
   { header: 'FECHA', key: 'date', width: 32 },
   { header: 'TIPO DE REGISTRO', key: 'typeRegister', width: 32 },
-]
+];
 
 const getQueryAssists = (filter: FilterAssists) => {
   const { startDate, endDate } = filter;

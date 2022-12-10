@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Checkbox, Col, Form, message, Modal, Row } from "antd";
+import { Checkbox, Col, message, Modal, Row } from "antd";
 import { Permission, Team } from "../../interfaces";
 import { update } from "../../services/firebase";
 
@@ -102,7 +102,7 @@ const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
       forceRender 
       destroyOnClose={true}
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={resetForm}
       onOk={save}
       title="Permisos"

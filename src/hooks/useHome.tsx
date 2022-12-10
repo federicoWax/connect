@@ -5,15 +5,14 @@ import { getFirestore, collection, query, orderBy, where, DocumentData, Query, l
 import useOnSnapshot from "../hooks/useOnSnapshot";
 import { Campaign, Client, Cobrador, FilterSale, Sale, Team, UserFirestore, UserFirestoreAuth } from "../interfaces";
 import { del, update } from '../services/firebase';
-import { dialogDeleteDoc } from '../utils';
+import { dayjsToStartDay, dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
 import dayjs from "dayjs";
 import ExcelJS from 'exceljs';
 import useCollection from './useCollection';
+import { endDateEndDay, startDateStartDay } from '../constants';
 
 const db = getFirestore();
-const StartDate = moment();
-const EndDate = moment();
 const columnsWorksheet = [
   { header: 'VENDEDOR', key: 'seller', width: 32 },
   { header: 'PROCESO', key: 'processUser', width: 32 },
@@ -47,9 +46,6 @@ const columnsWorksheet = [
 const columnsExcel = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 const limitClients = 10;
 
-StartDate.set({ hour:0, minute:0, second:0, millisecond:0});
-EndDate.set({ hour:24, minute:59, second:59, millisecond:59});
-
 const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {
   const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
 
@@ -64,8 +60,8 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   if(((concluded || concluded === null) && !esid) || (esid && startDate && endDate)) {
     Query = query(
       Query,
-      where(typeDate, ">=", startDate ? startDate.set({ hour:0, minute:0, second:0, millisecond:0}).toDate() : StartDate.toDate()),
-      where(typeDate, "<=", endDate ? endDate.set({ hour:24, minute:59, second:59, millisecond:59}).toDate() : EndDate.toDate())
+      where(typeDate, ">=", startDate ? dayjsToStartDay(startDate).toDate() : startDateStartDay),
+      where(typeDate, "<=", endDate ? dayjsToStartDay(endDate).toDate() : endDateEndDay)
     )
   }
 
@@ -237,17 +233,17 @@ const useUsers = () => {
     {
       title: 'Fecha / Hora creada',
       key: 'date',
-      render: (record: Sale) => <div>{moment(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+      render: (record: Sale) => <div>{dayjs(record.date?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Fecha / Hora pago',
       key: 'datePayment',
-      render: (record: Sale) => record.datePayment && <div>{moment(record.datePayment?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+      render: (record: Sale) => record.datePayment && <div>{dayjs(record.datePayment?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Fecha / Hora concluida',
       key: 'dateConclued',
-      render: (record: Sale) => record.dateConclued && <div>{moment(record.dateConclued?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
+      render: (record: Sale) => record.dateConclued && <div>{dayjs(record.dateConclued?.toDate().toString()).format("DD/MM/YYYY hh:mm a")}</div>
     },
     {
       title: 'Editar',
@@ -342,14 +338,14 @@ const useUsers = () => {
       ...sale,
       seller: users.find(user => user.id === sale.userId)?.name.toUpperCase(),
       processUser: users.find(user => user.email === sale.processUser)?.name.toUpperCase(),
-      date: moment(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
-      datePayment: sale.datePayment ? moment(sale.datePayment?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
-      dateConclued: sale.dateConclued ? moment(sale.dateConclued?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
+      date: dayjs(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
+      datePayment: sale.datePayment ? dayjs(sale.datePayment?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
+      dateConclued: sale.dateConclued ? dayjs(sale.dateConclued?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
       status: sale.concluded ? "Concluida" : "Pendiente".toUpperCase(),
       emailSeller: users.find(user => user.id === sale.userId)?.email.toUpperCase(),
       team: users.find(user => user.id === sale.userId)?.team.toUpperCase(),
       client: sale.client.toUpperCase(),
-      dateBirth: moment(sale.dateBirth?.toDate()).format("DD/MM/YYYY"),
+      dateBirth: dayjs(sale.dateBirth?.toDate()).format("DD/MM/YYYY"),
       address: sale.address.toUpperCase(),
       email: sale.email?.toUpperCase(),
       additionalEmail: sale.additionalEmail?.toUpperCase(),
