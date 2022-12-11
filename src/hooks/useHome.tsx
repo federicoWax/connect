@@ -260,9 +260,9 @@ const useUsers = () => {
       )
     },
     {
-      title: 'Eliminar',
+      title: userFirestore?.role === "Administrador" ? 'Eliminar' : '',
       key: 'delete',
-      render: (record: Sale) => (
+      render: (record: Sale) => userFirestore?.role === "Administrador" && (
         <Button 
           shape="circle" 
           icon={<DeleteOutlined />}
