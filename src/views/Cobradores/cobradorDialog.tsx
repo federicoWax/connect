@@ -62,7 +62,7 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
       forceRender 
       destroyOnClose={true}
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={resetForm}
       onOk={() => {
         form.validateFields()

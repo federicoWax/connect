@@ -149,7 +149,7 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
       forceRender 
       destroyOnClose={true}
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={resetForm}
       onOk={() => form.validateFields().then(save)}
       title={branch.id ? "Editar sucursal" : "Agregar sucursal"}

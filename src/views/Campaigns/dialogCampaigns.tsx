@@ -63,7 +63,7 @@ const CampaignDialog: FC<Props> = ({open, onClose, propCampaign}) => {
       forceRender 
       destroyOnClose={true}
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={resetForm}
       onOk={() => {
         form.validateFields()

@@ -117,7 +117,7 @@ const useUsers = () => {
     startDate: null,
     endDate: null,
     userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid,
-    statusPayment: null,
+    statusPayment: "",
     campaignId: "",
     teamId: "",
     statusLight: "",
@@ -159,9 +159,9 @@ const useUsers = () => {
 
         return (
           <>
-            <div> Nombre:  { user?.name }</div>
+            <div> Nombre: { user?.name }</div>
             <div> Correo: { user?.email }</div>    
-            <div> Equipo: { record?.team || user?.team  }</div>        
+            <div> Equipo: { record?.team || user?.team }</div>        
           </>
         )
       }
@@ -280,7 +280,7 @@ const useUsers = () => {
     if(!userFirestore) return;
 
     const query = getQuerySales(filter, userFirestore);
-    console.log(query)
+    
     setQuerySales(query);
   }, [filter, userFirestore]);
       

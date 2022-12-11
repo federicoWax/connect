@@ -66,13 +66,13 @@ export interface Sale extends Client {
 };
 
 export interface FilterSale {
-  concluded: boolean | null;
+  concluded: boolean | "";
   startDate: null | dayjs.Dayjs;
   endDate: null | dayjs.Dayjs;
   userId?: string;
   esid?: string;
   processUser?: string;
-  statusPayment: Boolean | null;
+  statusPayment: boolean | "";
   campaignId: string;
   teamId: string;
   statusLight: "Con luz" | "Sin luz" | "";

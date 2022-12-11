@@ -121,7 +121,7 @@ const UserConfigDialog: FC<Props> = ({open, onClose, branch}) => {
       forceRender 
       destroyOnClose
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={onClose}
       title="Configuración de usuario"
       cancelText="Cerrar"

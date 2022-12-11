@@ -87,7 +87,7 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
       forceRender 
       destroyOnClose={true}
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={resetForm}
       onOk={() => {
         form.validateFields()

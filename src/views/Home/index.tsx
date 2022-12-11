@@ -80,9 +80,9 @@ const Home = () => {
         <Col xs={24} sm={24} md={3} style={{ display: "grid" }}>
           <label>Estatus</label>
           <Select value={filter.concluded} onChange={value => setFilter({ ...filter, concluded: value })}>
+            <Option value="">Todas</Option>
             <Option value={false}>Pendientes</Option>
             <Option value={true}>Concluidas</Option>
-            <Option value={null}>Todas</Option>
           </Select>
         </Col>
         {
@@ -216,7 +216,7 @@ const Home = () => {
             value={filter.statusPayment} 
             onChange={value => setFilter({ ...filter, statusPayment: value })}
           >
-            <Option value={null}>Todas</Option>
+            <Option value="">Todas</Option>
             <Option value={true}>Pagadas</Option>
             <Option value={false}>No pagadas</Option>
           </Select>
@@ -232,7 +232,7 @@ const Home = () => {
           <Option value="">Todas las campañas</Option>
           {
             campaigns.map(c => (
-              <Option value={c.id}>{c.name}</Option>
+              <Option key={c.id} value={c.id}>{c.name}</Option>
             )) 
           }
           </Select>

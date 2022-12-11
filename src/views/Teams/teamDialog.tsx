@@ -58,7 +58,7 @@ const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
       forceRender 
       destroyOnClose={true}
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={resetForm}
       onOk={() => {
         form.validateFields()

@@ -155,7 +155,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
       forceRender 
       destroyOnClose={true}
       confirmLoading={saving}
-      visible={open}
+      open={open}
       onCancel={onClose}
       onOk={() => {
         form.validateFields()

@@ -1,71 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { 
-  UserOutlined, DollarOutlined, UnorderedListOutlined, 
-  ProfileOutlined, SettingOutlined, ScheduleOutlined
-} from '@ant-design/icons';
-import { MdAccountBox, MdGroup, MdLocationCity } from 'react-icons/md';
-import { BiDoorOpen } from 'react-icons/bi';
+import { SettingOutlined } from '@ant-design/icons';
 import { Layout, Menu } from "antd";
-import { auth } from "../../firebase";
 import { useAuth } from "../../context/AuthContext";
 import UserConfigDialog from "./userConfigDialog";
 import { getDocById } from "../../services/firebase";
 import { Branch } from "../../interfaces";
+import menuItems from "./menuItems";
 
 const { Sider } = Layout;
-const { SubMenu } = Menu;
-
-const menuItems = [
-  {
-    label: "Ventas",
-    route: "/ventas",
-    icon: <DollarOutlined />,
-  },
-  {
-    label: "Clientes",
-    route: "/clientes",
-    icon: <MdAccountBox />,
-  },
-  {
-    label: "Cobradores",
-    route: "/cobradores",
-    icon: <UnorderedListOutlined />
-  },
-  {
-    label: "Campañas",
-    route: "/campanas",
-    icon: <ProfileOutlined />
-  },
-  {
-    label: "Usuarios",
-    route: "/usuarios",
-    icon: <MdGroup /> 
-  },
-  {
-    label: "Equipos",
-    route: "/equipos",
-    icon: <UserOutlined />
-  },
-  {
-    label: "Sucursales",
-    route: "/sucursales",
-    icon: <MdLocationCity /> 
-  },
-  {
-    label: "Asistencias",
-    route: "/asistencias",
-    icon: <ScheduleOutlined /> 
-  },
-];
 
 const MenuComponent = () => {
   const [collapsed, setCollapsed] = useState<boolean | undefined>(true);
   const [open, setOpen] = useState<boolean>(false);
   const [branch, setBranch] = useState<Branch | null>(null);
   const location = useLocation();
-  const navigate = useNavigate();
   const { userFirestore } = useAuth();
+
+  const items = useMemo(() => {
+    return menuItems.filter(item => userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === item.title && (p.write || p.read)))
+  }, [userFirestore])
 
   useEffect(() => {
     const getBranch = async () => {
@@ -80,8 +34,6 @@ const MenuComponent = () => {
 
   const onCollapse = (collapsed: boolean | undefined) => setCollapsed(collapsed);
   
-  const signOut = async () => await auth.signOut();
-
   if(!userFirestore) return null;
 
   return (
@@ -98,20 +50,12 @@ const MenuComponent = () => {
         <br />
         <div >{branch?.name}</div>
       </div>
-      <Menu theme="dark" selectedKeys={[location.pathname]} mode="inline">
-        {
-          menuItems
-            .filter(item => userFirestore?.role === "Administrador" || userFirestore.permissions.some(p => p.module === item.label && (p.write || p.read)))
-            .map(item => (
-              <Menu.Item key={item.route} onClick={() => navigate(item.route)} icon={item.icon}>
-                {item.label}
-              </Menu.Item>
-            ))
-        }
-        <SubMenu key="sub1" icon={<UserOutlined />} title="Cuenta">
-          <Menu.Item key="4" icon={<BiDoorOpen />} onClick={signOut}>Cerrar sesión</Menu.Item>
-        </SubMenu>
-      </Menu>
+      <Menu 
+        theme="dark" 
+        selectedKeys={[location.pathname]} 
+        mode="inline"
+        items={items}
+      />
       <UserConfigDialog 
         open={open}
         onClose={() => setOpen(false)}
