@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { SettingOutlined } from '@ant-design/icons';
 import { Layout, Menu } from "antd";
 import { useAuth } from "../../context/AuthContext";

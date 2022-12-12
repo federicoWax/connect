@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import Assists from "../views/Assists";
+import { RouteProps } from "react-router-dom";
 
 const Campaigns = lazy(() => import('../views/Campaigns'));
 const Clients = lazy(() => import('../views/Clients'));
@@ -9,8 +9,14 @@ const Login = lazy(() => import('../views/Login'));
 const Users = lazy(() => import('../views/Users'));
 const Teams = lazy(() => import('../views/Teams'));
 const Branchs = lazy(() => import('../views/Branchs'));
+const Excels = lazy(() => import('../views/Excels'));
+const Assists = lazy(() => import('../views/Assists'));
 
-export const routes = [
+type RoutePropsKey = RouteProps & {
+  key: string;
+}
+
+export const routes: RoutePropsKey[] = [
   {
     key: 'login',
     path: '/login',
@@ -55,6 +61,16 @@ export const routes = [
     key: 'assists',
     path: '/asistencias',
     element: <Assists />
+  },
+  {
+    key: 'exceles',
+    path: '/exceles',
+    element: <Excels />
+  },
+  {
+    key: '*',
+    path: '*',
+    element: <div>404 not found</div>
   }
 ];
 

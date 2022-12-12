@@ -2,7 +2,8 @@ import { getAuth } from 'firebase/auth';
 import { Link } from 'react-router-dom';
 import { 
   UserOutlined, DollarOutlined, UnorderedListOutlined, 
-  ProfileOutlined, SettingOutlined, ScheduleOutlined
+  ProfileOutlined, SettingOutlined, ScheduleOutlined,
+  TeamOutlined, FileExcelOutlined
 } from '@ant-design/icons';
 import { MdAccountBox, MdGroup, MdLocationCity } from 'react-icons/md';
 
@@ -47,7 +48,7 @@ const menuItems = [
     key: '/equipos',
     title: 'Equipos',
     label: <Link to="/equipos">Equipos</Link>,
-    icon: <MdGroup style={styleIcon} />,
+    icon: <TeamOutlined style={styleIcon} />,
   },
   {
     key: '/sucursales',
@@ -60,6 +61,12 @@ const menuItems = [
     title: 'Asistencias',
     label: <Link to="/asistencias">Asistencias</Link>,
     icon: <ScheduleOutlined style={styleIcon} />,
+  },
+  {
+    key: '/exceles',
+    title: 'Exceles',
+    label: <Link to="/exceles">Exceles</Link>,
+    icon: <FileExcelOutlined style={styleIcon} />,
   },
   {
     key: '/cuenta',

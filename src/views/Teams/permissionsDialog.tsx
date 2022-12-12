@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { Checkbox, Col, message, Modal, Row } from "antd";
 import { Permission, Team } from "../../interfaces";
 import { update } from "../../services/firebase";
+import { initPermisions } from "../../constants";
 
 interface Props {
   open: boolean;
@@ -9,64 +10,15 @@ interface Props {
   propTeam: Team | null;
 };
 
-const initPermisions: Permission[] = [
-  {
-    module: "Ventas",
-    route: "/ventas",
-    read: false,
-    write: false
-  },
-  {
-    module: "Clientes",
-    route: "/clientes",
-    read: false,
-    write: false
-  },
-  {
-    module: "Cobradores",
-    route: "/cobradores",
-    read: false,
-    write: false
-  },
-  {
-    module: "Campañas",
-    route: "/campanas",
-    read: false,
-    write: false
-  },
-  {
-    module: "Usuarios",
-    route: "/usuarios",
-    read: false,
-    write: false
-  },
-  {
-    module: "Equipos",
-    route: "/equipos",
-    read: false,
-    write: false
-  },
-  {
-    module: "Sucursales",
-    route: "/sucursales",
-    read: false,
-    write: false
-  },
-  {
-    module: "Asistencias",
-    route: "/asistencias",
-    read: false,
-    write: false
-  },
-];
-
 const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [permissions, setPermissions] = useState<Permission[]>(initPermisions);
 
   useEffect(() => {
     if(propTeam?.permissions) {
-      setPermissions(propTeam.permissions);
+      const permissions = propTeam.permissions;
+
+      setPermissions([...permissions, ...initPermisions.filter(ip => !permissions.some(p => p.module === ip.module))]);
     }
   }, [propTeam]);
 
@@ -80,7 +32,7 @@ const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
     delete _propTeam.id;
 
     try {
-      update("teams", id, { permissions } );
+      await update("teams", id, { permissions } );
 
       message.success("Permisos guardados con exito!");
     } catch (error) {
@@ -129,13 +81,13 @@ const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
             <Col xs={4} sm={4} md={4}>
               <Checkbox 
                 checked={perm.read} 
-                onChange={() => setPermissions(permissions.map(p => p.module === perm.module ? ({...p, read: !p.read})  : p))} 
+                onChange={() => setPermissions(permissions.map(p => p.module === perm.module ? ({...p, read: !p.read}) : p))} 
               />
             </Col>
             <Col xs={4} sm={4} md={4}>
               <Checkbox 
                 checked={perm.write} 
-                onChange={() => setPermissions(permissions.map(p => p.module === perm.module ? ({...p, write: !p.write})  : p))} 
+                onChange={() => setPermissions(permissions.map(p => p.module === perm.module ? ({...p, write: !p.write}) : p))} 
               />
             </Col>
           </Row>

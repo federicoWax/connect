@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy, DocumentData, Query } from 'firebase/firestore';
@@ -79,7 +79,7 @@ const getColumns = (setUser: React.Dispatch<React.SetStateAction<UserFirestore |
 ];
 
 const useUsers = () => {
-  const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
+  const queryUsers = useMemo<Query<DocumentData>>(() => query(collection(db, "users"), orderBy('name')), []);
   const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy('name')));
   const [queryBranchs] = useState<Query<DocumentData>>(query(collection(db, "branchs"), orderBy('name')));
   const [snapshot, loading] = useOnSnapshot(queryUsers);

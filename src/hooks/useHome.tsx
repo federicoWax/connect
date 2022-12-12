@@ -53,11 +53,11 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     collection(db, "sales"), 
   )
 
-  if(concluded !== null) {
+  if(concluded !== "") {
     Query = query(Query, where('concluded', '==', concluded), orderBy(typeDate));
   }
 
-  if(((concluded || concluded === null) && !esid) || (esid && startDate && endDate)) {
+  if(((concluded || concluded === "") && !esid) || (esid && startDate && endDate)) {
     Query = query(
       Query,
       where(typeDate, ">=", startDate ? dayjsToStartDay(startDate).toDate() : startDateStartDay),
@@ -88,7 +88,7 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   if(statusLight) {
     Query = query(Query, where('statusLight', '==', statusLight));
   }
-
+  
   return Query;
 }
 

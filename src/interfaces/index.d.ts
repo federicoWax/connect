@@ -125,3 +125,25 @@ export interface FilterAssists {
   startDate: null | dayjs.Dayjs;
   endDate: null | dayjs.Dayjs;
 }
+
+export interface Excel {
+  id?: string;
+  name: string;
+  file: string | File;
+  userIds: string[];
+  campaniaE: string[];
+  campaniaF: string[];
+  campaniaG: string[];
+  campaniaH: string[];
+  campaniaI: string[];
+}
+
+export interface HistoryExcel {
+  id?: string;
+  excelId: string;
+  userId: string;
+  value: string;
+  row: number;
+  col: string;
+  date: Date;
+}
