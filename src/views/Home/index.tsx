@@ -45,11 +45,11 @@ const Home = () => {
   );
 
   const hideInputSelers = useMemo(() =>
-    userFirestore?.role === "Procesos" && (filter.concluded === null || filter.concluded),
+    userFirestore?.role === "Procesos" && (filter.concluded === "" || filter.concluded),
     [userFirestore, filter.concluded]
   );
 
-  if(filter.statusPayment !== null) {
+  if(filter.statusPayment !== "") {
     sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
   }
 

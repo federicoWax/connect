@@ -88,6 +88,8 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   if(statusLight) {
     Query = query(Query, where('statusLight', '==', statusLight));
   }
+
+  console.log(Query)
   
   return Query;
 }
@@ -137,6 +139,8 @@ const useUsers = () => {
   const [snapshotClients, loadingClients] = useCollection(queryClients); 
   const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns); 
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
+
+  console.log(snapshotSales?.docs.length)
 
   const columns = [
     {
@@ -281,6 +285,7 @@ const useUsers = () => {
 
     const query = getQuerySales(filter, userFirestore);
     
+    console.log(query);
     setQuerySales(query);
   }, [filter, userFirestore]);
       

@@ -11,6 +11,7 @@ export const endDateEndDay = new Date();
 endDateEndDay.setHours(23);
 endDateEndDay.setMinutes(59);
 endDateEndDay.setSeconds(59);
+endDateEndDay.setMilliseconds(59);
 
 export const initPermisions: Permission[] = [
   {
