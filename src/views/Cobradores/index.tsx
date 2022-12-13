@@ -20,7 +20,6 @@ const Cobradores = () => {
         </Button>
       }
       <Table
-        id=""
         style={{ overflowX: "auto", backgroundColor: "white" }}
         loading={loadingCobradores}
         columns={columns}

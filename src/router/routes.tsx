@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { RouteProps } from "react-router-dom";
+import SeeExcel from "../views/Excels/seeExcel.tsx";
 
 const Campaigns = lazy(() => import('../views/Campaigns'));
 const Clients = lazy(() => import('../views/Clients'));
@@ -66,6 +67,11 @@ export const routes: RoutePropsKey[] = [
     key: 'exceles',
     path: '/exceles',
     element: <Excels />
+  },
+  {
+    key: 'exceles/:id',
+    path: '/exceles/:id',
+    element: <SeeExcel />
   },
   {
     key: '*',

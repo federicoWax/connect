@@ -44,8 +44,6 @@ const AuthProvider: FC<Props> = ({ children }) => {
     };
   }, []);
 
-  console.log(user, loading)
-
   if(loading) return <FullLoader />;
 
   return <AuthContext.Provider value={{user, userFirestore}}>{children}</AuthContext.Provider>;

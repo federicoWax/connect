@@ -12,7 +12,7 @@ const { RangePicker } = DatePicker;
 
 const Home = () => {
   const { userFirestore } = useAuth();
-  let { 
+  const { 
     loadingUsers, 
     loadingSales, 
     loadingCampaigns, 
@@ -49,13 +49,17 @@ const Home = () => {
     [userFirestore, filter.concluded]
   );
 
-  if(filter.statusPayment !== "") {
-    sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
-  }
+  const _sales = useMemo(() => {
+    if(filter.statusPayment !== "") {
+      return sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
+    }
+
+    return sales;
+  }, [sales, filter.statusPayment]);
 
   return (
     <div>
-      <h1>Ventas: { sales.length }</h1>
+      <h1>Ventas: { _sales.length }</h1>
       {
         (userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === "Ventas" && p.write)) && <Button
           style={{ float: "right", marginBottom: 10 }}
@@ -273,7 +277,7 @@ const Home = () => {
         loading={loadingSales}
         columns={columns}
         pagination={false}
-        dataSource={sales.map(s => ({ ...s, key: s.id }))} locale={{ emptyText: "Sin ventas..." }}
+        dataSource={_sales.map(s => ({ ...s, key: s.id }))} locale={{ emptyText: "Sin ventas..." }}
       />
       <HomeDialog
         open={open}

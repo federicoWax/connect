@@ -1,6 +1,7 @@
 import { Rols } from "../types";
 import { Timestamp } from "firebase/firestore";
 import dayjs from "dayjs";
+import { RcFile } from "antd/es/upload";
 
 export interface Permission {
   module: string;
@@ -129,7 +130,7 @@ export interface FilterAssists {
 export interface Excel {
   id?: string;
   name: string;
-  file: string | File;
+  file?: string | RcFile;
   userIds: string[];
   campaniaE: string[];
   campaniaF: string[];

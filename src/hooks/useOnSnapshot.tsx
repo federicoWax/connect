@@ -24,7 +24,7 @@ const useOnSnapshot = (query: Query<DocumentData> | null): [QuerySnapshot<Docume
     }
   }, [query]);
 
-  return [snapshot as QuerySnapshot<DocumentData> | undefined, loading];
+  return [snapshot, loading];
 }
 
 export default useOnSnapshot;
