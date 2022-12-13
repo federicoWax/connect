@@ -148,3 +148,7 @@ export interface HistoryExcel {
   col: string;
   date: Date;
 }
+
+interface UserTag extends UserFirestore {
+  color: string;
+}

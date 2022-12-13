@@ -140,8 +140,6 @@ const useUsers = () => {
   const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns); 
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
 
-  console.log(snapshotSales?.docs.length)
-
   const columns = [
     {
       title: 'Cliente',
@@ -335,7 +333,7 @@ const useUsers = () => {
       };
     })
 
-    if(filter.statusPayment !== null) {
+    if(filter.statusPayment !== "") {
       sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
     }
 

@@ -84,13 +84,13 @@ const Home = () => {
         <Col xs={24} sm={24} md={3} style={{ display: "grid" }}>
           <label>Estatus</label>
           <Select value={filter.concluded} onChange={value => setFilter({ ...filter, concluded: value })}>
-            <Option value="">Todas</Option>
             <Option value={false}>Pendientes</Option>
             <Option value={true}>Concluidas</Option>
+            <Option value="">Todas</Option>
           </Select>
         </Col>
         {
-          (filter.concluded || filter.concluded === null) && <>
+          (filter.concluded || filter.concluded === "") && <>
             <Col xs={24} sm={24} md={3} style={{ display: "grid" }}>
               <label>Tipo de fecha para rango</label>
               <Select value={filter.typeDate} onChange={value => setFilter({ ...filter, typeDate: value })}>
