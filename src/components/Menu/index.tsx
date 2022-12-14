@@ -18,7 +18,7 @@ const MenuComponent = () => {
   const { userFirestore } = useAuth();
 
   const items = useMemo(() => {
-    return menuItems.filter(item => userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === item.title && (p.write || p.read)))
+    return menuItems.filter(item => userFirestore?.role === "Administrador" || item.key === "/cuenta" || userFirestore?.permissions.some(p => p.module === item.title && (p.write || p.read)))
   }, [userFirestore])
 
   useEffect(() => {

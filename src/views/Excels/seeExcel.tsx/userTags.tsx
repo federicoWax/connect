@@ -1,10 +1,18 @@
 import { Tag } from 'antd'
-import React from 'react'
+import { FC } from 'react';
+import { UserTag } from '../../../interfaces'
 
-const UserTags = ({}) => {
+interface Props {
+  userTags: UserTag[];
+}
+
+const UserTags: FC<Props> = ({userTags}) => {
   return (
     <div>
-      <Tag color="magenta">magenta</Tag>
+      <h4>Usuarios</h4>
+      { 
+        userTags.map(user => (<Tag style={{margin: 3}} color={user.color}>{user.name}</Tag>))
+      }
     </div>
   )
 }

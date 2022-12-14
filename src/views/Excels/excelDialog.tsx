@@ -7,11 +7,14 @@ import useOnSnapshot from '../../hooks/useOnSnapshot';
 import { LoadingOutlined, UploadOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/es/upload';
 import { add, deleteFile, update, uploadFile } from '../../services/firebase';
+import exceljs from "exceljs";
+import { getWorkbookFromFile } from '../../utils';
+
 
 interface Props {
   open: boolean;
   propExcel: Excel | null;
-  onClose: () => void
+  onClose: () => void;
 }
 
 interface UserExcel {
@@ -30,8 +33,19 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
   const [saving, setSaving] = useState(false);
   const [searchUser, setSearchUser] = useState("");
   const [usersExcel, setUsersExcel] = useState<UserExcel[]>([]);
+  const [users, setUsers] = useState<UserFirestore[]>([]);
   const [urlToDelete, setUrlToDelete] = useState("");
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if(propExcel) {
+      form.setFieldsValue(propExcel);
+      setExcel(propExcel);
+      return;
+    }
+
+    setExcel(initExcel);
+  }, [propExcel, form]);
 
   const fileList = useMemo(() => {
     return excel.file ? [excel.file as RcFile] : []
@@ -40,15 +54,16 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
   useEffect(() => {
     if(loading) return;
 
-    const users = snapshot?.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[];
+    const _users = snapshot?.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[];
 
-    setUsersExcel(users.map(user => ({
+    setUsers(_users);
+    setUsersExcel(_users.map(user => ({
       email: user.email,
       name: user.name,
-      selected: false,
+      selected: propExcel ? propExcel.userIds.includes(user.id as string) : false,
       userId: user.id as string
-    })))
-  }, [loading, snapshot])
+    })));
+  }, [loading, snapshot, propExcel])
 
   const save = async () => {
     if(!excel.file) {
@@ -60,6 +75,7 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
     
     try {
       setSaving(true);
+      let file: null | File = null;
 
       if(excel.file && typeof excel.file !== "string") {
         const url = await uploadFile("exceles", excel.file);
@@ -69,17 +85,53 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
           return;
         }
 
+        const workbook = await getWorkbookFromFile(excel.file) as exceljs.Workbook;
+        const sheet = workbook.worksheets[0];
+        const totalWorkRows = sheet.rowCount - 1;
+        const workColumns = Array.from({length: totalWorkRows}, () => "");
+
+        file = excel.file;
+        excel.userRows = workColumns;
+        excel.campaniaE = workColumns;
+        excel.campaniaF = workColumns;
+        excel.campaniaG = workColumns;
+        excel.campaniaH = workColumns;
+        excel.campaniaI = workColumns;
         excel.file = url;
       }
 
       excel.userIds = usersExcel.filter(ue => ue.selected).map(ue => ue.userId);
+      excel.userColors = excel.userIds.map(userId => {
+        const color = Math.floor(Math.random() * 16777215).toString(16);
+
+        return {
+          color: `#${color}`,
+          userId
+        }
+      });
 
       if(excel.id) {
         const id = excel.id;
 
         delete excel.id;
 
-        await update("exceles", id, excel);
+        let dataUpdate = {
+          name: excel.name,
+          userIds: excel.userIds,
+          userColors: excel.userColors,
+        } as any;
+
+        if(file) {
+          dataUpdate.userRows = excel.userRows;
+          dataUpdate.file = excel.file;
+          dataUpdate.campaniaE = excel.campaniaE;
+          dataUpdate.campaniaF = excel.campaniaF;
+          dataUpdate.campaniaG = excel.campaniaG;
+          dataUpdate.campaniaH = excel.campaniaH;
+          dataUpdate.campaniaI = excel.campaniaI;
+        }
+        
+        await update("exceles", id, dataUpdate);
       } else {
         await add("exceles", excel);
       }
@@ -100,9 +152,18 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
 
   const resetForm = () => {
     onClose();
-    form.resetFields();
-    setExcel(initExcel);
-    setSearchUser("");
+
+    setTimeout(() => {
+      form.resetFields();
+      setExcel(initExcel);
+      setSearchUser("");
+      setUsersExcel(users.map(user => ({
+        email: user.email,
+        name: user.name,
+        selected: false,
+        userId: user.id as string
+      })));
+    }, 300);
   }
 
   return (

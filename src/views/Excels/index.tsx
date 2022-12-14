@@ -20,11 +20,11 @@ const Excels = () => {
   
   const queryExceles = useMemo<Query<DocumentData>>(() => {
     if(userFirestore?.role === "Administrador") {
-      return query(collection(db, "exceles"), orderBy("name"))
+      return query(collection(db, "exceles"), orderBy("name"));
     }
 
-    return query(collection(db, "exceles"), where("userIds", "array-contains", userFirestore?.id), orderBy("name"))
-  }, [userFirestore?.role]);
+    return query(collection(db, "exceles"), where("userIds", "array-contains", userFirestore?.id), orderBy("name"));
+  }, [userFirestore]);
   const [snapExceles, loadingExceles] = useOnSnapshot(queryExceles); 
   
   const exceles = useMemo<Excel[]>(() => {
@@ -44,7 +44,7 @@ const Excels = () => {
       render: (record: Excel) => (
         <Button 
           shape="circle" 
-          icon={<DeleteOutlined />}
+          icon={<EyeOutlined />}
           onClick={() => navigate("/exceles/" + record.id)}
         />
       )
@@ -83,6 +83,8 @@ const Excels = () => {
       )
     },
   ];
+
+  console.log(userFirestore)
 
   return (
     <div>

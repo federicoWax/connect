@@ -73,6 +73,8 @@ export const initPermisions: Permission[] = [
 export const initExcel: Excel = {
   name: "",
   userIds: [],
+  userRows: [],
+  userColors: [],
   file: "",
   campaniaE: [],
   campaniaF: [],

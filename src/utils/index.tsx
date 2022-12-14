@@ -1,6 +1,7 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { message, Modal } from "antd";
 import dayjs from "dayjs";
+import exceljs from "exceljs";
 
 export const dialogDeleteDoc = (fun: () => Promise<unknown>) => {
   return new Promise((resolve) => {
@@ -37,3 +38,19 @@ export const dayjsToEndDay = (dj: dayjs.Dayjs) => {
 
   return dj;
 } 
+
+export const getWorkbookFromFile = (file: File) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+
+  reader.readAsArrayBuffer(file);
+
+  reader.onload = async () => {
+    let workbook = new exceljs.Workbook();
+    workbook = await workbook.xlsx.load(reader.result as ArrayBuffer)
+    resolve(workbook);
+  }
+  
+  reader.onerror = () => {
+    reject();
+  }
+});

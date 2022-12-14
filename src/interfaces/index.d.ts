@@ -127,11 +127,19 @@ export interface FilterAssists {
   endDate: null | dayjs.Dayjs;
 }
 
+interface ExcelUserColor {
+  userId: string | UserFirestore;
+  color: string;
+}
+
+
 export interface Excel {
   id?: string;
   name: string;
   file?: string | RcFile;
   userIds: string[];
+  userColors: ExcelUserColor[];
+  userRows: string[];
   campaniaE: string[];
   campaniaF: string[];
   campaniaG: string[];

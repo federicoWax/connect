@@ -283,7 +283,6 @@ const useUsers = () => {
 
     const query = getQuerySales(filter, userFirestore);
     
-    console.log(query);
     setQuerySales(query);
   }, [filter, userFirestore]);
       
