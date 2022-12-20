@@ -127,9 +127,12 @@ export interface FilterAssists {
   endDate: null | dayjs.Dayjs;
 }
 
-interface ExcelUserColor {
-  userId: string | UserFirestore;
+export interface ActiveUser {
+  lastUpdate: Date | Timestamp;
+  userId: string;
+  active: boolean;
   color: string;
+  user?: UserFirestore;
 }
 
 
@@ -138,13 +141,14 @@ export interface Excel {
   name: string;
   file?: string | RcFile;
   userIds: string[];
-  userColors: ExcelUserColor[];
   userRows: string[];
   campaniaE: string[];
   campaniaF: string[];
   campaniaG: string[];
   campaniaH: string[];
   campaniaI: string[];
+  activeUsers: ActiveUser[];
+  active: boolean;
 }
 
 export interface HistoryExcel {
@@ -157,6 +161,18 @@ export interface HistoryExcel {
   date: Date;
 }
 
-interface UserTag extends UserFirestore {
-  color: string;
+export interface RowTableExcel {
+  index: number;
+  userId: string;
+  userName: string;
+  firstName: string;
+  lastName: string;
+  snn: string;
+  dob: string;
+  e: string;
+  f: string;
+  g: string;
+  h: string;
+  i: string;
+  selecting: boolean;
 }

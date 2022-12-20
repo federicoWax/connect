@@ -84,8 +84,6 @@ const Excels = () => {
     },
   ];
 
-  console.log(userFirestore)
-
   return (
     <div>
       <h1>Exceles</h1>

@@ -109,8 +109,6 @@ const useAssists = () => {
     const a = document.createElement('a');
     const url = window.URL.createObjectURL(blob);
     
-    document.body.appendChild(a);
-
     a.href = url;
     a.download = "Reporte de ventas.xlsx";
     a.click();

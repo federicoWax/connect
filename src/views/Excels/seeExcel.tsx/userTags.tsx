@@ -1,18 +1,40 @@
-import { Tag } from 'antd'
+import { Badge, Tag } from 'antd'
 import { FC } from 'react';
-import { UserTag } from '../../../interfaces'
-
+import { ActiveUser } from '../../../interfaces'
 interface Props {
-  userTags: UserTag[];
+  activeUsers: ActiveUser[];
 }
 
-const UserTags: FC<Props> = ({userTags}) => {
+const UserTags: FC<Props> = ({ activeUsers }) => {
+  if(!activeUsers?.length) return null;
+
   return (
     <div>
       <h4>Usuarios</h4>
-      { 
-        userTags.map(user => (<Tag style={{margin: 3}} color={user.color}>{user.name}</Tag>))
+      <div style={{display: "flex"}}>
+      {
+        [...activeUsers]
+        .sort((a, b) => Number(b.active) - Number(a.active))
+        .map(user => (
+          <div 
+            key={user.userId}
+            style={{marginRight: 5}}
+          >
+            <Badge
+              dot
+              color={activeUsers.some(au => au.userId === user.userId && au.active) ? "green" : "red"}
+            >
+              <Tag
+                style={{ margin: 3 }}
+                color={user.color}
+              >
+                <b>{user.user?.name.toUpperCase()}</b>
+              </Tag>
+            </Badge>
+          </div>
+        ))
       }
+      </div>
     </div>
   )
 }

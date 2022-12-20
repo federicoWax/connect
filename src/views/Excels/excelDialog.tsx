@@ -1,15 +1,14 @@
 import { FC, useState, useEffect, useMemo } from 'react';
 import { Button, Card, Checkbox, Col, Form, Input, message, Modal, Row, Spin, Upload } from 'antd';
 import { getFirestore, collection, query, orderBy, DocumentData, Query } from 'firebase/firestore';
-import { initExcel } from '../../constants';
-import { Excel, UserFirestore } from '../../interfaces';
+import { colorTagsExcel, initExcel } from '../../constants';
+import { ActiveUser, Excel, UserFirestore } from '../../interfaces';
 import useOnSnapshot from '../../hooks/useOnSnapshot';
 import { LoadingOutlined, UploadOutlined } from '@ant-design/icons';
 import { RcFile } from 'antd/es/upload';
 import { add, deleteFile, update, uploadFile } from '../../services/firebase';
 import exceljs from "exceljs";
 import { getWorkbookFromFile } from '../../utils';
-
 
 interface Props {
   open: boolean;
@@ -66,6 +65,10 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
   }, [loading, snapshot, propExcel])
 
   const save = async () => {
+    if(!usersExcel.some(ue => ue.selected)) {
+      message.error("Favor de asignar usuarios al excel.", 4);
+      return;
+    }
     if(!excel.file) {
       message.error("Favor de subir un excel.", 4);
       return;
@@ -100,16 +103,8 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
         excel.file = url;
       }
 
-      excel.userIds = usersExcel.filter(ue => ue.selected).map(ue => ue.userId);
-      excel.userColors = excel.userIds.map(userId => {
-        const color = Math.floor(Math.random() * 16777215).toString(16);
-
-        return {
-          color: `#${color}`,
-          userId
-        }
-      });
-
+      excel.userIds = usersExcel.filter(ue => ue.selected).map(ue => ue.userId);  
+    
       if(excel.id) {
         const id = excel.id;
 
@@ -118,7 +113,7 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
         let dataUpdate = {
           name: excel.name,
           userIds: excel.userIds,
-          userColors: excel.userColors,
+          activeUsers: []
         } as any;
 
         if(file) {
@@ -130,9 +125,44 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
           dataUpdate.campaniaH = excel.campaniaH;
           dataUpdate.campaniaI = excel.campaniaI;
         }
-        
+          
+        for (let i = 0; i < excel.userIds.length; i++) {
+          const userId = excel.userIds[i];
+          const oldActiveUser = excel.activeUsers.find(au => au.userId === userId);
+
+          if(oldActiveUser) {
+            dataUpdate.activeUsers[i] = oldActiveUser;
+            continue;
+          }
+          
+          let color = "";
+
+          for (const c of colorTagsExcel) {
+            const user = dataUpdate.activeUsers.find((au: ActiveUser) => au.color === c);
+
+            if(!user) {
+              color = c;
+              break;
+            }
+          }
+
+          dataUpdate.activeUsers[i] = {
+            color,
+            active: false,
+            lastUpdate: new Date(),
+            userId
+          }
+        }
+
         await update("exceles", id, dataUpdate);
       } else {
+        excel.activeUsers = excel.userIds.map((userId, index) => ({
+          color: colorTagsExcel[index],
+          active: false,
+          lastUpdate: new Date(),
+          userId
+        }));
+        
         await add("exceles", excel);
       }
 
@@ -230,7 +260,19 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
                       <Col xs={2} >
                         <Checkbox 
                           checked={user.selected} 
-                          onChange={() => setUsersExcel(usersExcel.map(u => u.userId === user.userId ? ({...u, selected: !u.selected}) : u))} 
+                          onChange={() => {
+                            if(!user.selected && usersExcel.filter(ue => ue.selected).length === 50) {
+                              message.error("El excel no puede tener mas de 50 usuarios asignados!", 5);
+                              return;
+                            }
+
+                            if(user.selected && excel.userRows.includes(user.userId)) {
+                              message.error("No se puede desasignar, usuario con filas de trabajo en el excel!", 5);
+                              return;
+                            }
+                            
+                            setUsersExcel(usersExcel.map(u => u.userId === user.userId ? ({...u, selected: !u.selected}) : u));
+                          }} 
                         /> 
                       </Col>
                     </Row>

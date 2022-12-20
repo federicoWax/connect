@@ -1,6 +1,6 @@
 import { RcFile } from "antd/es/upload";
 import { getFirestore, collection, doc, getDoc, addDoc, updateDoc, deleteDoc, getDocs, QueryConstraint, query } from "firebase/firestore";
-import { getStorage, ref, deleteObject, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, deleteObject, uploadBytes, getDownloadURL, getBlob } from "firebase/storage";
 
 const db = getFirestore();
 const storage = getStorage();
@@ -16,6 +16,8 @@ export const update = (collection: string, id: string, data: any) => updateDoc(d
 export const del = (collection: string, id: string) => deleteDoc(doc(db, collection, id));
 
 export const deleteFile = (url: string) => deleteObject(ref(storage, url));
+
+export const getBlobByUrl = (url: string) => getBlob(ref(storage, url));
 
 export const uploadFile = async (path: string, file: RcFile) => {
   try {

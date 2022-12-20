@@ -74,11 +74,20 @@ export const initExcel: Excel = {
   name: "",
   userIds: [],
   userRows: [],
-  userColors: [],
   file: "",
   campaniaE: [],
   campaniaF: [],
   campaniaG: [],
   campaniaH: [],
   campaniaI: [],
+  activeUsers: [],
+  active: true
 } 
+
+export const colorTagsExcel = [
+  "#000000", "#0000FF", "#8A2BE2", "#A52A2A", "#5F9EA0", "#D2691E", "#DC143C", "#00008B", "#008B8B", "#008B8B",
+  "#006400", "#8B008B", "#9932CC", "#8B0000", "#483D8B", "#2F4F4F", "#9400D3", "#008000", "#4B0082", "#800000",
+  "#191970", "#000080", "#800080", "#8B4513", "#6A5ACD", "#008080", "#8B0000", "#C71585", "#DB7093", "#FF4500",
+  "#FF8C00", "#BDB76B", "#D8BFD8", "#DDA0DD", "#EE82EE", "#DA70D6", "#FF00FF", "#BA55D3", "#9370DB", "#8A2BE2",
+  "#4B0082", "#32CD32", "#3CB371", "#2E8B57", "#6B8E23", "#20B2AA", "#008B8B", "#5F9EA0", "#1E90FF", "#7B68EE"
+];

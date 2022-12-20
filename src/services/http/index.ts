@@ -34,3 +34,9 @@ export const post = async (url: string, body: any) => {
 
   return response.json();
 }
+
+export const getBlob = async (url: string) => {
+  const response = await fetch(url);
+
+  return response.blob();
+}

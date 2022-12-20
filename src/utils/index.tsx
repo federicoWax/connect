@@ -22,21 +22,11 @@ export const dialogDeleteDoc = (fun: () => Promise<unknown>) => {
  
 
 export const dayjsToStartDay = (dj: dayjs.Dayjs) => {
-  dj.set("hour", 0);
-  dj.set("minute", 0);
-  dj.set("second", 0)
-  dj.set("millisecond", 0);
-
-  return dj;
+  return dj.set("hour", 0).set("minute", 0).set("second", 0).set("millisecond", 0);
 } 
 
 export const dayjsToEndDay = (dj: dayjs.Dayjs) => {
-  dj.set("hour", 23);
-  dj.set("minute", 59);
-  dj.set("second", 59)
-  dj.set("millisecond", 59);
-
-  return dj;
+  return dj.set("hour", 23).set("minute", 59).set("second", 59).set("millisecond", 59);
 } 
 
 export const getWorkbookFromFile = (file: File) => new Promise((resolve, reject) => {

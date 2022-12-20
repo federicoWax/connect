@@ -5,7 +5,7 @@ import { getFirestore, collection, query, orderBy, where, DocumentData, Query, l
 import useOnSnapshot from "../hooks/useOnSnapshot";
 import { Campaign, Client, Cobrador, FilterSale, Sale, Team, UserFirestore, UserFirestoreAuth } from "../interfaces";
 import { del, update } from '../services/firebase';
-import { dayjsToStartDay, dialogDeleteDoc } from '../utils';
+import { dayjsToEndDay, dayjsToStartDay, dialogDeleteDoc } from '../utils';
 import { useAuth } from '../context/AuthContext';
 import dayjs from "dayjs";
 import ExcelJS from 'exceljs';
@@ -57,13 +57,16 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     Query = query(Query, where('concluded', '==', concluded), orderBy(typeDate));
   }
 
+
   if(((concluded || concluded === "") && !esid) || (esid && startDate && endDate)) {
     Query = query(
       Query,
       where(typeDate, ">=", startDate ? dayjsToStartDay(startDate).toDate() : startDateStartDay),
-      where(typeDate, "<=", endDate ? dayjsToStartDay(endDate).toDate() : endDateEndDay)
+      where(typeDate, "<=", endDate ? dayjsToEndDay(endDate).toDate() : endDateEndDay)
     )
   }
+
+  console.log(Query)
 
   if(userFirestore?.role === "Procesos" && (concluded === null || concluded)) {
     Query = query(Query, where('userId', '==', userFirestore.id));
@@ -89,8 +92,6 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     Query = query(Query, where('statusLight', '==', statusLight));
   }
 
-  console.log(Query)
-  
   return Query;
 }
 
@@ -291,7 +292,7 @@ const useUsers = () => {
 
     if(loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
 
-    let _sales = snapshotSales?.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[]
+    let _sales = snapshotSales?.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[];
 
     setSales(_sales);
     setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);

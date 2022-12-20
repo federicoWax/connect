@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DocumentData, DocumentReference, DocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
+import { DocumentData, DocumentReference, DocumentSnapshot } from 'firebase/firestore';
 import { onSnapshot } from "firebase/firestore";
 
 const useDocOnSnapshot = (query: DocumentReference<DocumentData>  | null): [DocumentSnapshot<DocumentData> | undefined, boolean] => {
