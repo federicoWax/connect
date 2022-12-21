@@ -1,27 +1,36 @@
-import { Checkbox, Divider, Input, message, Spin, Table, Tag } from 'antd';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Checkbox, Divider, message, Spin, Table, Tag } from 'antd';
 import { doc, DocumentData, DocumentReference, getFirestore } from 'firebase/firestore';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import useDocOnSnapshot from '../../../hooks/useDocOnSnapshot';
 import { ActiveUser, Excel, RowTableExcel, UserFirestore } from '../../../interfaces';
-import { getBlobByUrl, getDocById, update } from '../../../services/firebase';
+import { add, getBlobByUrl, getDocById, update } from '../../../services/firebase';
 import { getWorkbookFromFile } from '../../../utils';
 import UserTags from './userTags';
 import exceljs from "exceljs";
 import { LoadingOutlined } from '@ant-design/icons';
+import ExcelJS from 'exceljs';
+import { columnsExcel, columnsTableExcel } from '../../../constants';
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 const SeeExcel = () => {
   const { id } = useParams();
   const { userFirestore } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [statusChanged, setStatusChanged] = useState(false);
   const [selecting, setSelecting] = useState(false);
   const [excel, setExcel] = useState<Excel>();
   const [userIds, setUserIds] = useState<string[]>([]);
   const [tableExcel, setTableExcel] = useState<RowTableExcel[]>([]);
+  const [downloading, setDownloading] = useState(false);
+  const inputRefsE = useRef<Array<HTMLInputElement | null>>([]);
+  const inputRefsF = useRef<Array<HTMLInputElement | null>>([]);
+  const inputRefsG = useRef<Array<HTMLInputElement | null>>([]);
+  const inputRefsH = useRef<Array<HTMLInputElement | null>>([]);
+  const inputRefsI = useRef<Array<HTMLInputElement | null>>([]);
 
   const queryExcel = useMemo<DocumentReference<DocumentData> | null>(() => {
     if (!id) return null;
@@ -61,6 +70,15 @@ const SeeExcel = () => {
     return _tableExcel;
   }
 
+  const setInputRefs = (campania: string[], refs:  (HTMLInputElement | null)[]) => {
+    campania.forEach((value, index) => {
+      if(refs[index]) {
+        const inputRef = refs[index] as HTMLInputElement; 
+        inputRef.value = value ;
+      }
+    })
+  }
+
   useEffect(() => {
     let mounted = true;
 
@@ -68,6 +86,11 @@ const SeeExcel = () => {
 
     const init = async () => {
       try {
+        if(!docSnapExcel?.exists()) {
+          navigate("/exceles");
+          return;
+        }
+
         const _excel = { ...docSnapExcel?.data(), id: docSnapExcel?.id } as Excel;
         const _userIds = _excel.userIds;
         const docPromises = _userIds.map(userId => getDocById("users", userId));
@@ -83,6 +106,19 @@ const SeeExcel = () => {
             user: users.find(u => u.id === au.userId)
           }))
         });
+
+        const { campaniaE, campaniaF, campaniaG, campaniaH, campaniaI } = _excel;
+        const refsE = inputRefsE.current;
+        const refsF = inputRefsF.current;
+        const refsG = inputRefsG.current;
+        const refsH = inputRefsH.current;
+        const refsI = inputRefsI.current;
+
+        setInputRefs(campaniaE, refsE);
+        setInputRefs(campaniaF, refsF);
+        setInputRefs(campaniaG, refsG);
+        setInputRefs(campaniaH, refsH);
+        setInputRefs(campaniaI, refsI);
 
         if (JSON.stringify(_userIds) !== JSON.stringify(userIds)) {
           setUserIds(_userIds);
@@ -119,7 +155,7 @@ const SeeExcel = () => {
     return () => {
       mounted = false;
     }
-  }, [docSnapExcel, loadingExcel, loading]);
+  }, [docSnapExcel, loadingExcel, loading, navigate]);
 
   const changeStatus = useCallback(async () => {
     if (!id || !userFirestore) return;
@@ -164,6 +200,33 @@ const SeeExcel = () => {
       }, 1000)
     }
   }, [selecting, excel, userFirestore])
+
+  const saveCampaign = useCallback(async (record: RowTableExcel, value: string, key: string) => {
+    if(!excel) return;
+
+    let compania = excel[key as keyof Excel] as string[]
+
+    compania = compania.map((e, i) => i === record.index ? value : e);
+
+    try {
+      await update("exceles", excel?.id as string, { [key]: compania });
+      await add(
+        "historyExcels", 
+        { 
+          excelId: excel.id,
+          userId: userFirestore?.id,
+          createdAt: new Date(),
+          column: key,
+          row: record.index,
+          value
+        }
+      );
+
+    } catch (error) {
+      console.log(error);
+      message.error("Error al guardar la celda.", 4);
+    }
+  }, [excel,userFirestore?.id])
 
   useEffect(() => {
     if (statusChanged) return;
@@ -252,50 +315,127 @@ const SeeExcel = () => {
         render: (text: string) => text,
       },
       {
-
-
+        width: 150,
         title: 'Compañia',
         key: 'e',
         dataIndex: 'e',
         render: (_: any, record: RowTableExcel) => (
-          <Input
-            name={'record' + record.index}
-            onBlur={(e) => {
-              console.log(e.target.value)
-            }}
+          <input
+            ref={e => inputRefsE.current[record.index] = e}
+            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            name={'companiae' + record.index}
+            onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaE")}
           />
         )
       },
       {
+        width: 150,
         title: 'Compañia',
         key: 'f',
         dataIndex: 'f',
-        render: (text: string) => text
+        render: (_: any, record: RowTableExcel) => (
+          <input
+            ref={e => inputRefsF.current[record.index] = e}
+            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            name={'companiaf' + record.index}
+            onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaF")}
+          />
+        )
       },
       {
+        width: 150,
         title: 'Compañia',
         key: 'g',
         dataIndex: 'g',
-        render: (text: string) => text
+        render: (_: any, record: RowTableExcel) => (
+          <input
+            ref={e => inputRefsG.current[record.index] = e}
+            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            name={'companiag' + record.index}
+            onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaG")}
+          />
+        )
       },
       {
+        width: 150,
         title: 'Compañia',
         key: 'h',
         dataIndex: 'h',
-        render: (text: string) => text
+        render: (_: any, record: RowTableExcel) => (
+          <input
+            ref={e => inputRefsH.current[record.index] = e}
+            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            name={'companiah' + record.index}
+            onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaH")}
+          />
+        )
       },
       {
+        width: 150,
         title: 'Compañia',
         key: 'i',
         dataIndex: 'i',
-        render: (text: string) => text
+        render: (_: any, record: RowTableExcel) => (
+          <input
+            ref={e => inputRefsI.current[record.index] = e}
+            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            name={'companiai' + record.index}
+            onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaI")}
+          />
+        )
       },
     ];
-  }, [excel, userFirestore, selecting, onSelectRow])
+  }, [excel, userFirestore, selecting, onSelectRow, saveCampaign])
+
+  const downloadExcel = async () => {
+    if(downloading) return;
+    
+    try {
+      setDownloading(true);
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Reporte de ventas');
+  
+      worksheet.columns = columnsTableExcel;
+  
+      columnsExcel.forEach(column => {
+        worksheet.getCell(column + '1').font = {
+          bold: true
+        };
+      })
+  
+      worksheet.addRows(tableExcel);
+  
+      const data =  await workbook.xlsx.writeBuffer();
+      const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+      const a = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      
+      document.body.appendChild(a);
+  
+      a.href = url;
+      a.download = `${excel?.name}.xlsx`;
+      a.click();
+    } catch (error) {
+      console.log(error);
+      message.error("Ocurrio un error al descargar el excel.", 4);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   return (
     <div>
-      <h1>Excel: {excel?.name}</h1>
+      <div style={{display: "flex", justifyContent: "space-between"}}>
+        <h1>Excel: {excel?.name}</h1> 
+        <Button
+          type="primary"
+          onClick={downloadExcel}
+          loading={downloading || loading}
+        >
+          Descargar excel
+        </Button>
+      </div>
       <UserTags activeUsers={excel?.activeUsers as ActiveUser[]} />
       <Divider />
       <Table

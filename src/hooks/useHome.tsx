@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import dayjs from "dayjs";
 import ExcelJS from 'exceljs';
 import useCollection from './useCollection';
-import { endDateEndDay, startDateStartDay } from '../constants';
+import { columnsExcel, endDateEndDay, startDateStartDay } from '../constants';
 
 const db = getFirestore();
 const columnsWorksheet = [
@@ -43,7 +43,6 @@ const columnsWorksheet = [
   { header: 'CAMPAÑA', key: 'campaign', width: 18 },
   { header: 'NOTAS', key: 'notes' },
 ];
-const columnsExcel = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
 const limitClients = 10;
 
 const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {

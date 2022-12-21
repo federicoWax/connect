@@ -82,7 +82,7 @@ export const initExcel: Excel = {
   campaniaI: [],
   activeUsers: [],
   active: true
-} 
+};
 
 export const colorTagsExcel = [
   "#000000", "#0000FF", "#8A2BE2", "#A52A2A", "#5F9EA0", "#D2691E", "#DC143C", "#00008B", "#008B8B", "#008B8B",
@@ -91,3 +91,58 @@ export const colorTagsExcel = [
   "#FF8C00", "#BDB76B", "#D8BFD8", "#DDA0DD", "#EE82EE", "#DA70D6", "#FF00FF", "#BA55D3", "#9370DB", "#8A2BE2",
   "#4B0082", "#32CD32", "#3CB371", "#2E8B57", "#6B8E23", "#20B2AA", "#008B8B", "#5F9EA0", "#1E90FF", "#7B68EE"
 ];
+
+export const columnsTableExcel = [
+  {
+    width: 20,
+    header: 'Usuario',
+    key: 'userName',
+  },
+  {
+    width: 20,
+    header: 'First Name',
+    key: 'firstName',
+  },
+  {
+    width: 20,
+    header: 'Last Name',
+    key: 'lastName',
+  },
+  {
+    width: 20,
+    header: 'SNN',
+    key: 'snn',
+  },
+  {
+    width: 20,
+    header: 'DOB',
+    key: 'dob',
+  },
+  {
+    width: 20,
+    header: 'Compañia',
+    key: 'e',
+  },
+  {
+    width: 20,
+    header: 'Compañia',
+    key: 'f',
+  },
+  {
+    width: 20,
+    header: 'Compañia',
+    key: 'g',
+  },
+  {
+    width: 20,
+    header: 'Compañia',
+    key: 'h',
+  },
+  {
+    width: 20,
+    header: 'Compañia',
+    key: 'i',
+  }
+];
+
+export const columnsExcel = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
