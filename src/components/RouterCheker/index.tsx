@@ -4,23 +4,21 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import FullLoader from '../FullLoader';
 import MenuComponent from '../Menu';
+import { initPermisions } from '../../constants';
 
 const RoterChecker = () => {
   const { user, userFirestore } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [userRoutes, setUserRoutes] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if(userFirestore) {
-      if(userFirestore.role === "Administrador") {
-        setUserRoutes(userFirestore.permissions.map(p => p.route));
-      } else {
-        setUserRoutes(userFirestore.permissions.filter(p => p.write || p.read).map(p => p.route));
-      }
+    if(!userFirestore) return;
 
-      setLoading(false);
+    if(userFirestore.role === "Administrador") {
+      setUserRoutes(initPermisions.map(p => p.route));
+    } else {
+      setUserRoutes(userFirestore.permissions.filter(p => p.write || p.read).map(p => p.route));
     }
   }, [userFirestore]);
 
@@ -32,10 +30,10 @@ const RoterChecker = () => {
 
     const inPrivateRoute = !userRoutes.some(r => location.pathname.includes(r))
 
-    if(!loading && user && (location.pathname === '/login' || location.pathname === '/' || inPrivateRoute)) {
+    if(user && (location.pathname === '/login' || location.pathname === '/' || inPrivateRoute)) {
       navigate('/ventas');
     }
-  }, [user, location, navigate, loading, userRoutes]);
+  }, [user, location, navigate, userRoutes]);
 
   return (
     <Layout style={{minHeight: "100vh"}}>

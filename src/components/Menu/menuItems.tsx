@@ -35,7 +35,7 @@ const menuItems = [
   {
     key: '/campañas',
     title: 'Campañas',
-    label: <Link to="/campañas">Campañas</Link>,
+    label: <Link to="/campanas">Campañas</Link>,
     icon: <ProfileOutlined style={styleIcon} />,
   },
   {

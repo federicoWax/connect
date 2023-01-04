@@ -23,15 +23,16 @@ const Excels = () => {
       return query(collection(db, "exceles"), orderBy("name"));
     }
 
-    return query(collection(db, "exceles"), where("userIds", "array-contains", userFirestore?.id), orderBy("name"));
+    return query(collection(db, "exceles"), where("userIds", "array-contains", userFirestore?.id || ""), orderBy("name"));
   }, [userFirestore]);
+
   const [snapExceles, loadingExceles] = useOnSnapshot(queryExceles); 
   
   const exceles = useMemo<Excel[]>(() => {
     return snapExceles?.docs.map(doc => ({...doc.data(), id: doc.id})) as Excel[] || []
   }, [snapExceles]);
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       title: 'Nombre',
       key: 'name',
@@ -50,10 +51,10 @@ const Excels = () => {
       )
     },
     {
-      title: 'Editar',
+      title: (userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === "Exceles" && p.write)) ? "Editar" : "",
       key: 'edit',
       render: (record: Excel) => (
-        <Button 
+        (userFirestore?.role === "Administrador" || userFirestore?.permissions.some(p => p.module === "Exceles" && p.write)) && <Button 
           shape="circle" 
           icon={<EditOutlined />}
           onClick={() => {
@@ -82,7 +83,7 @@ const Excels = () => {
         />
       )
     },
-  ];
+  ], [userFirestore, navigate]);
 
   return (
     <div>

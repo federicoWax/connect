@@ -65,8 +65,6 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     )
   }
 
-  console.log(Query)
-
   if(userFirestore?.role === "Procesos" && (concluded === null || concluded)) {
     Query = query(Query, where('userId', '==', userFirestore.id));
   } else if(userId) {
