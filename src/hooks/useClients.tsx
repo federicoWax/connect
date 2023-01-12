@@ -112,11 +112,7 @@ const useClients = () => {
     const { scrollHeight, scrollTop, clientHeight } = e.currentTarget;
     const bottom = (scrollHeight - scrollTop) < clientHeight;
 
-    console.log(bottom)
-
     if (!bottom) return;
-
-    console.log(clients, filter, search)
 
     try {
       const lastDoc = await getDocById("clients", clients[clients.length - 1]?.id as string);

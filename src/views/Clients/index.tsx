@@ -4,6 +4,10 @@ import useClients from "../../hooks/useClients";
 import ClientDialog from "./clientDialog";
 
 const { Option } = Select;
+const textSearch: Record<string, string> = {
+  client: "Cliente", 
+  esid: "ESID"
+};
 
 const Clients = () => {
   const { loadingClients, clients, columns, open, client, setOpen, cobradores, search, setSearch, onScroll, filter, setFilter, onSearch } = useClients();
@@ -38,7 +42,7 @@ const Clients = () => {
         </Col>
         <Col xs={24} md={22}>
           <Input.Search
-            placeholder={"Buscar por " + filter.toUpperCase()}
+            placeholder={"Buscar por " + textSearch[filter]}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onSearch={onSearch}
