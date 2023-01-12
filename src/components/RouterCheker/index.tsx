@@ -11,6 +11,7 @@ const RoterChecker = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [userRoutes, setUserRoutes] = useState<string[]>([]);
+  const [staring, setStaring] = useState(true);
 
   useEffect(() => {
     if(!userFirestore) return;
@@ -20,9 +21,13 @@ const RoterChecker = () => {
     } else {
       setUserRoutes(userFirestore.permissions.filter(p => p.write || p.read).map(p => p.route));
     }
+
+    setStaring(false);
   }, [userFirestore]);
 
   useEffect(() => {
+    if(staring) return;
+    
     if(!user && location.pathname !== "/login") {
       navigate('/login');   
       return;
@@ -33,7 +38,7 @@ const RoterChecker = () => {
     if(user && (location.pathname === '/login' || location.pathname === '/' || inPrivateRoute)) {
       navigate('/ventas');
     }
-  }, [user, location, navigate, userRoutes]);
+  }, [user, location, navigate, userRoutes, staring]);
 
   return (
     <Layout style={{minHeight: "100vh"}}>
