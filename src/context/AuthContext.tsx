@@ -11,9 +11,10 @@ interface Props {
 }
 
 const db = getFirestore();
-const AuthContext = createContext<{ user: User | null, userFirestore: UserFirestoreAuth | null }>({
+const AuthContext = createContext<{ user: User | null, userFirestore: UserFirestoreAuth | null, loading: boolean }>({
   user: null,
-  userFirestore: null
+  userFirestore: null,
+  loading: true
 });
 
 const AuthProvider: FC<Props> = ({ children }) => {
@@ -46,7 +47,7 @@ const AuthProvider: FC<Props> = ({ children }) => {
 
   if(loading) return <FullLoader />;
 
-  return <AuthContext.Provider value={{user, userFirestore}}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{user, userFirestore, loading}}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;

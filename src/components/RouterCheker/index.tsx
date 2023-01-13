@@ -7,23 +7,25 @@ import MenuComponent from '../Menu';
 import { initPermisions } from '../../constants';
 
 const RoterChecker = () => {
-  const { user, userFirestore } = useAuth();
+  const { user, userFirestore, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [userRoutes, setUserRoutes] = useState<string[]>([]);
   const [staring, setStaring] = useState(true);
 
   useEffect(() => {
-    if(!userFirestore) return;
+    if(loading) return;
 
-    if(userFirestore.role === "Administrador") {
-      setUserRoutes(initPermisions.map(p => p.route));
-    } else {
-      setUserRoutes(userFirestore.permissions.filter(p => p.write || p.read).map(p => p.route));
+    if(userFirestore) {
+      if(userFirestore?.role === "Administrador") {
+        setUserRoutes(initPermisions.map(p => p.route));
+      } else {
+        setUserRoutes(userFirestore?.permissions?.filter(p => p.write || p.read).map(p => p.route));
+      }
     }
-
+   
     setStaring(false);
-  }, [userFirestore]);
+  }, [userFirestore, loading]);
 
   useEffect(() => {
     if(staring) return;
