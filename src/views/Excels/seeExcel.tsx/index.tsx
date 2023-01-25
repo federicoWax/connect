@@ -70,11 +70,11 @@ const SeeExcel = () => {
     return _tableExcel;
   }
 
-  const setInputRefs = (campania: string[], refs:  (HTMLInputElement | null)[]) => {
+  const setInputRefs = (campania: string[], refs: (HTMLInputElement | null)[]) => {
     campania.forEach((value, index) => {
-      if(refs[index]) {
-        const inputRef = refs[index] as HTMLInputElement; 
-        inputRef.value = value ;
+      if (refs[index]) {
+        const inputRef = refs[index] as HTMLInputElement;
+        inputRef.value = value;
       }
     })
   }
@@ -86,7 +86,7 @@ const SeeExcel = () => {
 
     const init = async () => {
       try {
-        if(!docSnapExcel?.exists()) {
+        if (!docSnapExcel?.exists()) {
           navigate("/exceles");
           return;
         }
@@ -180,7 +180,7 @@ const SeeExcel = () => {
   }, [id, userFirestore])
 
   const onSelectRow = useCallback(async (record: RowTableExcel) => {
-    if(selecting) return;
+    if (selecting) return;
 
     setSelecting(true);
     setTableExcel(t => t.map(row => row.index === record.index ? ({ ...row, selecting: true }) : row));
@@ -202,7 +202,7 @@ const SeeExcel = () => {
   }, [selecting, excel, userFirestore])
 
   const saveCampaign = useCallback(async (record: RowTableExcel, value: string, key: string) => {
-    if(!excel) return;
+    if (!excel) return;
 
     let compania = excel[key as keyof Excel] as string[]
 
@@ -211,8 +211,8 @@ const SeeExcel = () => {
     try {
       await update("exceles", excel?.id as string, { [key]: compania });
       await add(
-        "historyExcels", 
-        { 
+        "historyExcels",
+        {
           excelId: excel.id,
           userId: userFirestore?.id,
           createdAt: new Date(),
@@ -226,7 +226,7 @@ const SeeExcel = () => {
       console.log(error);
       message.error("Error al guardar la celda.", 4);
     }
-  }, [excel,userFirestore?.id])
+  }, [excel, userFirestore?.id])
 
   useEffect(() => {
     if (statusChanged) return;
@@ -260,10 +260,10 @@ const SeeExcel = () => {
               record.selecting
                 ? <Spin indicator={antIcon} />
                 : <Checkbox
-                    checked={record.userId !== "" && excel?.userRows.includes(record.userId)}
-                    onChange={async () => await onSelectRow(record)}
-                    disabled={selecting || (record.userId !== "" && excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
-                  />
+                  checked={record.userId !== "" && excel?.userRows.includes(record.userId)}
+                  onChange={async () => await onSelectRow(record)}
+                  disabled={selecting || (record.userId !== "" && excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+                />
             }
           </div>
         )
@@ -388,31 +388,31 @@ const SeeExcel = () => {
   }, [excel, userFirestore, selecting, onSelectRow, saveCampaign])
 
   const downloadExcel = async () => {
-    if(downloading) return;
-    
+    if (downloading) return;
+
     try {
       setDownloading(true);
 
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('Reporte de ventas');
-  
+
       worksheet.columns = columnsTableExcel;
-  
+
       columnsExcel.forEach(column => {
         worksheet.getCell(column + '1').font = {
           bold: true
         };
       })
-  
+
       worksheet.addRows(tableExcel);
-  
-      const data =  await workbook.xlsx.writeBuffer();
-      const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+
+      const data = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const a = document.createElement('a');
       const url = window.URL.createObjectURL(blob);
-      
+
       document.body.appendChild(a);
-  
+
       a.href = url;
       a.download = `${excel?.name}.xlsx`;
       a.click();
@@ -426,15 +426,17 @@ const SeeExcel = () => {
 
   return (
     <div>
-      <div style={{display: "flex", justifyContent: "space-between"}}>
-        <h1>Excel: {excel?.name}</h1> 
-        <Button
-          type="primary"
-          onClick={downloadExcel}
-          loading={downloading || loading}
-        >
-          Descargar excel
-        </Button>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h1>Excel: {excel?.name}</h1>
+        {
+          userFirestore?.role === "Administrador" && <Button
+            type="primary"
+            onClick={downloadExcel}
+            loading={downloading || loading}
+          >
+            Descargar excel
+          </Button>
+        }
       </div>
       <UserTags activeUsers={excel?.activeUsers as ActiveUser[]} />
       <Divider />
