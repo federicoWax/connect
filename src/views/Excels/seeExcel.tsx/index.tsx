@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Checkbox, Divider, message, Spin, Table, Tag } from 'antd';
 import { doc, DocumentData, DocumentReference, getFirestore } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -31,6 +31,14 @@ const SeeExcel = () => {
   const inputRefsG = useRef<Array<HTMLInputElement | null>>([]);
   const inputRefsH = useRef<Array<HTMLInputElement | null>>([]);
   const inputRefsI = useRef<Array<HTMLInputElement | null>>([]);
+  const allInputRefs: Record<string, MutableRefObject<(HTMLInputElement | null)[]>> = {
+    inputRefsE,
+    inputRefsF,
+    inputRefsG,
+    inputRefsH,
+    inputRefsI
+  };
+
 
   const queryExcel = useMemo<DocumentReference<DocumentData> | null>(() => {
     if (!id) return null;
@@ -70,13 +78,23 @@ const SeeExcel = () => {
     return _tableExcel;
   }
 
-  const setInputRefs = (campania: string[], refs: (HTMLInputElement | null)[]) => {
-    campania.forEach((value, index) => {
+  const setInputRefs = (campania: string[], refs: (HTMLInputElement | null)[], keyColumn: string) => {
+    const oldInputRefs = allInputRefs[keyColumn];
+    
+    for (let index = 0; index < campania.length; index++) {
+      const oldInputRef = oldInputRefs.current[index];
+
+      if(oldInputRef && document.activeElement === oldInputRef) {
+        continue;
+      }
+
+      const value = campania[index];
+
       if (refs[index]) {
         const inputRef = refs[index] as HTMLInputElement;
         inputRef.value = value;
       }
-    })
+    }
   }
 
   useEffect(() => {
@@ -114,11 +132,11 @@ const SeeExcel = () => {
         const refsH = inputRefsH.current;
         const refsI = inputRefsI.current;
 
-        setInputRefs(campaniaE, refsE);
-        setInputRefs(campaniaF, refsF);
-        setInputRefs(campaniaG, refsG);
-        setInputRefs(campaniaH, refsH);
-        setInputRefs(campaniaI, refsI);
+        setInputRefs(campaniaE, refsE, "inputRefsE");
+        setInputRefs(campaniaF, refsF, "inputRefsF");
+        setInputRefs(campaniaG, refsG, "inputRefsG");
+        setInputRefs(campaniaH, refsH, "inputRefsH");
+        setInputRefs(campaniaI, refsI, "inputRefsI");
 
         if (JSON.stringify(_userIds) !== JSON.stringify(userIds)) {
           setUserIds(_userIds);
@@ -228,6 +246,14 @@ const SeeExcel = () => {
     }
   }, [excel, userFirestore?.id])
 
+  const disabledInput = useCallback((ref: MutableRefObject<(HTMLInputElement | null)[]>, record: RowTableExcel) => {
+    return Boolean(
+      ref.current[record.index] === null 
+      || record.userId === "" 
+      || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)
+    );
+  }, [userFirestore, excel])
+
   useEffect(() => {
     if (statusChanged) return;
 
@@ -322,7 +348,7 @@ const SeeExcel = () => {
         render: (_: any, record: RowTableExcel) => (
           <input
             ref={e => inputRefsE.current[record.index] = e}
-            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            disabled={disabledInput(inputRefsE, record)}
             name={'companiae' + record.index}
             onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaE")}
           />
@@ -336,7 +362,7 @@ const SeeExcel = () => {
         render: (_: any, record: RowTableExcel) => (
           <input
             ref={e => inputRefsF.current[record.index] = e}
-            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            disabled={disabledInput(inputRefsF, record)}
             name={'companiaf' + record.index}
             onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaF")}
           />
@@ -350,7 +376,7 @@ const SeeExcel = () => {
         render: (_: any, record: RowTableExcel) => (
           <input
             ref={e => inputRefsG.current[record.index] = e}
-            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            disabled={disabledInput(inputRefsG, record)}
             name={'companiag' + record.index}
             onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaG")}
           />
@@ -364,7 +390,7 @@ const SeeExcel = () => {
         render: (_: any, record: RowTableExcel) => (
           <input
             ref={e => inputRefsH.current[record.index] = e}
-            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            disabled={disabledInput(inputRefsH, record)}
             name={'companiah' + record.index}
             onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaH")}
           />
@@ -378,14 +404,14 @@ const SeeExcel = () => {
         render: (_: any, record: RowTableExcel) => (
           <input
             ref={e => inputRefsI.current[record.index] = e}
-            disabled={inputRefsF.current[record.index] === null || record.userId === "" || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+            disabled={disabledInput(inputRefsI, record)}
             name={'companiai' + record.index}
             onBlur={async (e) => await saveCampaign(record, e.target.value, "campaniaI")}
           />
         )
       },
     ];
-  }, [excel, userFirestore, selecting, onSelectRow, saveCampaign])
+  }, [excel, userFirestore, selecting, onSelectRow, saveCampaign, disabledInput])
 
   const downloadExcel = async () => {
     if (downloading) return;
