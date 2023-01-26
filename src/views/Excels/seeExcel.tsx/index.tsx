@@ -26,19 +26,20 @@ const SeeExcel = () => {
   const [userIds, setUserIds] = useState<string[]>([]);
   const [tableExcel, setTableExcel] = useState<RowTableExcel[]>([]);
   const [downloading, setDownloading] = useState(false);
+  const [sheet, setSheet] = useState<exceljs.Worksheet>()
+
   const inputRefsE = useRef<Array<HTMLInputElement | null>>([]);
   const inputRefsF = useRef<Array<HTMLInputElement | null>>([]);
   const inputRefsG = useRef<Array<HTMLInputElement | null>>([]);
   const inputRefsH = useRef<Array<HTMLInputElement | null>>([]);
   const inputRefsI = useRef<Array<HTMLInputElement | null>>([]);
-  const allInputRefs: Record<string, MutableRefObject<(HTMLInputElement | null)[]>> = {
+  const allInputRefs: Record<string, MutableRefObject<(HTMLInputElement | null)[]>> = useMemo(() => ({
     inputRefsE,
     inputRefsF,
     inputRefsG,
     inputRefsH,
     inputRefsI
-  };
-
+  }), []);
 
   const queryExcel = useMemo<DocumentReference<DocumentData> | null>(() => {
     if (!id) return null;
@@ -46,39 +47,8 @@ const SeeExcel = () => {
     return doc(getFirestore(), "exceles", id);
   }, [id]);
   const [docSnapExcel, loadingExcel] = useDocOnSnapshot(queryExcel);
-  const [sheet, setSheet] = useState<exceljs.Worksheet>()
 
-  const getTableExcel = (sheet: exceljs.Worksheet, _excel: Excel, users: UserFirestore[]) => {
-    const _tableExcel: RowTableExcel[] = [];
-    const { campaniaE, campaniaF, campaniaG, campaniaH, campaniaI, userRows } = _excel;
-
-    sheet.eachRow((row, numberRow) => {
-      if (numberRow !== 1) {
-        const indexCampaign = numberRow - 2;
-        const rowTableExcel: RowTableExcel = {
-          index: indexCampaign,
-          userName: users.find(u => u.id === userRows[indexCampaign])?.name || "",
-          userId: userRows[indexCampaign],
-          firstName: row.getCell(1).value?.toString() as string,
-          lastName: row.getCell(2).value?.toString() as string,
-          snn: row.getCell(3).value?.toString() as string,
-          dob: row.getCell(4).value?.toString() as string,
-          e: campaniaE[indexCampaign],
-          f: campaniaF[indexCampaign],
-          g: campaniaG[indexCampaign],
-          h: campaniaH[indexCampaign],
-          i: campaniaI[indexCampaign],
-          selecting: false
-        };
-
-        _tableExcel.push(rowTableExcel);
-      }
-    });
-
-    return _tableExcel;
-  }
-
-  const setInputRefs = (campania: string[], refs: (HTMLInputElement | null)[], keyColumn: string) => {
+  const setInputRefs = useCallback((campania: string[], refs: (HTMLInputElement | null)[], keyColumn: string) => {
     const oldInputRefs = allInputRefs[keyColumn];
     
     for (let index = 0; index < campania.length; index++) {
@@ -95,85 +65,7 @@ const SeeExcel = () => {
         inputRef.value = value;
       }
     }
-  }
-
-  useEffect(() => {
-    let mounted = true;
-
-    if (loadingExcel) return;
-
-    const init = async () => {
-      try {
-        if (!docSnapExcel?.exists()) {
-          navigate("/exceles");
-          return;
-        }
-
-        const _excel = { ...docSnapExcel?.data(), id: docSnapExcel?.id } as Excel;
-        const _userIds = _excel.userIds;
-        const docPromises = _userIds.map(userId => getDocById("users", userId));
-
-        const allDocs = await Promise.all(docPromises);
-
-        const users = allDocs.map(doc => ({ ...doc.data(), id: doc.id })) as UserFirestore[];
-
-        setExcel({
-          ..._excel,
-          activeUsers: _excel.activeUsers.map(au => ({
-            ...au,
-            user: users.find(u => u.id === au.userId)
-          }))
-        });
-
-        const { campaniaE, campaniaF, campaniaG, campaniaH, campaniaI } = _excel;
-        const refsE = inputRefsE.current;
-        const refsF = inputRefsF.current;
-        const refsG = inputRefsG.current;
-        const refsH = inputRefsH.current;
-        const refsI = inputRefsI.current;
-
-        setInputRefs(campaniaE, refsE, "inputRefsE");
-        setInputRefs(campaniaF, refsF, "inputRefsF");
-        setInputRefs(campaniaG, refsG, "inputRefsG");
-        setInputRefs(campaniaH, refsH, "inputRefsH");
-        setInputRefs(campaniaI, refsI, "inputRefsI");
-
-        if (JSON.stringify(_userIds) !== JSON.stringify(userIds)) {
-          setUserIds(_userIds);
-
-          const blobExcel = await getBlobByUrl(_excel?.file as string) as Blob;
-
-          const fileExcel = new File([blobExcel], "excel.xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-          const workbook = await getWorkbookFromFile(fileExcel) as exceljs.Workbook;
-
-          const _sheet = workbook.worksheets[0];
-          const _tableExcel = getTableExcel(_sheet, _excel, users);
-
-          setSheet(_sheet);
-          setTableExcel(_tableExcel);
-          return;
-        }
-
-        const _tableExcel = getTableExcel(sheet as exceljs.Worksheet, _excel, users);
-
-        if (!mounted) return;
-
-        setTableExcel(_tableExcel);
-      } catch (error) {
-        console.log(error);
-        message.error("Error al cargar el excel!");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    init();
-
-    return () => {
-      mounted = false;
-    }
-  }, [docSnapExcel, loadingExcel, loading, navigate]);
+  }, [allInputRefs])
 
   const changeStatus = useCallback(async () => {
     if (!id || !userFirestore) return;
@@ -253,6 +145,114 @@ const SeeExcel = () => {
       || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)
     );
   }, [userFirestore, excel])
+
+  const getTableExcel = (sheet: exceljs.Worksheet, _excel: Excel, users: UserFirestore[]) => {
+    const _tableExcel: RowTableExcel[] = [];
+    const { campaniaE, campaniaF, campaniaG, campaniaH, campaniaI, userRows } = _excel;
+
+    sheet.eachRow((row, numberRow) => {
+      if (numberRow !== 1) {
+        const indexCampaign = numberRow - 2;
+        const rowTableExcel: RowTableExcel = {
+          index: indexCampaign,
+          userName: users.find(u => u.id === userRows[indexCampaign])?.name || "",
+          userId: userRows[indexCampaign],
+          firstName: row.getCell(1).value?.toString() as string,
+          lastName: row.getCell(2).value?.toString() as string,
+          snn: row.getCell(3).value?.toString() as string,
+          dob: row.getCell(4).value?.toString() as string,
+          e: campaniaE[indexCampaign],
+          f: campaniaF[indexCampaign],
+          g: campaniaG[indexCampaign],
+          h: campaniaH[indexCampaign],
+          i: campaniaI[indexCampaign],
+          selecting: false
+        };
+
+        _tableExcel.push(rowTableExcel);
+      }
+    });
+
+    return _tableExcel;
+  }
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (loadingExcel) return;
+
+    const init = async () => {
+      try {
+        if (!docSnapExcel?.exists()) {
+          navigate("/exceles");
+          return;
+        }
+
+        const _excel = { ...docSnapExcel?.data(), id: docSnapExcel?.id } as Excel;
+        const _userIds = _excel.userIds;
+        const docPromises = _userIds.map(userId => getDocById("users", userId));
+
+        const allDocs = await Promise.all(docPromises);
+
+        const users = allDocs.map(doc => ({ ...doc.data(), id: doc.id })) as UserFirestore[];
+
+        setExcel({
+          ..._excel,
+          activeUsers: _excel.activeUsers.map(au => ({
+            ...au,
+            user: users.find(u => u.id === au.userId)
+          }))
+        });
+
+        const { campaniaE, campaniaF, campaniaG, campaniaH, campaniaI } = _excel;
+        const refsE = inputRefsE.current;
+        const refsF = inputRefsF.current;
+        const refsG = inputRefsG.current;
+        const refsH = inputRefsH.current;
+        const refsI = inputRefsI.current;
+
+        setInputRefs(campaniaE, refsE, "inputRefsE");
+        setInputRefs(campaniaF, refsF, "inputRefsF");
+        setInputRefs(campaniaG, refsG, "inputRefsG");
+        setInputRefs(campaniaH, refsH, "inputRefsH");
+        setInputRefs(campaniaI, refsI, "inputRefsI");
+
+        if (JSON.stringify(_userIds) !== JSON.stringify(userIds)) {
+          setUserIds(_userIds);
+
+          const blobExcel = await getBlobByUrl(_excel?.file as string) as Blob;
+
+          const fileExcel = new File([blobExcel], "excel.xlsx", { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+          const workbook = await getWorkbookFromFile(fileExcel) as exceljs.Workbook;
+
+          const _sheet = workbook.worksheets[0];
+          const _tableExcel = getTableExcel(_sheet, _excel, users);
+
+          setSheet(_sheet);
+          setTableExcel(_tableExcel);
+          return;
+        }
+
+        const _tableExcel = getTableExcel(sheet as exceljs.Worksheet, _excel, users);
+
+        if (!mounted) return;
+
+        setTableExcel(_tableExcel);
+      } catch (error) {
+        console.log(error);
+        message.error("Error al cargar el excel!");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    init();
+
+    return () => {
+      mounted = false;
+    }
+  }, [docSnapExcel, loadingExcel, loading, navigate, setInputRefs]);
 
   useEffect(() => {
     if (statusChanged) return;
