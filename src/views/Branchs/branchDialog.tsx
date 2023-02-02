@@ -41,7 +41,7 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
   const  { isLoaded , loadError }  =  useJsApiLoader ( { 
     googleMapsApiKey: apiKey, 
     libraries
-  })
+  });
 
   useEffect(() => {
     if (propBranch) {

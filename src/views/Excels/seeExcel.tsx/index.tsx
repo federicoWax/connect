@@ -288,7 +288,7 @@ const SeeExcel = () => {
                 : <Checkbox
                   checked={record.userId !== "" && excel?.userRows.includes(record.userId)}
                   onChange={async () => await onSelectRow(record)}
-                  disabled={selecting || (record.userId !== "" && excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
+                  disabled={selecting || (userFirestore?.role !== "Administrador" && record.userId !== "" && excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)}
                 />
             }
           </div>
