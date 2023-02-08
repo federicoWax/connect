@@ -1,4 +1,4 @@
-import { Badge, Tag } from 'antd'
+import { Badge, Row, Tag } from 'antd'
 import { FC } from 'react';
 import { ActiveUser } from '../../../interfaces'
 interface Props {
@@ -11,14 +11,14 @@ const UserTags: FC<Props> = ({ activeUsers }) => {
   return (
     <div>
       <h4>Usuarios</h4>
-      <div style={{display: "flex"}}>
+      <Row style={{display: "flex"}}>
       {
         [...activeUsers]
         .sort((a, b) => Number(b.active) - Number(a.active))
         .map(user => (
           <div 
             key={user.userId}
-            style={{marginRight: 5}}
+            style={{margin: 2}}
           >
             <Badge
               dot
@@ -34,7 +34,7 @@ const UserTags: FC<Props> = ({ activeUsers }) => {
           </div>
         ))
       }
-      </div>
+      </Row>
     </div>
   )
 }

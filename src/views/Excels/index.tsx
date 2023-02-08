@@ -29,7 +29,7 @@ const Excels = () => {
   const [snapExceles, loadingExceles] = useOnSnapshot(queryExceles); 
   
   const exceles = useMemo<Excel[]>(() => {
-    return snapExceles?.docs.map(doc => ({...doc.data(), id: doc.id})) as Excel[] || []
+    return snapExceles?.docs.map(doc => ({...doc.data(), id: doc.id})) as Excel[] || [];
   }, [snapExceles]);
 
   const columns = useMemo(() => [
