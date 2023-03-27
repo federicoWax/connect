@@ -315,7 +315,11 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               label="Estatus de venta"
               name="statusSale"
             >
-              <Select value={sale.statusSale} onChange={value => setSale({...sale, statusSale: value })}>
+              <Select 
+                value={sale.statusSale} 
+                onChange={value => setSale({...sale, statusSale: value })}
+                disabled={Boolean(sale.id) && userFirestore?.role !== "Administrador"}
+              >
                 <Option value="Activación">Activación</Option>
                 <Option value="Mensualidad">Mensualidad</Option>
                 <Option value="Desconexión">Desconexión</Option>
