@@ -356,7 +356,7 @@ const useUsers = () => {
       receives: sale.receives.toUpperCase(),
       livingPlace: sale.livingPlace.toUpperCase(),
       previousCompany: sale.previousCompany.toUpperCase(),
-      paymentAmount: `$${Number(sale?.paymentAmount || 0).toFixed(2)}`,
+      paymentAmount: sale.statusSale === "Devolución" ? `-$${Number(sale?.paymentAmount || 0).toFixed(2)}` : `$${Number(sale?.paymentAmount || 0).toFixed(2)}` ,
       comision: "$20.00",
       campaign: campaigns.find(campaign => campaign.id === sale.campaign)?.name.toUpperCase(),
       notes: sale.notes.toUpperCase(),

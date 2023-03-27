@@ -147,7 +147,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
 
   const optionsClients = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
-  const hideInputs = userFirestore?.role === "Procesos" && sale.id && sale.userId !== user?.uid; 
+  const hideInputs = userFirestore?.role === "Procesos" && sale.id && sale.userId !== user?.uid;
   
   return (
     <Modal
@@ -498,6 +498,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               name="notes"
             >
               <Input.TextArea
+                disabled={typeof sale.id === "string" && user?.email !== sale.processUser && user?.uid !== sale.userId && userFirestore?.role !== "Administrador"}
                 rows={6}
                 value={sale.notes} 
                 onChange={(e) => setSale({...sale, notes: e.target.value})}
