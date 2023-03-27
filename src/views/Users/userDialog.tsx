@@ -3,6 +3,7 @@ import { Modal, Row, Col, Form, Input, Select, message } from 'antd';
 import { Branch, Team, UserFirestore } from '../../interfaces';
 import { post } from '../../services/http';
 import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import { useAuth } from "../../context/AuthContext";
 
 interface Props {
   open: boolean;
@@ -31,6 +32,7 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
   const [user, setUser] = useState<UserFirestore>(init_user);
   const [saving, setSaving] = useState<boolean>(false);
   const [form] = Form.useForm();
+  const { userFirestore } = useAuth();
 
   useEffect(() => {
     if(propUser) {
@@ -81,6 +83,8 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
   }
 
   const passwordRequired = Boolean(!user.id || (user.id && user.password));
+
+  console.log(user.role)
 
   return (
     <Modal
@@ -164,6 +168,7 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
                   <Select value={user.role} onChange={value => setUser({...user, role: value})}>
                     <Option value="Vendedor">Vendedor</Option>
                     <Option value="Procesos">Procesos</Option>
+                    {userFirestore?.role === "Administrador" && <Option value="Administrador">Administrador</Option>}
                   </Select>
                 </Form.Item>
               </Col>
