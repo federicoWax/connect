@@ -14,6 +14,12 @@ const RoterChecker = () => {
   const [staring, setStaring] = useState(true);
 
   useEffect(() => {
+    if(window.location.hostname.includes("connect-4dee9.web.app")) {
+      window.location.replace('https://www.google.com.mx/')
+    }
+  }, []);
+
+  useEffect(() => {
     if(loading) return;
 
     if(userFirestore) {
