@@ -84,8 +84,6 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
 
   const passwordRequired = Boolean(!user.id || (user.id && user.password));
 
-  console.log(user.role)
-
   return (
     <Modal
       forceRender 
