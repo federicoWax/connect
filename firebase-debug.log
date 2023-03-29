@@ -1,0 +1,30 @@
+[debug] [2023-03-29T16:02:59.734Z] ----------------------------------------------------------------------
+[debug] [2023-03-29T16:02:59.735Z] Command:       C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\firebase-tools\lib\bin\firebase.js hosting:disable
+[debug] [2023-03-29T16:02:59.735Z] CLI Version:   11.25.1
+[debug] [2023-03-29T16:02:59.735Z] Platform:      win32
+[debug] [2023-03-29T16:02:59.736Z] Node Version:  v18.14.2
+[debug] [2023-03-29T16:02:59.736Z] Time:          Wed Mar 29 2023 09:02:59 GMT-0700 (Pacific Daylight Time)
+[debug] [2023-03-29T16:02:59.736Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-03-29T16:02:59.787Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-03-29T16:02:59.787Z] > authorizing via signed-in user (federicocas6@gmail.com)
+[debug] [2023-03-29T16:02:59.787Z] [iam] checking project connect-4dee9 for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2023-03-29T16:02:59.789Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/connect-4dee9:testIamPermissions [none]
+[debug] [2023-03-29T16:02:59.789Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/connect-4dee9:testIamPermissions x-goog-quota-user=projects/connect-4dee9
+[debug] [2023-03-29T16:02:59.789Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/connect-4dee9:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2023-03-29T16:03:00.278Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/connect-4dee9:testIamPermissions 200
+[debug] [2023-03-29T16:03:00.278Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/connect-4dee9:testIamPermissions {}
+[debug] [2023-03-29T16:03:00.278Z] [iam] error while checking permissions, command may fail: FirebaseError: Authorization failed. This account is missing the following required permissions on project connect-4dee9:
+
+  firebase.projects.get
+  firebasehosting.sites.update
+[debug] [2023-03-29T16:03:00.279Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/connect-4dee9 [none]
+[debug] [2023-03-29T16:03:00.680Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/connect-4dee9 403
+[debug] [2023-03-29T16:03:00.680Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/connect-4dee9 {"error":{"code":403,"message":"The caller does not have permission","status":"PERMISSION_DENIED"}}
+[debug] [2023-03-29T16:03:00.681Z] HTTP Error: 403, The caller does not have permission
+[debug] [2023-03-29T16:03:00.864Z] FirebaseError: HTTP Error: 403, The caller does not have permission
+    at responseToError (C:\Users\Pc123\AppData\Roaming\nvm\v18.14.2\node_modules\firebase-tools\lib\responseToError.js:49:12)
+    at RetryOperation._fn (C:\Users\Pc123\AppData\Roaming\nvm\v18.14.2\node_modules\firebase-tools\lib\apiv2.js:288:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: Failed to get Firebase project connect-4dee9. Please make sure the project exists and your account has permission to access it.
