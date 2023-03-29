@@ -1,6 +1,5 @@
 {
   "hosting": {
-    "target": "connect",
     "public": "build",
     "ignore": [
       "firebase.json",
@@ -14,14 +13,6 @@
       }
     ],
     "headers": [
-      {
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache"
-          }
-        ]
-      },
       {
         "source": "/build/app/**",
         "headers": [
