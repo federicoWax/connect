@@ -60,10 +60,11 @@ export interface Sale extends Client {
   concluded: boolean;
   paymentAmount: string;
   processUser?: string;
-  paymentMethod: "BARRI" | "Western union" | "Ria" | "Dolex" | "Zelle" | "Cashapp" | "";
   sends: string;
   receives: string;
   team?: string;
+  idSeller?: string;
+  nameSeller?: string;
 };
 
 export interface FilterSale {
@@ -134,7 +135,6 @@ export interface ActiveUser {
   color: string;
   user?: UserFirestore;
 }
-
 
 export interface Excel {
   id?: string;
