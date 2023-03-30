@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
 import dayjs from "dayjs";
@@ -74,6 +74,10 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
     setLoading(false);
   }, [propSale, cobradores, loading, setForm]);
 
+  const disabledInputs = useMemo(() => {
+    return sale.id !== undefined && sale.userId !== user?.uid && userFirestore?.role !== "Administrador";
+  }, [userFirestore, sale, user])
+
   const save = async () => {
     if(saving) return;
 
@@ -148,7 +152,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
   const optionsClients = clients.map((c) => ({value: c.esid?.toString(), label: c.esid + " - " + c.client})) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[];
   const hideInputs = userFirestore?.role === "Procesos" && sale.id && sale.userId !== user?.uid;
-  
+
   return (
     <Modal
       width={1000}
@@ -181,6 +185,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               <Input
                 value={sale.client} 
                 onChange={(e) => setSale({...sale, client: e.target.value})}
+                disabled={disabledInputs}
               />
             </Form.Item>
           </Col>
@@ -193,6 +198,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 onChange={(date) => setSale({...sale, dateBirth: date ? Timestamp.fromDate(date.toDate()) : null }) }
                 style={{width: "100%", marginTop: 8}}
                 placeholder="Fecha de nacimiento"
+                disabled={disabledInputs}
               />
             </Col>
           }
@@ -208,6 +214,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                   onWheel={(e) => e.currentTarget.blur()}
                   value={sale.phone} 
                   onChange={(e) => setSale({...sale, phone: e.target.value})}
+                  disabled={disabledInputs}
                 />
               </Form.Item>
             </Col>
@@ -225,6 +232,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 type="number"
                 value={sale.additionalPhone} 
                 onChange={(e) => setSale({...sale, additionalPhone: e.target.value})}
+                disabled={disabledInputs}
               />
             </Form.Item>
           </Col>
@@ -235,6 +243,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               rules={[{ required: true, message: 'ESID requerido.' }]}
             >
               <AutoComplete
+                disabled={disabledInputs}
                 onSearch={setSearchESID}
                 value={sale.esid}
                 options={optionsClients} 
@@ -273,7 +282,8 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               name="address"
               rules={[{ required: true, message: 'Dirección requerida.' }]}
             >
-              <Input 
+              <Input
+                disabled={disabledInputs}
                 type="text"
                 value={sale.address} 
                 onChange={(e) => setSale({...sale, address: e.target.value})}
@@ -290,6 +300,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 rules={[{ message: 'Correo electrinico válido requerido.', type: 'email' }]}  
               >
                 <Input 
+                  disabled={disabledInputs}
                   type="email"
                   value={sale.email} 
                   onChange={(e) => setSale({...sale, email: e.target.value})}
@@ -304,6 +315,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               rules={[{ required: true, message: 'Correo electrinico adicional válido requerido.', type: 'email' }]}
             >
               <Input 
+                disabled={disabledInputs}
                 type="email"
                 value={sale.additionalEmail} 
                 onChange={(e) => setSale({...sale, additionalEmail: e.target.value})}
@@ -318,7 +330,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               <Select 
                 value={sale.statusSale} 
                 onChange={value => setSale({...sale, statusSale: value })}
-                disabled={Boolean(sale.id) && userFirestore?.role !== "Administrador"}
+                disabled={disabledInputs}
               >
                 <Option value="Activación">Activación</Option>
                 <Option value="Mensualidad">Mensualidad</Option>
@@ -335,7 +347,11 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               label="Estatus de servicio"
               name="statusLight"
             >
-              <Select value={sale.statusLight} onChange={value => setSale({...sale, statusLight: value })}>
+              <Select 
+                disabled={disabledInputs}
+                value={sale.statusLight} 
+                onChange={value => setSale({...sale, statusLight: value })}
+              >
                 <Option value="Con luz">Con luz</Option>
                 <Option value="Sin luz">Sin luz</Option>
               </Select>
@@ -347,7 +363,11 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 label="Método de pago"
                 name="paymentMethod"
               >
-                <Select value={sale.paymentMethod} onChange={value => setSale({...sale, paymentMethod: value })}>
+                <Select 
+                  disabled={disabledInputs}
+                  value={sale.paymentMethod} 
+                  onChange={value => setSale({...sale, paymentMethod: value })}
+                >
                   <Option value="BARRI">BARRI</Option>
                   <Option value="Western union">Western union</Option>
                   <Option value="Ria">Ria</Option>
@@ -366,6 +386,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 name="referenceNumber"
               >
                 <Input 
+                  disabled={disabledInputs}
                   type="text"
                   value={sale.referenceNumber} 
                   onChange={(e) => setSale({...sale, referenceNumber: e.target.value})}
@@ -382,6 +403,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 name="sends"
               >
                 <Input 
+                  disabled={disabledInputs}
                   type="text"
                   value={sale.sends} 
                   onChange={(e) => setSale({...sale, sends: e.target.value})}
@@ -394,6 +416,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 name="receives"
               >
                 <Select
+                  disabled={disabledInputs}
                   onChange={(value) => setSale({...sale, receives: value})}
                   value={sale.receives} 
                 >
@@ -412,7 +435,11 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 name="livingPlace"
                 rules={[{ required: true, message: 'Vivienda requerida.' }]}
               >
-                <Select value={sale.livingPlace} onChange={value => setSale({...sale, livingPlace: value })}>
+                <Select 
+                  disabled={disabledInputs}
+                  value={sale.livingPlace} 
+                  onChange={value => setSale({...sale, livingPlace: value })}
+                >
                   <Option value="Casa">Casa</Option>
                   <Option value="Traila">Traila</Option>
                   <Option value="Apartamento">Apartamento</Option>
@@ -428,6 +455,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               name="previousCompany"
             >
               <Input 
+                disabled={disabledInputs}
                 type="text"
                 value={sale.previousCompany} 
                 onChange={(e) => setSale({...sale, previousCompany: e.target.value})}
@@ -442,6 +470,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
                 rules={sale.statusSale === "Mensualidad" ? [{ required: true, message: 'Cantidad de cobro requerida.' }] : []}
               >
                 <Input 
+                  disabled={disabledInputs}
                   onWheel={(e) => e.currentTarget.blur()}
                   type="number"
                   value={sale.paymentAmount} 
@@ -457,7 +486,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
             >
               <AutoComplete
                 allowClear
-                disabled={Boolean(userFirestore?.role !== "Administrador" && sale.processUser && sale.processUser !== userFirestore?.email)}
+                disabled={disabledInputs && Boolean(userFirestore?.role !== "Administrador" && sale.processUser && sale.processUser !== userFirestore?.email)}
                 value={sale?.processUser}
                 options={optionsProcessUser} 
                 filterOption={(inputValue, option) =>
@@ -483,6 +512,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               name="campaign"
             >
               <Select
+                disabled={disabledInputs}
                 onChange={(value) => setSale({...sale, campaign: value})}
                 value={sale.campaign} 
               >
@@ -502,7 +532,7 @@ const HomeDialog: FC<Props> = ({open, onClose, propSale, cobradores, clients, us
               name="notes"
             >
               <Input.TextArea
-                disabled={typeof sale.id === "string" && user?.email !== sale.processUser && user?.uid !== sale.userId && userFirestore?.role !== "Administrador"}
+                disabled={disabledInputs && typeof sale.id === "string" && user?.email !== sale.processUser && user?.uid !== sale.userId && userFirestore?.role !== "Administrador"}
                 rows={6}
                 value={sale.notes} 
                 onChange={(e) => setSale({...sale, notes: e.target.value})}

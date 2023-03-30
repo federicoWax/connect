@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 
 function App() {
   useEffect(() => {
+    console.log(window.location.hostname)
     if(window.location.hostname.includes("connect-4dee9.web.app")) {
       window.location.replace('https://www.google.com.mx/')
     }
