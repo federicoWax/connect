@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Switch } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { getFirestore, collection, query, orderBy, where, DocumentData, Query, limit, Timestamp } from 'firebase/firestore';
@@ -11,10 +11,14 @@ import dayjs from "dayjs";
 import ExcelJS from 'exceljs';
 import useCollection from './useCollection';
 import { columnsExcel, endDateEndDay, startDateStartDay } from '../constants';
+import { ColumnsType } from "antd/es/table";
 
 const db = getFirestore();
 const columnsWorksheet = [
+  { header: 'CREADOR', key: 'creator', width: 32 },
+  { header: 'EQUIPO CREADOR', key: 'teamSeller', width: 32 },
   { header: 'VENDEDOR', key: 'seller', width: 32 },
+  { header: 'EQUIPO VENDEDOR', key: 'teamSeller', width: 32 },
   { header: 'PROCESO', key: 'processUser', width: 32 },
   { header: 'FECHA / HORA CREADA', key: 'date',  width: 22  },
   { header: 'FECHA / HORA PAGO', key: 'datePayment',  width: 22  },
@@ -55,7 +59,6 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   if(concluded !== "") {
     Query = query(Query, where('concluded', '==', concluded), orderBy(typeDate));
   }
-
 
   if(((concluded || concluded === "") && !esid) || (esid && startDate && endDate)) {
     Query = query(
@@ -138,7 +141,7 @@ const useUsers = () => {
   const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns); 
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
 
-  const columns = [
+  const columns: ColumnsType<Sale> = useMemo(() => [
     {
       title: 'Cliente',
       key: 'client',
@@ -152,8 +155,8 @@ const useUsers = () => {
       render: (text: string) => text
     },
     {
-      title: 'Vendedor',
-      key: 'seller',
+      title: 'Creador',
+      key: 'creator',
       render: (record: Sale) => {
         const user = users.find(user =>  user.id === record.userId);
 
@@ -165,6 +168,22 @@ const useUsers = () => {
           </>
         )
       }
+    },
+    {
+      title: 'Vendedor',
+      key: 'seller',
+      render: (record: Sale) => {
+        const user = users.find(user =>  user.email === record.idSeller);
+
+        return (
+          <>
+            <div> Nombre: { user?.name }</div>
+            <div> Correo: { user?.email }</div>    
+            <div> Equipo: { user?.team }</div>        
+          </>
+        )
+      },
+      width: '30%',
     },
     {
       title: 'Campaña',
@@ -274,7 +293,7 @@ const useUsers = () => {
         />
       )
     }
-  ];
+  ], [campaigns, userFirestore, users]);
 
   useEffect(() => {
     if(!userFirestore) return;
@@ -336,7 +355,10 @@ const useUsers = () => {
 
     let _sales = sales.map(sale => ({
       ...sale,
-      seller: users.find(user => user.id === sale.userId)?.name.toUpperCase(),
+      creator: users.find(user => user.id === sale.userId)?.name.toUpperCase(),
+      teamCreator: users.find(user => user.id === sale.userId)?.team.toUpperCase(),
+      seller: users.find(user => user.email === sale.idSeller)?.name.toUpperCase(),
+      teamSeller: users.find(user => user.email === sale.idSeller)?.team.toUpperCase(),
       processUser: users.find(user => user.email === sale.processUser)?.name.toUpperCase(),
       date: dayjs(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
       datePayment: sale.datePayment ? dayjs(sale.datePayment?.toDate()).format("DD/MM/YYYY hh:mm a") : "",

@@ -78,7 +78,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
     return sale.id !== undefined && sale.userId !== user?.uid && userFirestore?.role !== "Administrador";
   }, [userFirestore, sale, user])
 
-  const optionsSellers = useMemo(() => users.map((u) => ({ value: u.email, label: u.email + " - " + u.name })) as Autocomplete[], [users]);
+  const optionsSellers = useMemo(() => users.map((u) => ({ value: u.email, label:  u.name + " - " + u.email })) as Autocomplete[], [users]);
 
   const save = async () => {
     if (saving) return;
