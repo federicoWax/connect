@@ -16,7 +16,7 @@ import { ColumnsType } from "antd/es/table";
 const db = getFirestore();
 const columnsWorksheet = [
   { header: 'CREADOR', key: 'creator', width: 32 },
-  { header: 'EQUIPO CREADOR', key: 'teamSeller', width: 32 },
+  { header: 'EQUIPO CREADOR', key: 'teamCreator', width: 32 },
   { header: 'VENDEDOR', key: 'seller', width: 32 },
   { header: 'EQUIPO VENDEDOR', key: 'teamSeller', width: 32 },
   { header: 'PROCESO', key: 'processUser', width: 32 },
