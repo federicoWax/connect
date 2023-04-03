@@ -20,29 +20,29 @@ const columnsWorksheet = [
   { header: 'VENDEDOR', key: 'seller', width: 32 },
   { header: 'EQUIPO VENDEDOR', key: 'teamSeller', width: 32 },
   { header: 'PROCESO', key: 'processUser', width: 32 },
-  { header: 'FECHA / HORA CREADA', key: 'date',  width: 22  },
-  { header: 'FECHA / HORA PAGO', key: 'datePayment',  width: 22  },
-  { header: 'FECHA / HORA CONCLUIDA', key: 'dateConclued',  width: 22  },
+  { header: 'FECHA / HORA CREADA', key: 'date', width: 22 },
+  { header: 'FECHA / HORA PAGO', key: 'datePayment', width: 22 },
+  { header: 'FECHA / HORA CONCLUIDA', key: 'dateConclued', width: 22 },
   { header: 'CONCLUIDA / PENDIENTE', key: 'status', width: 22 },
-  { header: 'CORREO VENDEDOR', key: 'emailSeller',  width: 32  },
-  { header: 'EQUIPO', key: 'team'  },
-  { header: 'CLIENTE', key: 'client',  width: 32  },
-  { header: 'FECHA DE NACIMIENTO', key: 'dateBirth',  width: 18  },
-  { header: 'TELÉFONO', key: 'phone',  width: 16  },
-  { header: 'TELÉFONO ADICIONAL', key: 'additionalPhone',  width: 16  },
-  { header: 'ESID', key: 'esid',  width: 32  },
-  { header: 'DIRECCIÓN', key: 'address',  width: 40  },
-  { header: 'CORREO ELECTRÓNICO', key: 'email',  width: 32  },
-  { header: 'CORREO ELECTRÓNICO ADICIONAL', key: 'additionalEmail',  width: 32  },
+  { header: 'CORREO VENDEDOR', key: 'emailSeller', width: 32 },
+  { header: 'EQUIPO', key: 'team' },
+  { header: 'CLIENTE', key: 'client', width: 32 },
+  { header: 'FECHA DE NACIMIENTO', key: 'dateBirth', width: 18 },
+  { header: 'TELÉFONO', key: 'phone', width: 16 },
+  { header: 'TELÉFONO ADICIONAL', key: 'additionalPhone', width: 16 },
+  { header: 'ESID', key: 'esid', width: 32 },
+  { header: 'DIRECCIÓN', key: 'address', width: 40 },
+  { header: 'CORREO ELECTRÓNICO', key: 'email', width: 32 },
+  { header: 'CORREO ELECTRÓNICO ADICIONAL', key: 'additionalEmail', width: 32 },
   { header: 'ESTATUS DE VENTA', key: 'statusSale', width: 16 },
   { header: 'ESTATUS LUZ', key: 'statusLight' },
   { header: 'MÉTODO DE PAGO', key: 'paymentMethod', width: 16 },
-  { header: 'NÚMERO DE REFERENCIA', key: 'referenceNumber',  width: 22  },
-  { header: 'RECIBE', key: 'receives',  width: 32  },
-  { header: 'ENVIA', key: 'sends',  width: 32  },
-  { header: 'VIVIENDA', key: 'livingPlace',  width: 16  },
-  { header: 'COMPAÑIA ANTERIOR', key: 'previousCompany',  width: 32  },
-  { header: 'CANTIDAD DE COBRO', key: 'paymentAmount',  width: 22 },
+  { header: 'NÚMERO DE REFERENCIA', key: 'referenceNumber', width: 22 },
+  { header: 'RECIBE', key: 'receives', width: 32 },
+  { header: 'ENVIA', key: 'sends', width: 32 },
+  { header: 'VIVIENDA', key: 'livingPlace', width: 16 },
+  { header: 'COMPAÑIA ANTERIOR', key: 'previousCompany', width: 32 },
+  { header: 'CANTIDAD DE COBRO', key: 'paymentAmount', width: 22 },
   { header: 'COMISIÓN', key: 'comision' },
   { header: 'CAMPAÑA', key: 'campaign', width: 18 },
   { header: 'NOTAS', key: 'notes' },
@@ -53,14 +53,14 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
 
   let Query = query(
-    collection(db, "sales"), 
+    collection(db, "sales"),
   )
 
-  if(concluded !== "") {
+  if (concluded !== "") {
     Query = query(Query, where('concluded', '==', concluded), orderBy(typeDate));
   }
 
-  if(((concluded || concluded === "") && !esid) || (esid && startDate && endDate)) {
+  if (((concluded || concluded === "") && !esid) || (esid && startDate && endDate)) {
     Query = query(
       Query,
       where(typeDate, ">=", startDate ? dayjsToStartDay(startDate).toDate() : startDateStartDay),
@@ -68,27 +68,27 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     )
   }
 
-  if(userFirestore?.role === "Procesos" && (concluded === null || concluded)) {
+  if (userFirestore?.role === "Procesos" && (concluded === null || concluded)) {
     Query = query(Query, where('userId', '==', userFirestore.id));
-  } else if(userId) {
+  } else if (userId) {
     Query = query(Query, where('userId', '==', userId));
   }
-  
-  if(esid) {
+
+  if (esid) {
     Query = query(Query, where('esid', '==', esid));
   }
 
-  if(processUser) 
+  if (processUser)
     Query = query(Query, where('processUser', '==', processUser));
-  
-  if(campaignId) 
+
+  if (campaignId)
     Query = query(Query, where('campaign', '==', campaignId));
-  
-  if(teamId) {
+
+  if (teamId) {
     Query = query(Query, where('team', '==', teamId));
   }
-  
-  if(statusLight) {
+
+  if (statusLight) {
     Query = query(Query, where('statusLight', '==', statusLight));
   }
 
@@ -134,11 +134,11 @@ const useUsers = () => {
   const [queryCampaigns] = useState<Query<DocumentData>>(query(collection(db, "campaigns"), orderBy("name")));
   const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy("name")));
 
-  const [snapshotSales, loadingSales] = useOnSnapshot(querySales); 
-  const [snapshotUsers, loadingUsers] = useCollection(queryUsers); 
-  const [snapshotCobradores, loadingCobradores] = useCollection(queryCobradores); 
-  const [snapshotClients, loadingClients] = useCollection(queryClients); 
-  const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns); 
+  const [snapshotSales, loadingSales] = useOnSnapshot(querySales);
+  const [snapshotUsers, loadingUsers] = useCollection(queryUsers);
+  const [snapshotCobradores, loadingCobradores] = useCollection(queryCobradores);
+  const [snapshotClients, loadingClients] = useCollection(queryClients);
+  const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns);
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
 
   const columns: ColumnsType<Sale> = useMemo(() => [
@@ -158,13 +158,13 @@ const useUsers = () => {
       title: 'Creador',
       key: 'creator',
       render: (record: Sale) => {
-        const user = users.find(user =>  user.id === record.userId);
+        const user = users.find(user => user.id === record.userId);
 
         return (
           <>
-            <div> Nombre: { user?.name }</div>
-            <div> Correo: { user?.email }</div>    
-            <div> Equipo: { record?.team || user?.team }</div>        
+            <div> Nombre: {user?.name}</div>
+            <div> Correo: {user?.email}</div>
+            <div> Equipo: {record?.team || user?.team}</div>
           </>
         )
       }
@@ -173,13 +173,13 @@ const useUsers = () => {
       title: 'Vendedor',
       key: 'seller',
       render: (record: Sale) => {
-        const user = users.find(user =>  user.email === record.idSeller);
+        const user = users.find(user => user.email === record.idSeller);
 
         return (
           <>
-            <div> Nombre: { user?.name }</div>
-            <div> Correo: { user?.email }</div>    
-            <div> Equipo: { user?.team }</div>        
+            <div> Nombre: {user?.name}</div>
+            <div> Correo: {user?.email}</div>
+            <div> Equipo: {user?.team}</div>
           </>
         )
       },
@@ -195,12 +195,12 @@ const useUsers = () => {
       title: 'Equipo',
       key: 'team',
       render: (record: Sale) => {
-        if(record.team) {
+        if (record.team) {
           return record.team;
         }
 
-        const user = users.find(user =>  user.id === record.userId);
-        return user?.team;            
+        const user = users.find(user => user.id === record.userId);
+        return user?.team;
       }
     },
     {
@@ -223,9 +223,9 @@ const useUsers = () => {
           {record.concluded ? "Concluida" : "Pendiente"}
           <br />
           {
-            ["Administrador", "Procesos"].includes(userFirestore?.role as string) && userFirestore?.email === record.processUser && <Switch 
+            ["Administrador", "Procesos"].includes(userFirestore?.role as string) && userFirestore?.email === record.processUser && <Switch
               checked={record.concluded}
-              onChange={async (checket) => await update("sales", record.id as string, {concluded: checket, dateConclued: checket ? Timestamp.now() : null})}
+              onChange={async (checket) => await update("sales", record.id as string, { concluded: checket, dateConclued: checket ? Timestamp.now() : null })}
             />
           }
         </>
@@ -241,10 +241,10 @@ const useUsers = () => {
       title: 'Proceso',
       key: 'processUser',
       render: (record: Sale) => {
-        const user = users.find(user =>  user.email === record.processUser);
+        const user = users.find(user => user.email === record.processUser);
         return (
           user?.email && <>
-            <div> { user?.name }</div>
+            <div> {user?.name}</div>
           </>
         )
       }
@@ -268,13 +268,13 @@ const useUsers = () => {
       title: 'Editar',
       key: 'edit',
       render: (sale: Sale) => (
-        <Button 
-          shape="circle" 
+        <Button
+          shape="circle"
           icon={<EditOutlined />}
           onClick={() => {
             setOpen(true);
             setSale(sale);
-          }} 
+          }}
         />
       )
     },
@@ -282,12 +282,12 @@ const useUsers = () => {
       title: userFirestore?.role === "Administrador" ? 'Eliminar' : '',
       key: 'delete',
       render: (record: Sale) => userFirestore?.role === "Administrador" && (
-        <Button 
-          shape="circle" 
+        <Button
+          shape="circle"
           icon={<DeleteOutlined />}
           onClick={() => {
             const deleteUser = () => del("sales", record.id as string);
-  
+
             dialogDeleteDoc(deleteUser);
           }}
         />
@@ -296,41 +296,41 @@ const useUsers = () => {
   ], [campaigns, userFirestore, users]);
 
   useEffect(() => {
-    if(!userFirestore) return;
+    if (!userFirestore) return;
 
     const query = getQuerySales(filter, userFirestore);
-    
+
     setQuerySales(query);
   }, [filter, userFirestore]);
-      
+
   useEffect(() => {
     let mounted = true;
 
-    if(loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
+    if (loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
 
-    let _sales = snapshotSales?.docs.map(doc => ({...doc.data(), id: doc.id })) as Sale[];
+    let _sales = snapshotSales?.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Sale[];
 
     setSales(_sales);
-    setUsers(snapshotUsers.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[]);
-    setCobradores(snapshotCobradores.docs.map(doc => ({...doc.data(), id: doc.id })) as Cobrador[]);
-    setClients(snapshotClients.docs.map(doc => ({...doc.data(), id: doc.id })) as Client[]);
-    setCampaigns(snapshotCampaigns.docs.map(doc => ({...doc.data(), id: doc.id })) as Campaign[]);
-    setTeams(snapshotTeams.docs.map(doc => ({...doc.data(), id: doc.id })) as Team[]);
+    setUsers(snapshotUsers.docs.map(doc => ({ ...doc.data(), id: doc.id })) as UserFirestore[]);
+    setCobradores(snapshotCobradores.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Cobrador[]);
+    setClients(snapshotClients.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Client[]);
+    setCampaigns(snapshotCampaigns.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Campaign[]);
+    setTeams(snapshotTeams.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Team[]);
 
     return () => {
       mounted = false;
     }
   }, [
-    snapshotSales, 
-    snapshotUsers, 
-    snapshotCobradores, 
-    snapshotClients, 
+    snapshotSales,
+    snapshotUsers,
+    snapshotCobradores,
+    snapshotClients,
     snapshotCampaigns,
     snapshotTeams,
-    loadingSales, 
-    loadingUsers, 
-    loadingCobradores, 
-    loadingClients, 
+    loadingSales,
+    loadingUsers,
+    loadingCobradores,
+    loadingClients,
     loadingCampaigns,
     loadingTeams,
     userFirestore,
@@ -349,7 +349,7 @@ const useUsers = () => {
       };
     })
 
-    if(filter.statusPayment !== "") {
+    if (filter.statusPayment !== "") {
       sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
     }
 
@@ -378,7 +378,7 @@ const useUsers = () => {
       receives: sale.receives.toUpperCase(),
       livingPlace: sale.livingPlace.toUpperCase(),
       previousCompany: sale.previousCompany.toUpperCase(),
-      paymentAmount: sale.statusSale === "Devolución" ? `-$${Number(sale?.paymentAmount || 0).toFixed(2)}` : `$${Number(sale?.paymentAmount || 0).toFixed(2)}` ,
+      paymentAmount: sale.statusSale === "Devolución" ? `-$${Number(sale?.paymentAmount || 0).toFixed(2)}` : `$${Number(sale?.paymentAmount || 0).toFixed(2)}`,
       comision: "$20.00",
       campaign: campaigns.find(campaign => campaign.id === sale.campaign)?.name.toUpperCase(),
       notes: sale.notes.toUpperCase(),
@@ -386,11 +386,11 @@ const useUsers = () => {
 
     worksheet.addRows(_sales);
 
-    const data =  await workbook.xlsx.writeBuffer();
-    const blob = new Blob([data], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const data = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const a = document.createElement('a');
     const url = window.URL.createObjectURL(blob);
-    
+
     document.body.appendChild(a);
 
     a.href = url;
@@ -400,26 +400,26 @@ const useUsers = () => {
 
   const onSearchClients = (value: string) => setQueryClients(getQueryClients(value, filter.fieldsClient));
 
-  return { 
-    loadingUsers, 
-    loadingSales, 
+  return {
+    loadingUsers,
+    loadingSales,
     loadingCampaigns,
     loadingTeams,
-    users, 
-    sales, 
-    clients, 
+    users,
+    sales,
+    clients,
     teams,
-    columns, 
-    sale, 
-    open, 
-    setOpen, 
-    setSale, 
-    filter, 
-    setFilter, 
-    cobradores, 
-    downloadExcel, 
-    campaigns, 
-    onSearchClients 
+    columns,
+    sale,
+    open,
+    setOpen,
+    setSale,
+    filter,
+    setFilter,
+    cobradores,
+    downloadExcel,
+    campaigns,
+    onSearchClients
   };
 }
 
