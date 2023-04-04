@@ -20,6 +20,9 @@ const useOnSnapshot = (query: Query<DocumentData> | null, loadingOnChangeQuery?:
 
       setSnapshot(_snapshot);
       setLoading(false);
+    }, (error) => {
+      console.error(error);
+      setLoading(false);
     });
 
     return () => {

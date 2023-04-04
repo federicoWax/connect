@@ -70,8 +70,8 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
 
   if (userFirestore?.role === "Procesos" && (concluded === null || concluded)) {
     Query = query(Query, where('userId', '==', userFirestore.id));
-  } else if (userId) {
-    Query = query(Query, where('userId', '==', userId));
+  } else if (userFirestore?.role === "Vendedor") {
+    Query = query(Query, where('idSeller', '==', userFirestore.email));
   }
 
   if (esid) {
@@ -119,7 +119,7 @@ const useUsers = () => {
     concluded: false,
     startDate: null,
     endDate: null,
-    userId: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? "" : user?.uid,
+    userId: "",
     statusPayment: "",
     campaignId: "",
     teamId: "",
@@ -135,6 +135,7 @@ const useUsers = () => {
   const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy("name")));
 
   const [snapshotSales, loadingSales] = useOnSnapshot(querySales);
+
   const [snapshotUsers, loadingUsers] = useCollection(queryUsers);
   const [snapshotCobradores, loadingCobradores] = useCollection(queryCobradores);
   const [snapshotClients, loadingClients] = useCollection(queryClients);
@@ -238,9 +239,12 @@ const useUsers = () => {
       render: (text: string) => text
     },
     {
-      title: 'Proceso',
+      title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Proceso' : '',
       key: 'processUser',
       render: (record: Sale) => {
+        if(["Administrador", "Procesos"].includes(userFirestore?.role as string)) {
+          return <div></div>
+        }
         const user = users.find(user => user.email === record.processUser);
         return (
           user?.email && <>
@@ -310,7 +314,7 @@ const useUsers = () => {
 
     let _sales = snapshotSales?.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Sale[];
 
-    setSales(_sales);
+    setSales(_sales || []);
     setUsers(snapshotUsers.docs.map(doc => ({ ...doc.data(), id: doc.id })) as UserFirestore[]);
     setCobradores(snapshotCobradores.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Cobrador[]);
     setClients(snapshotClients.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Client[]);
