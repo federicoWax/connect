@@ -171,9 +171,6 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
       title={sale.id ? "Editar venta" : "Agregar venta"}
       cancelText="Cancelar"
       okText="Guardar"
-      okButtonProps={{
-        disabled: userFirestore?.role !== "Administrador" && userFirestore?.team !== "ADMIN",
-      }}
     >
       <Form
         form={form}
