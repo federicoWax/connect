@@ -184,7 +184,6 @@ const useUsers = () => {
           </>
         )
       },
-      width: '30%',
     },
     {
       title: 'Campaña',
@@ -243,14 +242,14 @@ const useUsers = () => {
       key: 'processUser',
       render: (record: Sale) => {
         if(["Administrador", "Procesos"].includes(userFirestore?.role as string)) {
-          return <div></div>
-        }
-        const user = users.find(user => user.email === record.processUser);
-        return (
-          user?.email && <>
+          const user = users.find(user => user.email === record.processUser);
+          return user?.email && <>
             <div> {user?.name}</div>
           </>
-        )
+          
+        }
+        
+        return <div></div>
       }
     },
     {
@@ -363,7 +362,7 @@ const useUsers = () => {
       teamCreator: users.find(user => user.id === sale.userId)?.team.toUpperCase(),
       seller: users.find(user => user.email === sale.idSeller)?.name.toUpperCase(),
       teamSeller: users.find(user => user.email === sale.idSeller)?.team.toUpperCase(),
-      processUser: users.find(user => user.email === sale.processUser)?.name.toUpperCase(),
+      processUser: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? users.find(user => user.email === sale.processUser)?.name.toUpperCase() : "",
       date: dayjs(sale.date?.toDate()).format("DD/MM/YYYY hh:mm a"),
       datePayment: sale.datePayment ? dayjs(sale.datePayment?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
       dateConclued: sale.dateConclued ? dayjs(sale.dateConclued?.toDate()).format("DD/MM/YYYY hh:mm a") : "",
