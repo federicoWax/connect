@@ -72,6 +72,8 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     Query = query(Query, where('userId', '==', userFirestore.id));
   } else if (userFirestore?.role === "Vendedor") {
     Query = query(Query, where('idSeller', '==', userFirestore.email));
+  } else if (userId) {
+    Query = query(Query, where('userId', '==', userId));
   }
 
   if (esid) {
