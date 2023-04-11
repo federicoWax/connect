@@ -554,7 +554,6 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
               name="notes"
             >
               <Input.TextArea
-                disabled={typeof sale.id === "string" && user?.email !== sale.processUser && user?.uid !== sale.userId && userFirestore?.role !== "Administrador"}
                 rows={6}
                 value={sale.notes}
                 onChange={(e) => setSale({ ...sale, notes: e.target.value })}

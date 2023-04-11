@@ -50,7 +50,7 @@ const columnsWorksheet = [
 const limitClients = 10;
 
 const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {
-  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate } = filter;
+  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate, userSeller } = filter;
 
   let Query = query(
     collection(db, "sales"),
@@ -72,7 +72,13 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
     Query = query(Query, where('userId', '==', userFirestore.id));
   } else if (userFirestore?.role === "Vendedor") {
     Query = query(Query, where('idSeller', '==', userFirestore.email));
-  } else if (userId) {
+  }
+  
+  if(userSeller) {
+    Query = query(Query, where('idSeller', '==', userSeller));
+  }
+  
+  if (userId) {
     Query = query(Query, where('userId', '==', userId));
   }
 
@@ -128,6 +134,7 @@ const useUsers = () => {
     statusLight: "",
     typeDate: "date",
     fieldsClient: "esid",
+    userSeller: ""
   });
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter, userFirestore as UserFirestoreAuth));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
@@ -245,10 +252,10 @@ const useUsers = () => {
       render: (record: Sale) => {
         if(["Administrador", "Procesos"].includes(userFirestore?.role as string)) {
           const user = users.find(user => user.email === record.processUser);
+
           return user?.email && <>
             <div> {user?.name}</div>
           </>
-          
         }
         
         return <div></div>

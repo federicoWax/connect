@@ -40,7 +40,17 @@ const Home = () => {
   );
 
   const optionsProcessUser = useMemo(() =>
-    users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.email + " - " + u.name})) as Autocomplete[],
+    users.filter(u => u.role !== "Vendedor").map((u) => ({value: u.email, label: u.name + " - " + u.email})) as Autocomplete[],
+    [users]
+  );
+
+  const optionsUsers = useMemo(() =>
+    users.map((u) => ({value: u.id, label: u.name + " - " + u.email})) as Autocomplete[],
+    [users]
+  );
+
+  const optionsUserSellers = useMemo(() =>
+    users.map((u) => ({value: u.email, label: u.name + " - " + u.email})) as Autocomplete[],
     [users]
   );
 
@@ -138,20 +148,34 @@ const Home = () => {
         }
         {
           (!hideInputSelers && ["Administrador", "Procesos"].includes(userFirestore?.role as string)) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
-            <label>Vendedores</label>
+            <label>Creadores</label>
             <Select 
               loading={loadingUsers} 
               value={filter.userId} 
               onChange={value => setFilter({ ...filter, userId: value })}
               allowClear
-            >
-            <Option value="">{"Todos los vendedores"}</Option>
-            {
-              users.map(user => (
-                <Option key={user.id} value={user.id}>{user.name + " - " + user.email}</Option>
-              )) 
-            }
-            </Select>
+              showSearch
+              filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+              options={optionsUsers}
+              onClear={() => setFilter({...filter, userId: ""})}
+              placeholder="Buscar usuario creador"
+            />
+          </Col>
+        }
+         {
+          (!hideInputSelers && ["Administrador", "Procesos"].includes(userFirestore?.role as string)) && <Col xs={24} sm={24} md={6} style={{ display: "grid" }}>
+            <label>Vendedores</label>
+            <Select 
+              loading={loadingUsers} 
+              value={filter.userSeller} 
+              onChange={value => setFilter({ ...filter, userSeller: value })}
+              allowClear
+              showSearch
+              filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+              options={optionsUserSellers}
+              onClear={() => setFilter({...filter, userSeller: ""})}
+              placeholder="Buscar usuario vendedor"
+            />
           </Col>
         }
         {
@@ -159,6 +183,7 @@ const Home = () => {
             <label>Procesos</label>
             <AutoComplete
               allowClear
+              disabled={loadingUsers}
               value={sale?.processUser}
               options={optionsProcessUser} 
               filterOption={(inputValue, option) =>
