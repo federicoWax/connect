@@ -67,10 +67,8 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
       where(typeDate, "<=", endDate ? dayjsToEndDay(endDate).toDate() : endDateEndDay)
     )
   }
-
-  if (userFirestore?.role === "Procesos" && (concluded === null || concluded)) {
-    Query = query(Query, where('userId', '==', userFirestore.id));
-  } else if (userFirestore?.role === "Vendedor") {
+  
+  if (userFirestore?.role === "Vendedor" || (userFirestore?.role === "Procesos" && (concluded === null || concluded))) {
     Query = query(Query, where('idSeller', '==', userFirestore.email));
   }
   
