@@ -482,7 +482,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
             </Col>
           }
           {
-            (userFirestore?.role === "Administrador" || !sale.id) && <Col xs={24} sm={24} md={8}>
+            (["Administrador", "Procesos"].includes(userFirestore?.role as string) || !sale.id) && <Col xs={24} sm={24} md={8}>
               <Form.Item
                 label="Usuario de proceso"
                 name="processUser"
