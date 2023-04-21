@@ -481,31 +481,34 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
               </Form.Item>
             </Col>
           }
-          <Col xs={24} sm={24} md={8}>
-            <Form.Item
-              label="Usuario de proceso"
-              name="processUser"
-            >
-              <AutoComplete
-                allowClear
-                disabled={disabledInputs && Boolean(userFirestore?.role !== "Administrador" && sale.processUser && sale.processUser !== userFirestore?.email)}
-                value={sale?.processUser}
-                options={optionsProcessUser}
-                filterOption={(inputValue, option) =>
-                  option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
-                }
-                onSelect={async (value: string) => {
-                  setSale({ ...sale, processUser: value });
-
-                  if (sale.id) {
-                    await update("sales", sale.id, { processUser: value || "" });
+          {
+            (userFirestore?.role === "Administrador" || !sale.id) && <Col xs={24} sm={24} md={8}>
+              <Form.Item
+                label="Usuario de proceso"
+                name="processUser"
+              >
+                <AutoComplete
+                  allowClear
+                  disabled={disabledInputs && Boolean(userFirestore?.role !== "Administrador" && sale.processUser && sale.processUser !== userFirestore?.email)}
+                  value={sale?.processUser}
+                  options={optionsProcessUser}
+                  filterOption={(inputValue, option) =>
+                    option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                   }
-                }}
-                placeholder="Buscar usuario proceso"
-                onClear={() => setSale({ ...sale, processUser: "" })}
-              />
-            </Form.Item>
-          </Col>
+                  onSelect={async (value: string) => {
+                    setSale({ ...sale, processUser: value });
+
+                    if (sale.id) {
+                      await update("sales", sale.id, { processUser: value || "" });
+                    }
+                  }}
+                  placeholder="Buscar usuario proceso"
+                  onClear={() => setSale({ ...sale, processUser: "" })}
+                />
+              </Form.Item>
+            </Col>
+          }
+         
         </Row>
         <Row gutter={10} style={{ marginTop: 10 }}>
           <Col xs={24} sm={24} md={8}>
