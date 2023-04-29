@@ -339,6 +339,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                 <Option value="Desconexión">Desconexión</Option>
                 <Option value="Devolución">Devolución</Option>
                 <Option value="Recuperación">Recuperación</Option>
+                <Option value="Reproceso">Reproceso</Option>
               </Select>
             </Form.Item>
           </Col>
