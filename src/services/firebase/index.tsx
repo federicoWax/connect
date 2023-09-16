@@ -7,7 +7,7 @@ const storage = getStorage();
 
 export const getCollection = (path: string, _query: QueryConstraint[]) => getDocs(query(collection(db, path), ..._query))
 
-export const getDocById = (collection: string, id: string) => getDoc(doc(db, collection, id)); 
+export const getDocById = (collection: string, id: string) => getDoc(doc(db, collection, id));
 
 export const add = (collectionName: string, data: any) => addDoc(collection(db, collectionName), data);
 
@@ -29,5 +29,28 @@ export const uploadFile = async (path: string, file: RcFile) => {
   } catch (error) {
     console.log(error);
     return "";
+  }
+}
+
+export const getGenericDocById = async <T extends { id?: string }>(collectionName: string, id: string) => {
+  try {
+    const document = await getDoc(doc(db, collectionName, id));
+
+    return { id, ...document.data() } as T;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const getCollectionGeneric = async <T extends { id: string }>(path: string, _query: QueryConstraint[]) => {
+  try {
+    const { docs } = await getDocs(query(collection(db, path), ..._query))
+
+    return docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    })) as T[]
+  } catch (error) {
+    throw error;
   }
 }

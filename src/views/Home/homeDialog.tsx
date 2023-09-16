@@ -1,10 +1,10 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
-import { collection, getDocs, getFirestore, query, Timestamp, where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, limit, query, Timestamp, where } from "firebase/firestore";
 import dayjs from "dayjs";
 import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
-import { add, update } from "../../services/firebase";
+import { add, getCollection, update } from "../../services/firebase";
 
 const db = getFirestore();
 const { Option } = Select;
@@ -47,9 +47,9 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
   const [form] = Form.useForm();
   const { user, userFirestore } = useAuth();
 
-  const setForm = useCallback((_sale: Sale) => {
+  const setForm = useCallback((_sale: Sale, resetFields: boolean = true) => {
     setSale(_sale);
-    form.resetFields();
+    if (resetFields) form.resetFields();
     form.setFieldsValue(_sale);
   }, [form])
 
@@ -78,15 +78,29 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
     return sale.id !== undefined && sale.userId !== user?.uid && userFirestore?.role !== "Administrador";
   }, [userFirestore, sale, user])
 
-  const optionsSellers = useMemo(() => users.map((u) => ({ value: u.email, label:  u.name + " - " + u.email })) as Autocomplete[], [users]);
+  const optionsSellers = useMemo(() => users.map((u) => ({ value: u.email, label: u.name + " - " + u.email })) as Autocomplete[], [users]);
 
   const save = async () => {
     if (saving) return;
 
-    setSaving(true);
-
     let _sale = { ...sale };
     const id = _sale.id;
+
+    const sales = await getCollection("sales", [where("esid", "==", _sale.esid), where("concluded", "==", false)]);
+
+    if (sales.size) {
+      message.warning("Exite alguna venta pendiente con el mismo ESID.", 4);
+      return;
+    }
+
+    const anyOldSale = await getCollection("sales", [where("esid", "==", _sale.esid), where("statusSale", "in", ["Activación", "Mensualidad"]), limit(1)]);
+
+    if (anyOldSale.empty && _sale.statusSale === "Desconexión") {
+      message.warning("Este ESID no tiene activaciones o mensualidades.", 4);
+      return;
+    }
+
+    setSaving(true);
 
     if (!id) {
       _sale.team = userFirestore?.team;
@@ -252,19 +266,23 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onSelect={(value: string) => {
+                onChange={(value: string) => {
+                  let _sale = { ...sale, esid: value } as Sale;
+
                   if (value) {
-                    let clinet = clients.find(c => c.esid === value);
+                    let client = clients.find(c => c.esid === value);
 
-                    delete clinet?.id;
-                    delete clinet?.receives;
-                    delete clinet?.sends;
-                    delete clinet?.paymentMethod;
+                    if (client) {
+                      delete client?.id;
+                      delete client?.receives;
+                      delete client?.sends;
+                      delete client?.paymentMethod;
 
-                    const _sale = { ...sale, ...clinet } as Sale;
-
-                    setForm(_sale);
+                      _sale = { ..._sale, ...client }
+                    }
                   }
+
+                  setForm(_sale, false);
                 }}
                 onClear={() => setSale({ ...sale, esid: "" })}
               >
@@ -509,7 +527,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
               </Form.Item>
             </Col>
           }
-         
+
         </Row>
         <Row gutter={10} style={{ marginTop: 10 }}>
           <Col xs={24} sm={24} md={8}>
