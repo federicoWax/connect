@@ -88,7 +88,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
 
     const sales = await getCollection("sales", [where("esid", "==", _sale.esid), where("concluded", "==", false)]);
 
-    if (sales.size) {
+    if (sales.size && !sale.id) {
       message.warning("Exite alguna venta pendiente con el mismo ESID.", 4);
       return;
     }
