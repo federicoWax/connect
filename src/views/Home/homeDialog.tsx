@@ -436,18 +436,28 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                 label="Recibe"
                 name="receives"
               >
-                <Select
-                  disabled={disabledInputs}
-                  onChange={(value) => setSale({ ...sale, receives: value })}
-                  value={sale.receives}
-                >
-                  <Option key="" value="">Sin receptor</Option>
-                  {
-                    cobradores.map(cobrador => (
-                      <Option key={cobrador.id} value={cobrador.name}>{cobrador.name}</Option>
-                    ))
-                  }
-                </Select>
+                {
+                  sale.paymentMethod === "Ria"
+                    ? <Input
+                      disabled={disabledInputs}
+                      type="text"
+                      value={sale.receives}
+                      onChange={(e) => setSale({ ...sale, receives: e.target.value })}
+                    />
+                    : <Select
+                      disabled={disabledInputs}
+                      onChange={(value) => setSale({ ...sale, receives: value })}
+                      value={sale.receives}
+                    >
+                      <Option key="" value="">Sin receptor</Option>
+                      {
+                        cobradores.map(cobrador => (
+                          <Option key={cobrador.id} value={cobrador.name}>{cobrador.name}</Option>
+                        ))
+                      }
+                    </Select>
+                }
+
               </Form.Item>
             </Col>
             <Col xs={24} sm={24} md={8}>
