@@ -350,7 +350,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
               <Select
                 value={sale.statusSale}
                 onChange={value => setSale({ ...sale, statusSale: value })}
-                disabled={disabledInputs}
+                disabled={sale.id !== undefined && userFirestore?.role !== "Administrador"}
               >
                 <Option value="Activación">Activación</Option>
                 <Option value="Mensualidad">Mensualidad</Option>
@@ -594,7 +594,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
           </Col>
         </Row>
       </Form>
-    </Modal>
+    </Modal >
   )
 }
 
