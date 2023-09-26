@@ -50,8 +50,9 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
   const setForm = useCallback((_sale: Sale, resetFields: boolean = true) => {
     setSale(_sale);
     if (resetFields) form.resetFields();
+    console.log(_sale);
     form.setFieldsValue(_sale);
-  }, [form])
+  }, [form]);
 
   useEffect(() => {
     setLoading(true);
@@ -76,7 +77,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
 
   const disabledInputs = useMemo(() => {
     return sale.id !== undefined && sale.userId !== user?.uid && userFirestore?.role !== "Administrador";
-  }, [userFirestore, sale, user])
+  }, [userFirestore, sale, user]);
 
   const optionsSellers = useMemo(() => users.map((u) => ({ value: u.email, label: u.name + " - " + u.email })) as Autocomplete[], [users]);
 
@@ -163,7 +164,26 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
       setSaving(false);
       onClose();
     }
-  }
+  };
+
+  const onChangeESID = (value: string) => {
+    let _sale = { ...sale, esid: value } as Sale;
+
+    if (value) {
+      let client = clients.find(c => c.esid === value);
+
+      if (client) {
+        delete client?.id;
+        delete client?.receives;
+        delete client?.sends;
+        delete client?.paymentMethod;
+
+        _sale = { ..._sale, ...client };
+      }
+    }
+
+    setForm(_sale, false);
+  };
 
   const optionsClients = clients.map((c) => ({ value: c.esid?.toString(), label: c.esid + " - " + c.client })) as Autocomplete[];
   const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({ value: u.email, label: u.email + " - " + u.name })) as Autocomplete[];
@@ -266,24 +286,8 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onChange={(value: string) => {
-                  let _sale = { ...sale, esid: value } as Sale;
-
-                  if (value) {
-                    let client = clients.find(c => c.esid === value);
-
-                    if (client) {
-                      delete client?.id;
-                      delete client?.receives;
-                      delete client?.sends;
-                      delete client?.paymentMethod;
-
-                      _sale = { ..._sale, ...client }
-                    }
-                  }
-
-                  setForm(_sale, false);
-                }}
+                onChange={(value: string,) => onChangeESID(value)}
+                onSelect={(value: string) => onChangeESID(value)}
                 onClear={() => setSale({ ...sale, esid: "" })}
               >
                 <Input.Search
@@ -595,7 +599,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
         </Row>
       </Form>
     </Modal >
-  )
-}
+  );
+};
 
 export default HomeDialog;
