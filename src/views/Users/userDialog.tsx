@@ -25,37 +25,37 @@ const init_user: UserFirestore = {
   phone: '',
   city: '',
   team: '',
-  branch: ''
+  branch: '',
+  enterprise: ''
 };
 
-const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
+const UserDialog: FC<Props> = ({ open, onClose, propUser, teams, branchs }) => {
   const [user, setUser] = useState<UserFirestore>(init_user);
   const [saving, setSaving] = useState<boolean>(false);
   const [form] = Form.useForm();
   const { userFirestore } = useAuth();
 
   useEffect(() => {
-    if(propUser) {
+    if (propUser) {
       form.setFieldsValue(propUser);
       setUser(propUser);
     }
   }, [propUser, form]);
 
   const save = async () => {
-    if(saving) return;
+    if (saving) return;
 
-    if(user.password && (user.password !== user.passwordConfirm)) {
-
+    if (user.password && (user.password !== user.passwordConfirm)) {
       message.error("Las contraseñas no coinciden");
       return;
     }
 
-    let _user = {...user};
+    let _user = { ...user };
     _user.email = _user.email.toLowerCase();
 
     const otherUser = await getDocs(query(collection(db, "users"), where("email", "==", _user.email)));
 
-    if(otherUser.docs.length && otherUser.docs[0].id !== _user.id) {
+    if (otherUser.docs.length && otherUser.docs[0].id !== _user.id) {
       message.error("El correo ya está registrado");
       return;
     }
@@ -80,13 +80,13 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
     form.resetFields();
     setUser(init_user);
     onClose();
-  }
+  };
 
   const passwordRequired = Boolean(!user.id || (user.id && user.password));
 
   return (
     <Modal
-      forceRender 
+      forceRender
       destroyOnClose={true}
       confirmLoading={saving}
       open={open}
@@ -94,16 +94,16 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
       onOk={() => {
         form.validateFields()
           .then(save)
-          .catch(() => {});
+          .catch(() => { });
       }}
       title={user.id ? "Editar Usuario" : "Agregar Usuario"}
       cancelText="Cancelar"
       okText="Guardar"
     >
-      <Form 
+      <Form
         form={form}
-        layout="vertical" 
-        style={{overflowY: "auto", overflowX: "hidden", maxHeight: 500}}
+        layout="vertical"
+        style={{ overflowY: "auto", overflowX: "hidden", maxHeight: 500 }}
       >
         <Row gutter={10}>
           <Col xs={24} sm={24} md={24}>
@@ -113,8 +113,8 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
               rules={[{ required: true, message: 'Nombre requerido.' }]}
             >
               <Input
-                value={user.name} 
-                onChange={(e) => setUser({...user, name: e.target.value})}
+                value={user.name}
+                onChange={(e) => setUser({ ...user, name: e.target.value })}
               />
             </Form.Item>
             <Form.Item
@@ -122,23 +122,23 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
               name="email"
               rules={[{ required: true, message: 'Favor de escribir un Correo válido.', type: 'email' }]}
             >
-              <Input 
+              <Input
                 type="email"
-                value={user.email} 
-                onChange={(e) => setUser({...user, email: e.target.value})}
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
               />
             </Form.Item>
-            <Row gutter={10} style={{marginTop: 10}}>
+            <Row gutter={10} style={{ marginTop: 10 }}>
               <Col xs={24} sm={24} md={12}>
                 <Form.Item
                   label="Contraseña"
                   name="password"
-                  rules={[{ required: passwordRequired, message: 'Contraseña de 6 digitos requerida.', min: passwordRequired? 0 : 6 }]}
+                  rules={[{ required: passwordRequired, message: 'Contraseña de 6 digitos requerida.', min: passwordRequired ? 0 : 6 }]}
                 >
-                  <Input 
+                  <Input
                     type="password"
-                    value={user.password} 
-                    onChange={(e) => setUser({...user, password: e.target.value})}
+                    value={user.password}
+                    onChange={(e) => setUser({ ...user, password: e.target.value })}
                   />
                 </Form.Item>
               </Col>
@@ -148,22 +148,22 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
                   name="passwordConfirm"
                   rules={[{ required: passwordRequired, message: 'Contraseña de confirmación de 6 digitos requerida.', min: passwordRequired ? 0 : 6 }]}
                 >
-                  <Input 
+                  <Input
                     type="password"
-                    value={user.passwordConfirm} 
-                    onChange={(e) => setUser({...user, passwordConfirm: e.target.value})}
+                    value={user.passwordConfirm}
+                    onChange={(e) => setUser({ ...user, passwordConfirm: e.target.value })}
                   />
                 </Form.Item>
               </Col>
             </Row>
-            <Row gutter={10} style={{marginTop: 10}}>
+            <Row gutter={10} style={{ marginTop: 10 }}>
               <Col xs={24} sm={24} md={12}>
                 <Form.Item
                   label="Rol"
                   name="role"
                   rules={[{ required: true, message: 'Rol requerido.' }]}
                 >
-                  <Select value={user.role} onChange={value => setUser({...user, role: value})}>
+                  <Select value={user.role} onChange={value => setUser({ ...user, role: value })}>
                     <Option value="Vendedor">Vendedor</Option>
                     <Option value="Procesos">Procesos</Option>
                     {userFirestore?.role === "Administrador" && <Option value="Administrador">Administrador</Option>}
@@ -176,27 +176,27 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
                   name="phone"
                   rules={[{ required: true, message: 'Teléfono de 10 digitos requerido.', len: 10 }]}
                 >
-                  <Input 
+                  <Input
                     type="number"
-                    value={user.phone} 
-                    onChange={(e) => setUser({...user, phone: e.target.value})}
+                    value={user.phone}
+                    onChange={(e) => setUser({ ...user, phone: e.target.value })}
                   />
                 </Form.Item>
               </Col>
             </Row>
-            <Row gutter={10} style={{marginTop: 10}}>
+            <Row gutter={10} style={{ marginTop: 10 }}>
               <Col xs={24} sm={24} md={12}>
                 <Form.Item
                   label="Equipo"
                   name="team"
                   rules={[{ required: true, message: 'Equipo requerido.' }]}
                 >
-                  <Select value={user.team} onChange={value => setUser({...user, team: value})}>
-                  {
-                    teams.map(t => (
-                      <Option key={t.id} value={t.name}>{t.name}</Option>
-                    ))
-                  }
+                  <Select value={user.team} onChange={value => setUser({ ...user, team: value })}>
+                    {
+                      teams.map(t => (
+                        <Option key={t.id} value={t.name}>{t.name}</Option>
+                      ))
+                    }
                   </Select>
                 </Form.Item>
               </Col>
@@ -206,12 +206,12 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
                   name="branch"
                   rules={[{ required: true, message: 'Sucursal requerida.' }]}
                 >
-                  <Select value={user.branch} onChange={value => setUser({...user, branch: value})}>
-                  {
-                    branchs.map(t => (
-                      <Option key={t.id} value={t.id}>{t.name}</Option>
-                    ))
-                  }
+                  <Select value={user.branch} onChange={value => setUser({ ...user, branch: value })}>
+                    {
+                      branchs.map(t => (
+                        <Option key={t.id} value={t.id}>{t.name}</Option>
+                      ))
+                    }
                   </Select>
                 </Form.Item>
               </Col>
@@ -222,9 +222,21 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
                   rules={[{ required: true, message: 'Ciudad requerida.' }]}
                 >
                   <Input
-                    value={user.city} 
-                    onChange={(e) => setUser({...user, city: e.target.value})}
+                    value={user.city}
+                    onChange={(e) => setUser({ ...user, city: e.target.value })}
                   />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={24} md={12}>
+                <Form.Item
+                  label="Empresa"
+                  name="enterprise"
+                  rules={[{ required: true, message: 'Empresa requerida.' }]}
+                >
+                  <Select value={user.enterprise} onChange={value => setUser({ ...user, enterprise: value })}>
+                    <Option value="ConnectUs">ConnectUs</Option>
+                    <Option value="CMG">CMG</Option>
+                  </Select>
                 </Form.Item>
               </Col>
             </Row>
@@ -232,7 +244,7 @@ const UserDialog: FC<Props> = ({open, onClose, propUser, teams, branchs}) => {
         </Row>
       </Form>
     </Modal>
-  )
-}
+  );
+};
 
 export default UserDialog;

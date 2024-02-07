@@ -21,13 +21,14 @@ export interface UserFirestore {
   id?: string;
   email: string;
   password?: string;
-  passwordConfirm? : string;
+  passwordConfirm?: string;
   role: Rols;
   name: string;
   phone: string;
   city: string;
   team: string;
   branch: string;
+  enterprise?: string;
 };
 
 export interface Client {
@@ -88,7 +89,7 @@ export interface Cobrador {
   name: string;
 }
 
-export interface Campaign extends Cobrador {}
+export interface Campaign extends Cobrador { }
 
 export interface Team extends Cobrador {
   permissions?: Permission[];
@@ -116,7 +117,7 @@ export interface Assistence {
   name?: string;
   email?: string;
   team?: string;
-  typeRegister?:" ENTRADA" | "SALIDA A COMIDA" | "ENTRADA DE COMIDA" | "SALIDA",
+  typeRegister?: " ENTRADA" | "SALIDA A COMIDA" | "ENTRADA DE COMIDA" | "SALIDA";
 }
 
 export interface Position {
@@ -124,7 +125,7 @@ export interface Position {
   lng: number;
 }
 
-export interface FilterAssists {  
+export interface FilterAssists {
   startDate: null | dayjs.Dayjs;
   endDate: null | dayjs.Dayjs;
 }

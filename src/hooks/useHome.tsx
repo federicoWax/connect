@@ -47,14 +47,13 @@ const columnsWorksheet = [
   { header: 'CAMPAÑA', key: 'campaign', width: 18 },
   { header: 'NOTAS', key: 'notes' },
 ];
-const limitClients = 10;
 
 const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {
-  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate, userSeller } = filter;
+  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate, userSeller, fieldsClient } = filter;
 
   let Query = query(
     collection(db, "sales"),
-  )
+  );
 
   if (concluded !== "") {
     Query = query(Query, where('concluded', '==', concluded), orderBy(typeDate));
@@ -65,23 +64,23 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
       Query,
       where(typeDate, ">=", startDate ? dayjsToStartDay(startDate).toDate() : startDateStartDay),
       where(typeDate, "<=", endDate ? dayjsToEndDay(endDate).toDate() : endDateEndDay)
-    )
+    );
   }
-  
+
   if (userFirestore?.role === "Vendedor" || (userFirestore?.role === "Procesos" && (concluded === null || concluded))) {
     Query = query(Query, where('idSeller', '==', userFirestore.email));
   }
-  
-  if(userSeller) {
+
+  if (userSeller) {
     Query = query(Query, where('idSeller', '==', userSeller));
   }
-  
+
   if (userId) {
     Query = query(Query, where('userId', '==', userId));
   }
 
   if (esid) {
-    Query = query(Query, where('esid', '==', esid));
+    Query = query(Query, where(fieldsClient, '==', esid));
   }
 
   if (processUser)
@@ -99,17 +98,7 @@ const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => 
   }
 
   return Query;
-}
-
-const getQueryClients = (searchESID: string, field: string) => {
-  let Query = query(collection(db, "clients"));
-
-  searchESID
-    ? Query = query(Query, where(field, '==', searchESID))
-    : Query = query(Query, orderBy("client"), limit(limitClients));
-
-  return Query;
-}
+};
 
 const useUsers = () => {
   const { userFirestore, user } = useAuth();
@@ -119,6 +108,7 @@ const useUsers = () => {
   const [users, setUsers] = useState<UserFirestore[]>([]);
   const [cobradores, setCobradores] = useState<Cobrador[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
+  const [clientsDialog, setClientsDialog] = useState<Client[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [filter, setFilter] = useState<FilterSale>({
@@ -134,18 +124,46 @@ const useUsers = () => {
     fieldsClient: "esid",
     userSeller: ""
   });
+  const [searchClients, setSearchClients] = useState("");
+  const [searchClientsDialog, setSearchClientsDialog] = useState("");
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter, userFirestore as UserFirestoreAuth));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
   const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
-  const [queryClients, setQueryClients] = useState<Query<DocumentData>>(getQueryClients("", filter.fieldsClient));
   const [queryCampaigns] = useState<Query<DocumentData>>(query(collection(db, "campaigns"), orderBy("name")));
   const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy("name")));
-
   const [snapshotSales, loadingSales] = useOnSnapshot(querySales);
+
+  useEffect(() => {
+    if (!open) {
+      setSearchClientsDialog("");
+    }
+  }, [open]);
+
+  const queryClients = useMemo(() => {
+    let q = query(collection(db, "clients"));
+
+    searchClients
+      ? q = query(q, where(filter.fieldsClient, '==', searchClients))
+      : q = query(q, orderBy("client"), limit(10));
+
+    return q;
+  }, [searchClients, filter.fieldsClient]);
+
+  const queryClientsDialog = useMemo(() => {
+    let q = query(collection(db, "clients"));
+
+    searchClientsDialog
+      ? q = query(q, where("esid", '==', searchClientsDialog))
+      : q = query(q, orderBy("client"), limit(10));
+
+    return q;
+  }, [searchClientsDialog]);
+
+  const [snapshotClients, loadingClients] = useCollection(queryClients);
+  const [snapshotClientsDialog, loadingClientsDialog] = useCollection(queryClientsDialog);
 
   const [snapshotUsers, loadingUsers] = useCollection(queryUsers);
   const [snapshotCobradores, loadingCobradores] = useCollection(queryCobradores);
-  const [snapshotClients, loadingClients] = useCollection(queryClients);
   const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns);
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
 
@@ -174,7 +192,7 @@ const useUsers = () => {
             <div> Correo: {user?.email}</div>
             <div> Equipo: {record?.team || user?.team}</div>
           </>
-        )
+        );
       }
     },
     {
@@ -189,7 +207,7 @@ const useUsers = () => {
             <div> Correo: {user?.email}</div>
             <div> Equipo: {user?.team}</div>
           </>
-        )
+        );
       },
     },
     {
@@ -248,15 +266,15 @@ const useUsers = () => {
       title: ["Administrador", "Procesos"].includes(userFirestore?.role as string) ? 'Proceso' : '',
       key: 'processUser',
       render: (record: Sale) => {
-        if(["Administrador", "Procesos"].includes(userFirestore?.role as string)) {
+        if (["Administrador", "Procesos"].includes(userFirestore?.role as string)) {
           const user = users.find(user => user.email === record.processUser);
 
           return user?.email && <>
             <div> {user?.name}</div>
-          </>
+          </>;
         }
-        
-        return <div></div>
+
+        return <div></div>;
       }
     },
     {
@@ -316,7 +334,7 @@ const useUsers = () => {
   useEffect(() => {
     let mounted = true;
 
-    if (loadingUsers || loadingSales || loadingCobradores || loadingTeams || !mounted) return;
+    if (loadingUsers || loadingSales || loadingCobradores || loadingTeams || loadingCampaigns || loadingClients || loadingClientsDialog || !mounted) return;
 
     let _sales = snapshotSales?.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Sale[];
 
@@ -324,17 +342,19 @@ const useUsers = () => {
     setUsers(snapshotUsers.docs.map(doc => ({ ...doc.data(), id: doc.id })) as UserFirestore[]);
     setCobradores(snapshotCobradores.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Cobrador[]);
     setClients(snapshotClients.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Client[]);
+    setClientsDialog(snapshotClientsDialog.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Client[]);
     setCampaigns(snapshotCampaigns.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Campaign[]);
     setTeams(snapshotTeams.docs.map(doc => ({ ...doc.data(), id: doc.id })) as Team[]);
 
     return () => {
       mounted = false;
-    }
+    };
   }, [
     snapshotSales,
     snapshotUsers,
     snapshotCobradores,
     snapshotClients,
+    snapshotClientsDialog,
     snapshotCampaigns,
     snapshotTeams,
     loadingSales,
@@ -343,6 +363,7 @@ const useUsers = () => {
     loadingClients,
     loadingCampaigns,
     loadingTeams,
+    loadingClientsDialog,
     userFirestore,
     user
   ]);
@@ -357,7 +378,7 @@ const useUsers = () => {
       worksheet.getCell(column + '1').font = {
         bold: true
       };
-    })
+    });
 
     if (filter.statusPayment !== "") {
       sales = sales.filter(s => filter.statusPayment ? s.paymentAmount : !s.paymentAmount);
@@ -406,9 +427,11 @@ const useUsers = () => {
     a.href = url;
     a.download = "Reporte de ventas.xlsx";
     a.click();
-  }
+  };
 
-  const onSearchClients = (value: string) => setQueryClients(getQueryClients(value, filter.fieldsClient));
+  const onSearchClients = (value: string) => setSearchClients(value);
+
+  const onSearchClientsDialog = (value: string) => setSearchClientsDialog(value);
 
   return {
     loadingUsers,
@@ -418,6 +441,7 @@ const useUsers = () => {
     users,
     sales,
     clients,
+    clientsDialog,
     teams,
     columns,
     sale,
@@ -429,8 +453,9 @@ const useUsers = () => {
     cobradores,
     downloadExcel,
     campaigns,
-    onSearchClients
+    onSearchClients,
+    onSearchClientsDialog
   };
-}
+};
 
 export default useUsers;

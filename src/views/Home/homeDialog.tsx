@@ -1,8 +1,8 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, limit, query, Timestamp, where } from "firebase/firestore";
 import dayjs from "dayjs";
-import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
+import { Autocomplete, Campaign, Client, Cobrador, FilterSale, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, getCollection, update } from "../../services/firebase";
 
@@ -36,6 +36,7 @@ const init_sale: Sale = {
   paymentAmount: "",
   email: "",
   campaign: "dVfLotqwqWwSu6u1zowQ",
+  esid: ""
 };
 
 const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, users, campaigns, onSearchClients }) => {
@@ -82,48 +83,48 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
   const optionsSellers = useMemo(() => users.map((u) => ({ value: u.email, label: u.name + " - " + u.email })) as Autocomplete[], [users]);
 
   const save = async () => {
-    if (saving) return;
+    try {
+      if (saving) return;
 
-    let _sale = { ...sale };
-    const id = _sale.id;
+      setSaving(true);
 
-    const sales = await getCollection("sales", [where("esid", "==", _sale.esid), where("concluded", "==", false)]);
+      let _sale = { ...sale };
+      const id = _sale.id;
 
-    if (sales.size && !sale.id) {
-      message.warning("Exite alguna venta pendiente con el mismo ESID.", 4);
-      return;
-    }
+      const sales = await getCollection("sales", [where("esid", "==", _sale.esid), where("concluded", "==", false)]);
 
-    const anyOldSale = await getCollection("sales", [where("esid", "==", _sale.esid), where("statusSale", "in", ["Activación", "Mensualidad"]), limit(1)]);
+      if (sales.size && !sale.id) {
+        message.warning("Exite alguna venta pendiente con el mismo ESID.", 4);
+        return;
+      }
 
-    if (anyOldSale.empty && _sale.statusSale === "Desconexión") {
-      message.warning("Este ESID no tiene activaciones o mensualidades.", 4);
-      return;
-    }
+      const anyOldSale = await getCollection("sales", [where("esid", "==", _sale.esid), where("statusSale", "in", ["Activación", "Mensualidad"]), limit(1)]);
 
-    setSaving(true);
+      if (anyOldSale.empty && _sale.statusSale === "Desconexión") {
+        message.warning("Este ESID no tiene activaciones o mensualidades.", 4);
+        return;
+      }
 
-    if (!id) {
-      _sale.team = userFirestore?.team;
-      _sale.userId = user?.uid;
-      _sale.date = Timestamp.now();
+      if (!id) {
+        _sale.team = userFirestore?.team;
+        _sale.userId = user?.uid;
+        _sale.date = Timestamp.now();
 
-      if (_sale.paymentAmount) {
+        if (_sale.paymentAmount) {
+          _sale.datePayment = Timestamp.now();
+        }
+      }
+
+      if (id && paymentAmount !== _sale.paymentAmount) {
         _sale.datePayment = Timestamp.now();
       }
-    }
 
-    if (id && paymentAmount !== _sale.paymentAmount) {
-      _sale.datePayment = Timestamp.now();
-    }
+      delete _sale.id;
 
-    delete _sale.id;
+      if (!_sale.esid && searchESID && _sale.esid !== searchESID) {
+        _sale.esid = searchESID;
+      }
 
-    if (!_sale.esid && searchESID && _sale.esid !== searchESID) {
-      _sale.esid = searchESID;
-    }
-
-    try {
       const clientDocs = await getDocs(query(collection(db, "clients"), where("esid", "==", _sale.esid)));
 
       if (clientDocs.empty) {
@@ -167,7 +168,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
   };
 
   const onChangeESID = (value: string) => {
-    let _sale = { ...sale, esid: value } as Sale;
+    let _sale: Sale = { ...sale, esid: value };
 
     if (value) {
       let client = clients.find(c => c.esid === value);
@@ -177,6 +178,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
         delete client?.receives;
         delete client?.sends;
         delete client?.paymentMethod;
+        delete client?.phone;
 
         _sale = { ..._sale, ...client };
       }
@@ -197,10 +199,17 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
       confirmLoading={saving}
       open={open}
       onCancel={onClose}
-      onOk={() => {
-        form.validateFields()
-          .then(save)
-          .catch(() => { });
+      okButtonProps={{
+        loading: saving,
+        disabled: saving
+      }}
+      onOk={async () => {
+        try {
+          await form.validateFields();
+          await save();
+        } catch (error) {
+          console.log(error);
+        }
       }}
       title={sale.id ? "Editar venta" : "Agregar venta"}
       cancelText="Cancelar"
@@ -286,7 +295,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                 filterOption={(inputValue, option) =>
                   option!.label.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                 }
-                onChange={(value: string,) => onChangeESID(value)}
+                onChange={(value: string) => onChangeESID(value)}
                 onSelect={(value: string) => onChangeESID(value)}
                 onClear={() => setSale({ ...sale, esid: "" })}
               >
@@ -449,6 +458,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                       onChange={(e) => setSale({ ...sale, receives: e.target.value })}
                     />
                     : <Select
+                      aria-autocomplete="none"
                       disabled={disabledInputs}
                       onChange={(value) => setSale({ ...sale, receives: value })}
                       value={sale.receives}
