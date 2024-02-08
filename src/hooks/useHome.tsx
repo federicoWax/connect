@@ -49,10 +49,11 @@ const columnsWorksheet = [
 ];
 
 const getQuerySales = (filter: FilterSale, userFirestore: UserFirestoreAuth) => {
-  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate, userSeller, fieldsClient } = filter;
+  const { startDate, endDate, concluded, userId, esid, processUser, campaignId, teamId, statusLight, typeDate, userSeller, fieldsClient, enterprise } = filter;
 
   let Query = query(
     collection(db, "sales"),
+    where('enterprise', '==', enterprise),
   );
 
   if (concluded !== "") {
@@ -122,7 +123,8 @@ const useUsers = () => {
     statusLight: "",
     typeDate: "date",
     fieldsClient: "esid",
-    userSeller: ""
+    userSeller: "",
+    enterprise: userFirestore?.enterprise || "",
   });
   const [searchClients, setSearchClients] = useState("");
   const [searchClientsDialog, setSearchClientsDialog] = useState("");

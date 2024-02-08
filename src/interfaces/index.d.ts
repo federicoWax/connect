@@ -16,6 +16,7 @@ export interface UserFirestoreAuth {
   team: string;
   branch: string;
   permissions: Permission[];
+  enterprise?: string;
 }
 export interface UserFirestore {
   id?: string;
@@ -66,6 +67,7 @@ export interface Sale extends Client {
   team?: string;
   idSeller?: string;
   nameSeller?: string;
+  enterprise: string;
 };
 
 export interface FilterSale {
@@ -82,6 +84,7 @@ export interface FilterSale {
   typeDate: "datePayment" | "date" | "dateConclued";
   fieldsClient: "phone" | "esid";
   userSeller: "";
+  enterprise: string;
 };
 
 export interface Cobrador {

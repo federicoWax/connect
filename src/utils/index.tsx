@@ -17,17 +17,16 @@ export const dialogDeleteDoc = (fun: () => Promise<unknown>) => {
         resolve(true);
       },
     });
-  })
-}
- 
+  });
+};
 
 export const dayjsToStartDay = (dj: dayjs.Dayjs) => {
   return dj.set("hour", 0).set("minute", 0).set("second", 0).set("millisecond", 0);
-} 
+};
 
 export const dayjsToEndDay = (dj: dayjs.Dayjs) => {
   return dj.set("hour", 23).set("minute", 59).set("second", 59).set("millisecond", 59);
-} 
+};
 
 export const getWorkbookFromFile = (file: File) => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -36,11 +35,16 @@ export const getWorkbookFromFile = (file: File) => new Promise((resolve, reject)
 
   reader.onload = async () => {
     let workbook = new exceljs.Workbook();
-    workbook = await workbook.xlsx.load(reader.result as ArrayBuffer)
+    workbook = await workbook.xlsx.load(reader.result as ArrayBuffer);
     resolve(workbook);
-  }
-  
+  };
+
   reader.onerror = () => {
     reject();
-  }
+  };
 });
+
+export const getArrayChunk = <T extends {}>(array: Array<T>, size: number) => Array.from({ length: Math.ceil(array.length / size) }, (v, i) =>
+  array.slice(i * size, i * size + size)
+);
+

@@ -1,8 +1,8 @@
-import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, limit, query, Timestamp, where } from "firebase/firestore";
 import dayjs from "dayjs";
-import { Autocomplete, Campaign, Client, Cobrador, FilterSale, Sale, UserFirestore } from "../../interfaces";
+import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, getCollection, update } from "../../services/firebase";
 
@@ -36,7 +36,8 @@ const init_sale: Sale = {
   paymentAmount: "",
   email: "",
   campaign: "dVfLotqwqWwSu6u1zowQ",
-  esid: ""
+  esid: "",
+  enterprise: ""
 };
 
 const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, users, campaigns, onSearchClients }) => {
@@ -50,8 +51,9 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
 
   const setForm = useCallback((_sale: Sale, resetFields: boolean = true) => {
     setSale(_sale);
+
     if (resetFields) form.resetFields();
-    console.log(_sale);
+
     form.setFieldsValue(_sale);
   }, [form]);
 
@@ -109,6 +111,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
         _sale.team = userFirestore?.team;
         _sale.userId = user?.uid;
         _sale.date = Timestamp.now();
+        _sale.enterprise = userFirestore?.enterprise!;
 
         if (_sale.paymentAmount) {
           _sale.datePayment = Timestamp.now();

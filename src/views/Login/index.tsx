@@ -10,11 +10,11 @@ interface Account {
 }
 
 const Login: FC = () => {
-  const [account, setAccount] = useState<Account>({email: "", passowrd: ""});
+  const [account, setAccount] = useState<Account>({ email: "", passowrd: "" });
   const [loading, setLoading] = useState<boolean>(false);
-  
+
   const onFinish = async () => {
-    if(loading) return;
+    if (loading) return;
 
     try {
       setLoading(true);
@@ -24,15 +24,15 @@ const Login: FC = () => {
       console.log(error);
       message.error("Error, datos incorrectos.");
       setLoading(false);
-    } 
-  }
+    }
+  };
 
   return (
-    <div style={{marginTop: "15vh", padding: 30}}>
+    <div style={{ marginTop: "15vh", padding: 30 }}>
       <Row justify="center">
         <Col>
-          <div style={{textAlign: "center"}}>
-            <img alt="rifas-login" height={100} width={300} style={{ marginBottom: 20 }} src={logoLogin}/>
+          <div style={{ textAlign: "center" }}>
+            <img alt="rifas-login" height={100} width={300} style={{ marginBottom: 20 }} src={logoLogin} />
           </div>
           <Form
             name="basic"
@@ -46,17 +46,17 @@ const Login: FC = () => {
               name="email"
               rules={[{ required: true, message: 'Favor de escribir el correo.' }]}
             >
-              <Input value={account.email} onChange={(e) => setAccount({...account, email: e.target.value})} />
+              <Input value={account.email} onChange={(e) => setAccount({ ...account, email: e.target.value })} />
             </Form.Item>
             <Form.Item
               label="Contraseña"
               name="password"
               rules={[{ required: true, message: 'Favor de escribir la contraseña.' }]}
             >
-              <Input.Password value={account.passowrd} onChange={(e) => setAccount({...account, passowrd: e.target.value})} />
+              <Input.Password value={account.passowrd} onChange={(e) => setAccount({ ...account, passowrd: e.target.value })} />
             </Form.Item>
             <Form.Item>
-              <div style={{textAlign: "center"}}>
+              <div style={{ textAlign: "center" }}>
                 <Button type="primary" htmlType="submit" loading={loading}>
                   Entrar
                 </Button>
@@ -66,7 +66,7 @@ const Login: FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
 export default Login;
