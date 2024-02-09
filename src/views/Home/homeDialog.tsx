@@ -364,6 +364,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
               name="statusSale"
             >
               <Select
+                aria-autocomplete="none"
                 value={sale.statusSale}
                 onChange={value => setSale({ ...sale, statusSale: value })}
                 disabled={sale.id !== undefined && userFirestore?.role !== "Administrador"}
@@ -385,6 +386,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
               name="statusLight"
             >
               <Select
+                aria-autocomplete="none"
                 disabled={disabledInputs}
                 value={sale.statusLight}
                 onChange={value => setSale({ ...sale, statusLight: value })}
@@ -401,6 +403,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                 name="paymentMethod"
               >
                 <Select
+                  aria-autocomplete="none"
                   disabled={disabledInputs}
                   value={sale.paymentMethod}
                   onChange={value => setSale({ ...sale, paymentMethod: value })}
@@ -484,6 +487,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                 rules={[{ required: true, message: 'Vivienda requerida.' }]}
               >
                 <Select
+                  aria-autocomplete="none"
                   disabled={disabledInputs}
                   value={sale.livingPlace}
                   onChange={value => setSale({ ...sale, livingPlace: value })}
@@ -563,6 +567,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
               name="campaign"
             >
               <Select
+                aria-autocomplete="none"
                 disabled={disabledInputs}
                 onChange={(value) => setSale({ ...sale, campaign: value })}
                 value={sale.campaign}
