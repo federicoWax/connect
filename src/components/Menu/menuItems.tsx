@@ -1,11 +1,11 @@
 import { getAuth } from 'firebase/auth';
 import { Link } from 'react-router-dom';
-import { 
-  UserOutlined, DollarOutlined, UnorderedListOutlined, 
+import {
+  UserOutlined, DollarOutlined, UnorderedListOutlined,
   ProfileOutlined, SettingOutlined, ScheduleOutlined,
   TeamOutlined, FileExcelOutlined
 } from '@ant-design/icons';
-import { MdAccountBox, MdGroup, MdLocationCity } from 'react-icons/md';
+import { MdAccountBox, MdGroup, MdLocationCity, MdPayments } from 'react-icons/md';
 
 const signOut = () => getAuth().signOut();
 
@@ -69,6 +69,12 @@ const menuItems = [
     icon: <FileExcelOutlined style={styleIcon} />,
   },
   {
+    key: '/paymentMethods',
+    title: 'Metodos de pago',
+    label: <Link to="/metodos-de-pago">Metodos de pago</Link>,
+    icon: <MdPayments style={styleIcon} />,
+  },
+  {
     key: '/cuenta',
     title: '',
     icon: <SettingOutlined style={styleIcon} />,
@@ -83,6 +89,6 @@ const menuItems = [
       }
     ]
   }
-]
+];
 
 export default menuItems;

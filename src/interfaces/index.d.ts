@@ -90,6 +90,14 @@ export interface FilterSale {
 export interface Cobrador {
   id?: string;
   name: string;
+  enterprise?: string;
+}
+
+export interface PaymentMethod {
+  id?: string;
+  name: string;
+  createdAt?: Date | Timestamp;
+  updatedAt?: Date | Timestamp;
 }
 
 export interface Campaign extends Cobrador { }

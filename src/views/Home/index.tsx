@@ -42,8 +42,8 @@ const Home = () => {
   );
 
   const optionsProcessUser = useMemo(() =>
-    users.filter(u => u.role !== "Vendedor").map((u) => ({ value: u.email, label: u.name + " - " + u.email })) as Autocomplete[],
-    [users]
+    users.filter(u => u.role !== "Vendedor" && u.enterprise === userFirestore?.enterprise).map((u) => ({ value: u.email, label: u.name + " - " + u.email })) as Autocomplete[],
+    [users, userFirestore]
   );
 
   const optionsUsers = useMemo(() =>

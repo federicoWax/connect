@@ -130,10 +130,13 @@ const useUsers = () => {
   const [searchClientsDialog, setSearchClientsDialog] = useState("");
   const [querySales, setQuerySales] = useState<Query<DocumentData>>(getQuerySales(filter, userFirestore as UserFirestoreAuth));
   const [queryUsers] = useState<Query<DocumentData>>(query(collection(db, "users"), orderBy('name')));
-  const [queryCobradores] = useState<Query<DocumentData>>(query(collection(db, "cobradores"), orderBy("name")));
   const [queryCampaigns] = useState<Query<DocumentData>>(query(collection(db, "campaigns"), orderBy("name")));
   const [queryTeams] = useState<Query<DocumentData>>(query(collection(db, "teams"), orderBy("name")));
   const [snapshotSales, loadingSales] = useOnSnapshot(querySales);
+
+  const queryCobradores = useMemo<Query<DocumentData>>(() => {
+    return query(collection(db, "cobradores"), ...[where("enterprise", "==", userFirestore?.enterprise || ""), orderBy("name")]);
+  }, [userFirestore]);
 
   useEffect(() => {
     if (!open) {

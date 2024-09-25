@@ -12,10 +12,12 @@ const Teams = lazy(() => import('../views/Teams'));
 const Branchs = lazy(() => import('../views/Branchs'));
 const Excels = lazy(() => import('../views/Excels'));
 const Assists = lazy(() => import('../views/Assists'));
+const PaymentMethods = lazy(() => import('../views/PaymentMethods'));
+
 
 type RoutePropsKey = RouteProps & {
   key: string;
-}
+};
 
 export const routes: RoutePropsKey[] = [
   {
@@ -72,6 +74,11 @@ export const routes: RoutePropsKey[] = [
     key: 'exceles/:id',
     path: '/exceles/:id',
     element: <SeeExcel />
+  },
+  {
+    key: 'paymentMethods',
+    path: '/metodos-de-pago',
+    element: <PaymentMethods />
   },
   {
     key: '*',

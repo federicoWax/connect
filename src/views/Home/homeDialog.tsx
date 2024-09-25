@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, getCollection, update } from "../../services/firebase";
+import usePaymentMethods from "../../hooks/usePaymentMethods";
 
 const db = getFirestore();
 const { Option } = Select;
@@ -48,6 +49,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
   const [paymentAmount, setPaymentAmount] = useState<string>("");
   const [form] = Form.useForm();
   const { user, userFirestore } = useAuth();
+  const { paymentMethods, loading: loadingPaymentMethods } = usePaymentMethods();
 
   const setForm = useCallback((_sale: Sale, resetFields: boolean = true) => {
     setSale(_sale);
@@ -95,7 +97,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
 
       const sales = await getCollection("sales", [where("esid", "==", _sale.esid), where("concluded", "==", false)]);
 
-      if (sales.size && !sale.id) {
+      if (sales.size && !sale.id && sales.docs[0].data().team === userFirestore?.team) {
         message.warning("Exite alguna venta pendiente con el mismo ESID.", 4);
         return;
       }
@@ -191,8 +193,12 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
   };
 
   const optionsClients = clients.map((c) => ({ value: c.esid?.toString(), label: c.esid + " - " + c.client })) as Autocomplete[];
-  const optionsProcessUser = users.filter(u => u.role !== "Vendedor").map((u) => ({ value: u.email, label: u.email + " - " + u.name })) as Autocomplete[];
   const hideInputs = userFirestore?.role === "Procesos" && sale.id && sale.userId !== user?.uid;
+
+  const optionsProcessUser = useMemo(() =>
+    users.filter(u => u.role !== "Vendedor" && u.enterprise === userFirestore?.enterprise).map((u) => ({ value: u.email, label: u.name + " - " + u.email })) as Autocomplete[],
+    [users, userFirestore]
+  );
 
   return (
     <Modal
@@ -408,13 +414,9 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                   value={sale.paymentMethod}
                   onChange={value => setSale({ ...sale, paymentMethod: value })}
                 >
-                  <Option value="BARRI">BARRI</Option>
-                  <Option value="Western union">Western union</Option>
-                  <Option value="Ria">Ria</Option>
-                  <Option value="Dolex">Dolex</Option>
-                  <Option value="Zelle">Zelle</Option>x
-                  <Option value="Cashapp">Cashapp</Option>
-                  <Option value="MONEY GRAM">MONEY GRAM</Option>
+                  {
+                    paymentMethods.map(pm => <Option key={pm.name} value={pm.name}>{pm.name}</Option>)
+                  }
                 </Select>
               </Form.Item>
             </Col>

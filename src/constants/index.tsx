@@ -1,4 +1,4 @@
-import { Excel, Permission } from "../interfaces";
+import { Excel, PaymentMethod, Permission } from "../interfaces";
 
 export const startDateStartDay = new Date();
 startDateStartDay.setHours(0);
@@ -65,6 +65,12 @@ export const initPermisions: Permission[] = [
   {
     module: "Exceles",
     route: "/exceles",
+    read: false,
+    write: false
+  },
+  {
+    module: "Metodos de pago",
+    route: "/metodos-de-pago",
     read: false,
     write: false
   },
@@ -146,3 +152,7 @@ export const columnsTableExcel = [
 ];
 
 export const columnsExcel = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
+export const initPaymentMethod: PaymentMethod = {
+  name: "",
+};

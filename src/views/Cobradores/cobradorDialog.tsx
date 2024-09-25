@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Col, Form, Input, message, Modal, Row } from "antd";
+import { Col, Form, Input, message, Modal, Row, Select } from "antd";
 import { Cobrador } from "../../interfaces";
 import { add, update } from "../../services/firebase";
 
@@ -10,16 +10,16 @@ interface Props {
 };
 
 const init_cobrador: Cobrador = {
-  name: ""
+  name: "",
 };
 
-const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
+const CobradorDialog: FC<Props> = ({ open, onClose, propColaborador }) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [cobrador, setCobrador] = useState<Cobrador>(init_cobrador);
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if(propColaborador) {
+    if (propColaborador) {
       form.setFieldsValue(propColaborador);
       setCobrador(propColaborador);
 
@@ -30,16 +30,16 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
   }, [form, propColaborador]);
 
   const save = async () => {
-    if(saving) return;
+    if (saving) return;
 
     setSaving(true);
 
     const id = cobrador.id;
-    let _cobrador = {...cobrador};     
+    let _cobrador = { ...cobrador };
     delete _cobrador.id;
 
     try {
-      id ? await update("cobradores", id, _cobrador ) : await add('cobradores', _cobrador);
+      id ? await update("cobradores", id, _cobrador) : await add('cobradores', _cobrador);
 
       message.success("Cobrador guardado con exito!");
     } catch (error) {
@@ -49,17 +49,17 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
       setSaving(false);
       resetForm();
     }
-  }
+  };
 
   const resetForm = () => {
     form.resetFields();
     setCobrador(init_cobrador);
     onClose();
-  }
+  };
 
   return (
-   <Modal
-      forceRender 
+    <Modal
+      forceRender
       destroyOnClose={true}
       confirmLoading={saving}
       open={open}
@@ -67,18 +67,18 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
       onOk={() => {
         form.validateFields()
           .then(save)
-          .catch(() => {});
+          .catch(() => { });
       }}
       title={cobrador.id ? "Editar cobrador" : "Agregar cobrador"}
       cancelText="Cancelar"
       okText="Guardar"
     >
-      <Form 
+      <Form
         form={form}
-        layout="vertical" 
-        style={{overflowY: "auto", overflowX: "hidden", maxHeight: 500}}
+        layout="vertical"
+        style={{ overflowY: "auto", overflowX: "hidden", maxHeight: 500 }}
       >
-        <Row gutter={10} style={{marginTop: 10}}>
+        <Row gutter={10} style={{ marginTop: 10 }}>
           <Col xs={24} sm={24} md={24}>
             <Form.Item
               label="Nombre"
@@ -86,15 +86,27 @@ const CobradorDialog: FC<Props> = ({open, onClose, propColaborador}) => {
               rules={[{ required: true, message: 'Nombre requerido.' }]}
             >
               <Input
-                value={cobrador.name} 
-                onChange={(e) => setCobrador({...cobrador, name: e.target.value})}
+                value={cobrador.name}
+                onChange={(e) => setCobrador({ ...cobrador, name: e.target.value })}
               />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={24} md={24}>
+            <Form.Item
+              label="Empresa"
+              name="enterprise"
+              rules={[{ required: true, message: 'Empresa requerida.' }]}
+            >
+              <Select value={cobrador.enterprise} onChange={value => setCobrador({ ...cobrador, enterprise: value })}>
+                <Select.Option value="ConnectUs">ConnectUs</Select.Option>
+                <Select.Option value="CMG">CMG</Select.Option>
+              </Select>
             </Form.Item>
           </Col>
         </Row>
       </Form>
     </Modal>
-  )
-}
+  );
+};
 
 export default CobradorDialog;
