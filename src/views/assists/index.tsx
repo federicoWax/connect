@@ -1,12 +1,14 @@
-import { Button, DatePicker, Input, message, Table } from "antd";
+import { Button, DatePicker, Input, Table } from "antd";
 import useAssists from "../../hooks/useAssists";
 import dayjs from "dayjs";
 import { dayjsToEndDay, dayjsToStartDay } from "../../utils";
+import useMessage from "../../hooks/useMessage";
 
 const { RangePicker } = DatePicker;
 
 const Assists = () => {
   const { loadingAssists, assists, columns, search, setSearch, filter, setFilter, downloadExcel } = useAssists();
+  const message = useMessage();
 
   return (
     <div>
@@ -14,16 +16,16 @@ const Assists = () => {
       <Button type="primary" onClick={downloadExcel}>
         Descargar Reporte
       </Button>
-      <br/>
-      <br/>
+      <br />
+      <br />
       <div>Rango de fechas</div>
-      <RangePicker  
+      <RangePicker
         value={[filter.startDate, filter.endDate]}
         onChange={(dates) => {
           let startDate = dates ? dates[0] as dayjs.Dayjs : null;
           let endDate = dates ? dates[1] as dayjs.Dayjs : null;
 
-          if(!startDate || !endDate) {
+          if (!startDate || !endDate) {
             setFilter({ ...filter, startDate, endDate });
             return;
           }
@@ -33,7 +35,7 @@ const Assists = () => {
 
           const diff = endDate.diff(startDate, 'years', true);
 
-          if(diff > 1) {
+          if (diff > 1) {
             message.error("No se puede seleccionar un rango mayor a un año");
             setFilter({ ...filter, startDate: null, endDate: null });
             return;
@@ -56,15 +58,15 @@ const Assists = () => {
         pagination={false}
         dataSource={
           assists
-            .filter(c => 
-              c.name?.toString().toLowerCase().includes(search.toLowerCase()) 
+            .filter(c =>
+              c.name?.toString().toLowerCase().includes(search.toLowerCase())
               || c.email?.toString().toLowerCase().includes(search.toLowerCase())
             )
-            .map(c => ({ ...c, key: c.id }))} 
+            .map(c => ({ ...c, key: c.id }))}
         locale={{ emptyText: "Sin asistencias..." }}
       />
     </div>
-  )
-}
+  );
+};
 
 export default Assists;

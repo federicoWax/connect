@@ -1,8 +1,9 @@
 import { FC, useState } from 'react';
-import { Form, Input, Button, Row, Col, message } from 'antd';
+import { Form, Input, Button, Row, Col } from 'antd';
 import logoLogin from '../../assets/logo.jpeg';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
+import useMessage from "../../hooks/useMessage";
 
 interface Account {
   email: string;
@@ -12,6 +13,7 @@ interface Account {
 const Login: FC = () => {
   const [account, setAccount] = useState<Account>({ email: "", passowrd: "" });
   const [loading, setLoading] = useState<boolean>(false);
+  const message = useMessage();
 
   const onFinish = async () => {
     if (loading) return;

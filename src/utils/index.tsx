@@ -1,9 +1,10 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { message, Modal } from "antd";
+import { Modal } from "antd";
+import { MessageInstance } from "antd/es/message/interface";
 import dayjs from "dayjs";
 import exceljs from "exceljs";
 
-export const dialogDeleteDoc = (fun: () => Promise<unknown>) => {
+export const dialogDeleteDoc = (fun: () => Promise<unknown>, message: MessageInstance) => {
   return new Promise((resolve) => {
     return Modal.confirm({
       title: 'Eliminar',

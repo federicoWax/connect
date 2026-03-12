@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from "react";
-import { Col, Form, Input, message, Modal, Row } from "antd";
+import { Col, Form, Input, Modal, Row } from "antd";
 import { Team } from "../../interfaces";
 import { add, update } from "../../services/firebase";
+import useMessage from "../../hooks/useMessage";
 
 interface Props {
   open: boolean;
@@ -13,29 +14,30 @@ const init_team: Team = {
   name: ""
 };
 
-const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
+const TeamDialog: FC<Props> = ({ open, onClose, propTeam }) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [team, setTeam] = useState<Team>(init_team);
   const [form] = Form.useForm();
+  const message = useMessage();
 
   useEffect(() => {
-    if(propTeam) {
+    if (propTeam) {
       form.setFieldsValue(propTeam);
       setTeam(propTeam);
     }
   }, [form, propTeam]);
 
   const save = async () => {
-    if(saving) return;
+    if (saving) return;
 
     setSaving(true);
 
     const id = team.id;
-    let _team = {...team};     
+    let _team = { ...team };
     delete _team.id;
 
     try {
-      id ? await update("teams", id, _team ) : await add('teams', _team);
+      id ? await update("teams", id, _team) : await add('teams', _team);
 
       message.success("Equipo guardado con exito!");
     } catch (error) {
@@ -45,17 +47,17 @@ const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
       setSaving(false);
       resetForm();
     }
-  }
+  };
 
   const resetForm = () => {
     form.resetFields();
     setTeam(init_team);
     onClose();
-  }
+  };
 
   return (
-   <Modal
-      forceRender 
+    <Modal
+      forceRender
       destroyOnClose={true}
       confirmLoading={saving}
       open={open}
@@ -63,18 +65,18 @@ const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
       onOk={() => {
         form.validateFields()
           .then(save)
-          .catch(() => {});
+          .catch(() => { });
       }}
       title={team.id ? "Editar equipo" : "Agregar equipo"}
       cancelText="Cancelar"
       okText="Guardar"
     >
-      <Form 
+      <Form
         form={form}
-        layout="vertical" 
-        style={{overflowY: "auto", overflowX: "hidden", maxHeight: 500}}
+        layout="vertical"
+        style={{ overflowY: "auto", overflowX: "hidden", maxHeight: 500 }}
       >
-        <Row gutter={10} style={{marginTop: 10}}>
+        <Row gutter={10} style={{ marginTop: 10 }}>
           <Col xs={24} sm={24} md={24}>
             <Form.Item
               label="Nombre"
@@ -82,15 +84,15 @@ const TeamDialog: FC<Props> = ({open, onClose, propTeam}) => {
               rules={[{ required: true, message: 'Nombre requerido.' }]}
             >
               <Input
-                value={team.name} 
-                onChange={(e) => setTeam({...team, name: e.target.value})}
+                value={team.name}
+                onChange={(e) => setTeam({ ...team, name: e.target.value })}
               />
             </Form.Item>
           </Col>
         </Row>
       </Form>
     </Modal>
-  )
-}
+  );
+};
 
 export default TeamDialog;

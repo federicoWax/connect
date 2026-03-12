@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from "react";
-import { Col, Form, Input, message, Modal, Row } from "antd";
+import { Col, Form, Input, Modal, Row } from "antd";
 import { Campaign } from "../../interfaces";
 import { add, update } from "../../services/firebase";
+import useMessage from "../../hooks/useMessage";
 
 interface Props {
   open: boolean;
@@ -13,13 +14,14 @@ const init_campaign: Campaign = {
   name: ""
 };
 
-const CampaignDialog: FC<Props> = ({open, onClose, propCampaign}) => {
+const CampaignDialog: FC<Props> = ({ open, onClose, propCampaign }) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [campaign, setCampaign] = useState<Campaign>(init_campaign);
   const [form] = Form.useForm();
+  const message = useMessage();
 
   useEffect(() => {
-    if(propCampaign) {
+    if (propCampaign) {
       form.setFieldsValue(propCampaign);
       setCampaign(propCampaign);
 
@@ -30,17 +32,17 @@ const CampaignDialog: FC<Props> = ({open, onClose, propCampaign}) => {
   }, [form, propCampaign]);
 
   const save = async () => {
-    if(saving) return;
+    if (saving) return;
 
     setSaving(true);
 
     const id = campaign.id;
-    let _campaign= {...campaign};    
+    let _campaign = { ...campaign };
 
     delete _campaign.id;
 
     try {
-      id ? await update("campaigns", id, _campaign ) : await add('campaigns', _campaign);
+      id ? await update("campaigns", id, _campaign) : await add('campaigns', _campaign);
 
       message.success("Camapaña guardada con exito!");
     } catch (error) {
@@ -50,17 +52,17 @@ const CampaignDialog: FC<Props> = ({open, onClose, propCampaign}) => {
       setSaving(false);
       resetForm();
     }
-  }
+  };
 
   const resetForm = () => {
     form.resetFields();
     setCampaign(init_campaign);
     onClose();
-  }
+  };
 
   return (
-   <Modal
-      forceRender 
+    <Modal
+      forceRender
       destroyOnClose={true}
       confirmLoading={saving}
       open={open}
@@ -68,18 +70,18 @@ const CampaignDialog: FC<Props> = ({open, onClose, propCampaign}) => {
       onOk={() => {
         form.validateFields()
           .then(save)
-          .catch(() => {});
+          .catch(() => { });
       }}
       title={campaign.id ? "Editar campaña" : "Agregar campaña"}
       cancelText="Cancelar"
       okText="Guardar"
     >
-      <Form 
+      <Form
         form={form}
-        layout="vertical" 
-        style={{overflowY: "auto", overflowX: "hidden", maxHeight: 500}}
+        layout="vertical"
+        style={{ overflowY: "auto", overflowX: "hidden", maxHeight: 500 }}
       >
-        <Row gutter={10} style={{marginTop: 10}}>
+        <Row gutter={10} style={{ marginTop: 10 }}>
           <Col xs={24} sm={24} md={24}>
             <Form.Item
               label="Nombre"
@@ -87,15 +89,15 @@ const CampaignDialog: FC<Props> = ({open, onClose, propCampaign}) => {
               rules={[{ required: true, message: 'Nombre requerido.' }]}
             >
               <Input
-                value={campaign.name} 
-                onChange={(e) => setCampaign({...campaign, name: e.target.value})}
+                value={campaign.name}
+                onChange={(e) => setCampaign({ ...campaign, name: e.target.value })}
               />
             </Form.Item>
           </Col>
         </Row>
       </Form>
     </Modal>
-  )
-}
+  );
+};
 
 export default CampaignDialog;

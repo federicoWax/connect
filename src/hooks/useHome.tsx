@@ -12,6 +12,7 @@ import ExcelJS from 'exceljs';
 import useCollection from './useCollection';
 import { columnsExcel, endDateEndDay, startDateStartDay } from '../constants';
 import { ColumnsType } from "antd/es/table";
+import useMessage from "./useMessage";
 
 const db = getFirestore();
 const columnsWorksheet = [
@@ -171,6 +172,7 @@ const useUsers = () => {
   const [snapshotCobradores, loadingCobradores] = useCollection(queryCobradores);
   const [snapshotCampaigns, loadingCampaigns] = useCollection(queryCampaigns);
   const [snapshotTeams, loadingTeams] = useCollection(queryTeams);
+  const message = useMessage();
 
   const columns: ColumnsType<Sale> = useMemo(() => [
     {
@@ -321,12 +323,12 @@ const useUsers = () => {
           onClick={() => {
             const deleteUser = () => del("sales", record.id as string);
 
-            dialogDeleteDoc(deleteUser);
+            dialogDeleteDoc(deleteUser, message);
           }}
         />
       )
     }
-  ], [campaigns, userFirestore, users]);
+  ], [campaigns, userFirestore, users, message]);
 
   useEffect(() => {
     if (!userFirestore) return;

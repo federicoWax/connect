@@ -1,8 +1,9 @@
 import { FC, useEffect, useState } from "react";
-import { Col, Form, Input, message, Modal, Row } from "antd";
+import { Col, Form, Input, Modal, Row } from "antd";
 import { PaymentMethod } from "../../interfaces";
 import { add, update } from "../../services/firebase";
 import { initPaymentMethod } from "../../constants";
+import useMessage from "../../hooks/useMessage";
 
 interface Props {
   open: boolean;
@@ -14,6 +15,7 @@ const PaymentMethodsDialog: FC<Props> = ({ open, onClose, paymentMethod: payment
   const [saving, setSaving] = useState<boolean>(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initPaymentMethod);
   const [form] = Form.useForm();
+  const message = useMessage();
 
   useEffect(() => {
     if (paymentMethodProp) {

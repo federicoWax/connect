@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from "react";
-import { Col, Form, Input, message, Modal, Row, Select } from "antd";
+import { Col, Form, Input, Modal, Row, Select } from "antd";
 import { Cobrador } from "../../interfaces";
 import { add, update } from "../../services/firebase";
+import useMessage from "../../hooks/useMessage";
 
 interface Props {
   open: boolean;
@@ -17,6 +18,7 @@ const CobradorDialog: FC<Props> = ({ open, onClose, propColaborador }) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [cobrador, setCobrador] = useState<Cobrador>(init_cobrador);
   const [form] = Form.useForm();
+  const message = useMessage();
 
   useEffect(() => {
     if (propColaborador) {

@@ -1,5 +1,5 @@
 import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Checkbox, Divider, message, Spin, Table, Tag } from 'antd';
+import { Button, Checkbox, Divider, Spin, Table, Tag } from 'antd';
 import { doc, DocumentData, DocumentReference, getFirestore } from 'firebase/firestore';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
@@ -12,6 +12,7 @@ import exceljs from "exceljs";
 import { LoadingOutlined } from '@ant-design/icons';
 import ExcelJS from 'exceljs';
 import { columnsExcel, columnsTableExcel } from '../../../constants';
+import useMessage from "../../../hooks/useMessage";
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -26,7 +27,8 @@ const SeeExcel = () => {
   const [userIds, setUserIds] = useState<string[]>([]);
   const [tableExcel, setTableExcel] = useState<RowTableExcel[]>([]);
   const [downloading, setDownloading] = useState(false);
-  const [sheet, setSheet] = useState<exceljs.Worksheet>()
+  const [sheet, setSheet] = useState<exceljs.Worksheet>();
+  const message = useMessage();
 
   const inputRefsE = useRef<Array<HTMLInputElement | null>>([]);
   const inputRefsF = useRef<Array<HTMLInputElement | null>>([]);
@@ -50,11 +52,11 @@ const SeeExcel = () => {
 
   const setInputRefs = useCallback((campania: string[], refs: (HTMLInputElement | null)[], keyColumn: string) => {
     const oldInputRefs = allInputRefs[keyColumn];
-    
+
     for (let index = 0; index < campania.length; index++) {
       const oldInputRef = oldInputRefs.current[index];
 
-      if(oldInputRef && document.activeElement === oldInputRef) {
+      if (oldInputRef && document.activeElement === oldInputRef) {
         continue;
       }
 
@@ -65,7 +67,7 @@ const SeeExcel = () => {
         inputRef.value = value;
       }
     }
-  }, [allInputRefs])
+  }, [allInputRefs]);
 
   const changeStatus = useCallback(async () => {
     if (!id || !userFirestore) return;
@@ -87,7 +89,7 @@ const SeeExcel = () => {
     } finally {
       setStatusChanged(true);
     }
-  }, [id, userFirestore])
+  }, [id, userFirestore, message]);
 
   const onSelectRow = useCallback(async (record: RowTableExcel) => {
     if (selecting) return;
@@ -103,18 +105,18 @@ const SeeExcel = () => {
       );
     } catch (error) {
       console.log(error);
-      message.error("Ocurro un error al cambiar el estado de la selección!", 4)
+      message.error("Ocurro un error al cambiar el estado de la selección!", 4);
     } finally {
       setTimeout(() => {
         setSelecting(false);
-      }, 1000)
+      }, 1000);
     }
-  }, [selecting, excel, userFirestore])
+  }, [selecting, excel, userFirestore, message]);
 
   const saveCampaign = useCallback(async (record: RowTableExcel, value: string, key: string) => {
     if (!excel) return;
 
-    let compania = excel[key as keyof Excel] as string[]
+    let compania = excel[key as keyof Excel] as string[];
 
     compania = compania.map((e, i) => i === record.index ? value : e);
 
@@ -136,15 +138,15 @@ const SeeExcel = () => {
       console.log(error);
       message.error("Error al guardar la celda.", 4);
     }
-  }, [excel, userFirestore?.id])
+  }, [excel, userFirestore?.id, message]);
 
   const disabledInput = useCallback((ref: MutableRefObject<(HTMLInputElement | null)[]>, record: RowTableExcel) => {
     return Boolean(
-      ref.current[record.index] === null 
-      || record.userId === "" 
+      ref.current[record.index] === null
+      || record.userId === ""
       || (excel?.userRows.includes(record.userId) && record.userId !== userFirestore?.id)
     );
-  }, [userFirestore, excel])
+  }, [userFirestore, excel]);
 
   const getTableExcel = (sheet: exceljs.Worksheet, _excel: Excel, users: UserFirestore[]) => {
     const _tableExcel: RowTableExcel[] = [];
@@ -174,7 +176,7 @@ const SeeExcel = () => {
     });
 
     return _tableExcel;
-  }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -245,20 +247,20 @@ const SeeExcel = () => {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     init();
 
     return () => {
       mounted = false;
-    }
-  }, [docSnapExcel, loadingExcel, loading, navigate, setInputRefs]);
+    };
+  }, [docSnapExcel, loadingExcel, loading, navigate, setInputRefs, message]);
 
   useEffect(() => {
     if (statusChanged) return;
 
     changeStatus();
-  }, [changeStatus, statusChanged])
+  }, [changeStatus, statusChanged]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -266,7 +268,7 @@ const SeeExcel = () => {
     }, 1200000);
 
     return () => clearInterval(interval);
-  }, [changeStatus])
+  }, [changeStatus]);
 
   const columns = useMemo(() => {
     return [
@@ -309,7 +311,7 @@ const SeeExcel = () => {
             >
               <b>{record.userName.toUpperCase()}</b>
             </Tag>
-          )
+          );
         }
       },
       {
@@ -411,7 +413,7 @@ const SeeExcel = () => {
         )
       },
     ];
-  }, [excel, userFirestore, selecting, onSelectRow, saveCampaign, disabledInput])
+  }, [excel, userFirestore, selecting, onSelectRow, saveCampaign, disabledInput]);
 
   const downloadExcel = async () => {
     if (downloading) return;
@@ -428,7 +430,7 @@ const SeeExcel = () => {
         worksheet.getCell(column + '1').font = {
           bold: true
         };
-      })
+      });
 
       worksheet.addRows(tableExcel);
 
@@ -448,7 +450,7 @@ const SeeExcel = () => {
     } finally {
       setDownloading(false);
     }
-  }
+  };
 
   return (
     <div>
@@ -476,7 +478,7 @@ const SeeExcel = () => {
         loading={loading}
       />
     </div>
-  )
-}
+  );
+};
 
 export default SeeExcel;

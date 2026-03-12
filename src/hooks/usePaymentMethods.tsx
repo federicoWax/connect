@@ -8,6 +8,7 @@ import { initPaymentMethod } from "../constants";
 import { ColumnsType } from "antd/es/table";
 import { getFirestore, collection, query, orderBy, DocumentData, Query } from 'firebase/firestore';
 import useOnSnapshot from "./useOnSnapshot";
+import useMessage from "./useMessage";
 
 const db = getFirestore();
 
@@ -24,6 +25,8 @@ const usePaymentMethods = () => {
 
     setPaymentMethods(paymentMethodDocs?.docs.map(doc => ({ ...doc.data(), id: doc.id })) as PaymentMethod[]);
   }, [paymentMethodDocs, loading]);
+
+  const message = useMessage();
 
   const columns = useMemo<ColumnsType<PaymentMethod>>(() => [
     {
@@ -42,7 +45,7 @@ const usePaymentMethods = () => {
           onClick={() => {
             const deletePaymentMethod = () => del("paymentMethods", record.id as string);
 
-            dialogDeleteDoc(deletePaymentMethod);
+            dialogDeleteDoc(deletePaymentMethod, message);
           }}
         />
       )
@@ -61,7 +64,7 @@ const usePaymentMethods = () => {
         />
       )
     },
-  ], []);
+  ], [message]);
 
   return (
     {

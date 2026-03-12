@@ -1,11 +1,12 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import { AutoComplete, Col, DatePicker, Form, Input, message, Modal, Row, Select } from "antd";
+import { AutoComplete, Col, DatePicker, Form, Input, Modal, Row, Select } from "antd";
 import { collection, getDocs, getFirestore, limit, query, Timestamp, where } from "firebase/firestore";
 import dayjs from "dayjs";
 import { Autocomplete, Campaign, Client, Cobrador, Sale, UserFirestore } from "../../interfaces";
 import { useAuth } from "../../context/AuthContext";
 import { add, getCollection, update } from "../../services/firebase";
 import usePaymentMethods from "../../hooks/usePaymentMethods";
+import useMessage from "../../hooks/useMessage";
 
 const db = getFirestore();
 const { Option } = Select;
@@ -50,6 +51,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
   const [form] = Form.useForm();
   const { user, userFirestore } = useAuth();
   const { paymentMethods, loading: loadingPaymentMethods } = usePaymentMethods();
+  const message = useMessage();
 
   const setForm = useCallback((_sale: Sale, resetFields: boolean = true) => {
     setSale(_sale);
@@ -413,6 +415,7 @@ const HomeDialog: FC<Props> = ({ open, onClose, propSale, cobradores, clients, u
                   disabled={disabledInputs}
                   value={sale.paymentMethod}
                   onChange={value => setSale({ ...sale, paymentMethod: value })}
+                  loading={loadingPaymentMethods}
                 >
                   {
                     paymentMethods.map(pm => <Option key={pm.name} value={pm.name}>{pm.name}</Option>)

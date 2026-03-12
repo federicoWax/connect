@@ -1,5 +1,5 @@
 import { FC, useState, useEffect, useMemo } from 'react';
-import { Button, Card, Checkbox, Col, Form, Input, message, Modal, Row, Spin, Upload } from 'antd';
+import { Button, Card, Checkbox, Col, Form, Input, Modal, Row, Spin, Upload } from 'antd';
 import { getFirestore, collection, query, orderBy, DocumentData, Query } from 'firebase/firestore';
 import { colorTagsExcel, initExcel } from '../../constants';
 import { ActiveUser, Excel, UserFirestore } from '../../interfaces';
@@ -9,6 +9,7 @@ import { RcFile } from 'antd/es/upload';
 import { add, deleteFile, update, uploadFile } from '../../services/firebase';
 import exceljs from "exceljs";
 import { getWorkbookFromFile } from '../../utils';
+import useMessage from "../../hooks/useMessage";
 
 interface Props {
   open: boolean;
@@ -25,7 +26,7 @@ interface UserExcel {
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
+const ExcelDialog: FC<Props> = ({ open, propExcel, onClose }) => {
   const queryUsers = useMemo<Query<DocumentData>>(() => query(collection(getFirestore(), "users"), orderBy('name')), []);
   const [snapshot, loading] = useOnSnapshot(queryUsers);
   const [excel, setExcel] = useState(initExcel);
@@ -35,9 +36,10 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
   const [users, setUsers] = useState<UserFirestore[]>([]);
   const [urlToDelete, setUrlToDelete] = useState("");
   const [form] = Form.useForm();
+  const message = useMessage();
 
   useEffect(() => {
-    if(propExcel) {
+    if (propExcel) {
       form.setFieldsValue(propExcel);
       setExcel(propExcel);
       return;
@@ -47,13 +49,13 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
   }, [propExcel, form]);
 
   const fileList = useMemo(() => {
-    return excel.file ? [excel.file as RcFile] : []
-  }, [excel.file])
+    return excel.file ? [excel.file as RcFile] : [];
+  }, [excel.file]);
 
   useEffect(() => {
-    if(loading) return;
+    if (loading) return;
 
-    const _users = snapshot?.docs.map(doc => ({...doc.data(), id: doc.id})) as UserFirestore[];
+    const _users = snapshot?.docs.map(doc => ({ ...doc.data(), id: doc.id })) as UserFirestore[];
 
     setUsers(_users);
     setUsersExcel(_users.map(user => ({
@@ -62,28 +64,28 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
       selected: propExcel ? propExcel.userIds.includes(user.id as string) : false,
       userId: user.id as string
     })));
-  }, [loading, snapshot, propExcel])
+  }, [loading, snapshot, propExcel]);
 
   const save = async () => {
-    if(!usersExcel.some(ue => ue.selected)) {
+    if (!usersExcel.some(ue => ue.selected)) {
       message.error("Favor de asignar usuarios al excel.", 4);
       return;
     }
-    if(!excel.file) {
+    if (!excel.file) {
       message.error("Favor de subir un excel.", 4);
       return;
     }
 
-    if(saving) return;
-    
+    if (saving) return;
+
     try {
       setSaving(true);
       let file: null | File = null;
 
-      if(excel.file && typeof excel.file !== "string") {
+      if (excel.file && typeof excel.file !== "string") {
         const url = await uploadFile("exceles", excel.file);
 
-        if(!url) {
+        if (!url) {
           message.error("Error al subir el archivo excel!");
           return;
         }
@@ -91,7 +93,7 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
         const workbook = await getWorkbookFromFile(excel.file) as exceljs.Workbook;
         const sheet = workbook.worksheets[0];
         const totalWorkRows = sheet.rowCount - 1;
-        const workColumns = Array.from({length: totalWorkRows}, () => "");
+        const workColumns = Array.from({ length: totalWorkRows }, () => "");
 
         file = excel.file;
         excel.userRows = workColumns;
@@ -103,9 +105,9 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
         excel.file = url;
       }
 
-      excel.userIds = usersExcel.filter(ue => ue.selected).map(ue => ue.userId);  
-    
-      if(excel.id) {
+      excel.userIds = usersExcel.filter(ue => ue.selected).map(ue => ue.userId);
+
+      if (excel.id) {
         const id = excel.id;
 
         delete excel.id;
@@ -116,7 +118,7 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
           activeUsers: []
         } as any;
 
-        if(file) {
+        if (file) {
           dataUpdate.userRows = excel.userRows;
           dataUpdate.file = excel.file;
           dataUpdate.campaniaE = excel.campaniaE;
@@ -125,22 +127,22 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
           dataUpdate.campaniaH = excel.campaniaH;
           dataUpdate.campaniaI = excel.campaniaI;
         }
-          
+
         for (let i = 0; i < excel.userIds.length; i++) {
           const userId = excel.userIds[i];
           const oldActiveUser = excel.activeUsers.find(au => au.userId === userId);
 
-          if(oldActiveUser) {
+          if (oldActiveUser) {
             dataUpdate.activeUsers[i] = oldActiveUser;
             continue;
           }
-          
+
           let color = "";
 
           for (const c of colorTagsExcel) {
             const user = dataUpdate.activeUsers.find((au: ActiveUser) => au.color === c);
 
-            if(!user) {
+            if (!user) {
               color = c;
               break;
             }
@@ -151,7 +153,7 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
             active: false,
             lastUpdate: new Date(),
             userId
-          }
+          };
         }
 
         await update("exceles", id, dataUpdate);
@@ -162,11 +164,11 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
           lastUpdate: new Date(),
           userId
         }));
-        
+
         await add("exceles", excel);
       }
 
-      if(urlToDelete) {
+      if (urlToDelete) {
         await deleteFile(urlToDelete);
       }
 
@@ -178,7 +180,7 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
     } finally {
       setSaving(false);
     }
-  }
+  };
 
   const resetForm = () => {
     onClose();
@@ -194,11 +196,11 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
         userId: user.id as string
       })));
     }, 300);
-  }
+  };
 
   return (
     <Modal
-      forceRender 
+      forceRender
       destroyOnClose={true}
       confirmLoading={saving}
       open={open}
@@ -208,98 +210,98 @@ const ExcelDialog: FC<Props> = ({open, propExcel, onClose}) => {
       cancelText="Cancelar"
       okText="Guardar"
     >
-    {
-      loading
-      ?
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: 200
-          }}
-        >
-          <Spin indicator={antIcon}/>
-        </div>
-      :
-        <Form 
-          form={form}
-          layout="vertical" 
-          style={{overflowY: "auto", overflowX: "hidden", maxHeight: 500}}
-        >
-          <Row gutter={10} style={{marginTop: 10}}>
-            <Col xs={24} sm={24} md={24}>
-              <Form.Item
-                label="Nombre"
-                name="name"
-                rules={[{ required: true, message: 'Nombre requerido.' }]}
-              >
-                <Input
-                  value={excel.name} 
-                  onChange={(e) => setExcel({...excel, name: e.target.value})}
-                />
-              </Form.Item>
-              <h4>Usuarios asignados al excel</h4>
-              <Card>
-                <label>Buscar usuario</label>
-                <Input
-                  value={searchUser}
-                  onChange={(e) => setSearchUser(e.target.value)}
-                />
+      {
+        loading
+          ?
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: 200
+            }}
+          >
+            <Spin indicator={antIcon} />
+          </div>
+          :
+          <Form
+            form={form}
+            layout="vertical"
+            style={{ overflowY: "auto", overflowX: "hidden", maxHeight: 500 }}
+          >
+            <Row gutter={10} style={{ marginTop: 10 }}>
+              <Col xs={24} sm={24} md={24}>
+                <Form.Item
+                  label="Nombre"
+                  name="name"
+                  rules={[{ required: true, message: 'Nombre requerido.' }]}
+                >
+                  <Input
+                    value={excel.name}
+                    onChange={(e) => setExcel({ ...excel, name: e.target.value })}
+                  />
+                </Form.Item>
+                <h4>Usuarios asignados al excel</h4>
+                <Card>
+                  <label>Buscar usuario</label>
+                  <Input
+                    value={searchUser}
+                    onChange={(e) => setSearchUser(e.target.value)}
+                  />
+                  <br />
+                  <div style={{ minHeight: 190, maxHeight: 190, overflowY: "auto" }}>
+                    {
+                      usersExcel
+                        .filter(ue => ue.name.toLowerCase().includes(searchUser.toLowerCase()) || ue.email.toLowerCase().includes(searchUser.toLowerCase()))
+                        .map((user) => (
+                          <Row key={user.userId} style={{ marginTop: 10 }}>
+                            <Col xs={22}>
+                              <div>{user.name}</div>
+                              <div style={{ fontSize: 10 }}>{user.email}</div>
+                            </Col>
+                            <Col xs={2} >
+                              <Checkbox
+                                checked={user.selected}
+                                onChange={() => {
+                                  if (!user.selected && usersExcel.filter(ue => ue.selected).length === 50) {
+                                    message.error("El excel no puede tener mas de 50 usuarios asignados!", 5);
+                                    return;
+                                  }
+
+                                  if (user.selected && excel.userRows.includes(user.userId)) {
+                                    message.error("No se puede desasignar, usuario con filas de trabajo en el excel!", 5);
+                                    return;
+                                  }
+
+                                  setUsersExcel(usersExcel.map(u => u.userId === user.userId ? ({ ...u, selected: !u.selected }) : u));
+                                }}
+                              />
+                            </Col>
+                          </Row>
+                        ))
+                    }
+                  </div>
+                </Card>
                 <br />
-                <div style={{minHeight: 190, maxHeight: 190, overflowY: "auto"}}>
-                {
-                  usersExcel
-                    .filter(ue => ue.name.toLowerCase().includes(searchUser.toLowerCase()) || ue.email.toLowerCase().includes(searchUser.toLowerCase()) )
-                    .map((user) => (
-                    <Row key={user.userId} style={{marginTop: 10}}>
-                      <Col xs={22}>
-                        <div>{user.name}</div>
-                        <div style={{fontSize: 10}}>{user.email}</div>
-                      </Col>
-                      <Col xs={2} >
-                        <Checkbox 
-                          checked={user.selected} 
-                          onChange={() => {
-                            if(!user.selected && usersExcel.filter(ue => ue.selected).length === 50) {
-                              message.error("El excel no puede tener mas de 50 usuarios asignados!", 5);
-                              return;
-                            }
+                <Upload
+                  fileList={fileList}
+                  beforeUpload={(file) => setExcel({ ...excel, file })}
+                  onRemove={(file) => {
+                    if (file.url?.includes("https://firebasestorage.googleapis.com")) {
+                      setUrlToDelete(file.url);
+                    }
 
-                            if(user.selected && excel.userRows.includes(user.userId)) {
-                              message.error("No se puede desasignar, usuario con filas de trabajo en el excel!", 5);
-                              return;
-                            }
-                            
-                            setUsersExcel(usersExcel.map(u => u.userId === user.userId ? ({...u, selected: !u.selected}) : u));
-                          }} 
-                        /> 
-                      </Col>
-                    </Row>
-                  ))
-                }
-                </div>
-              </Card>
-              <br />
-              <Upload
-                fileList={fileList}
-                beforeUpload={(file) => setExcel({...excel, file})}
-                onRemove={(file) => {
-                  if(file.url?.includes("https://firebasestorage.googleapis.com")) {
-                    setUrlToDelete(file.url)
-                  }
-
-                  setExcel({...excel, file: undefined});
-                }}
-                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-                <Button type="primary" icon={<UploadOutlined />}>Excel</Button>
-              </Upload>
-            </Col>
-          </Row>
-        </Form>
-    }
+                    setExcel({ ...excel, file: undefined });
+                  }}
+                  accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                  <Button type="primary" icon={<UploadOutlined />}>Excel</Button>
+                </Upload>
+              </Col>
+            </Row>
+          </Form>
+      }
     </Modal>
-  )
-}
+  );
+};
 
 export default ExcelDialog;

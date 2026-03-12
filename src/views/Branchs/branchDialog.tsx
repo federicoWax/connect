@@ -1,16 +1,16 @@
 import { FC, useState, memo, useEffect } from "react";
-import { Button, Col, Form, Input, message, Modal, Row } from "antd";
+import { Button, Col, Form, Input, Modal, Row } from "antd";
 import { Branch, Center } from "../../interfaces";
 import { add, update } from "../../services/firebase";
-import { GoogleMap, DrawingManager, useJsApiLoader, Circle } from '@react-google-maps/api';
+import { GoogleMap, DrawingManager, useJsApiLoader, Circle, Libraries } from '@react-google-maps/api';
 import { ReloadOutlined } from "@ant-design/icons";
+import useMessage from "../../hooks/useMessage";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   propBranch: Branch | null;
 };
-type Libraries = ("drawing" | "geometry" | "localContext" | "places" | "visualization")[];
 
 const apiKey = "AIzaSyDAL0TdQNyLykbqiwBQInlazWDwcX9Edns";
 const initBranch: Branch = {
@@ -28,18 +28,19 @@ const containerStyle = {
 const libraries: Libraries = ["drawing"];
 const initZoom = 6;
 
-const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
+const BranchDialog: FC<Props> = ({ open, onClose, propBranch }) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [branch, setBranch] = useState<Branch>(initBranch);
   const [center, setCenter] = useState<Center>(initCenter);
   const [zoom, setZoom] = useState<number>(initZoom);
-  const [form] = Form.useForm(); 
+  const [form] = Form.useForm();
   const [options, setOptions] = useState<google.maps.drawing.DrawingManagerOptions>();
   const [polygon, setPolygon] = useState<google.maps.Circle>();
   const [showCircle, setShowCircle] = useState<boolean>(false);
+  const message = useMessage();
 
-  const  { isLoaded , loadError }  =  useJsApiLoader ( { 
-    googleMapsApiKey: apiKey, 
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: apiKey,
     libraries
   });
 
@@ -51,10 +52,10 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
   }, [propBranch, form]);
 
   useEffect(() => {
-    if(isLoaded) {
-      const drawingMode = window.google.maps.drawing?.OverlayType.CIRCLE
+    if (isLoaded) {
+      const drawingMode = window.google.maps.drawing?.OverlayType.CIRCLE;
 
-      if(propBranch && propBranch.center) {
+      if (propBranch && propBranch.center) {
         setOptions({
           drawingControl: false,
         });
@@ -79,19 +80,19 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
   }, [isLoaded, propBranch]);
 
   const save = async () => {
-    if(saving) return;
+    if (saving) return;
 
     setSaving(true);
 
     const id = branch.id;
-    let _branch = {...branch};     
+    let _branch = { ...branch };
     delete _branch.id;
 
     _branch.center = polygon ? { lat: Number(polygon.getCenter()?.lat()), lng: Number(polygon.getCenter()?.lng()) } : undefined;
     _branch.radius = polygon ? polygon.getRadius() : undefined;
 
     try {
-      id ? await update("branchs", id, _branch ) : await add('branchs', _branch);
+      id ? await update("branchs", id, _branch) : await add('branchs', _branch);
 
       message.success("Sucursal guardada con exito!");
     } catch (error) {
@@ -101,7 +102,7 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
       setSaving(false);
       resetForm();
     }
-  }
+  };
 
   const resetForm = () => {
     onClose();
@@ -110,7 +111,7 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
     setZoom(initZoom);
     setCenter(initCenter);
     clearPolygon();
-  }
+  };
 
   const onPolygonComplete = (polygon: google.maps.Circle) => {
     setOptions({
@@ -118,10 +119,10 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
     });
 
     setPolygon(polygon);
-  }
+  };
 
   const clearPolygon = () => {
-    if(!polygon) return;
+    if (!polygon) return;
 
     polygon.setMap(null);
 
@@ -134,19 +135,19 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
       },
     });
     setShowCircle(false);
-  }
+  };
 
   const onLoadCircle = (circle: google.maps.Circle) => {
     setPolygon(circle);
-  }
+  };
 
-  if(!isLoaded) return null;
+  if (!isLoaded) return null;
 
   const drawingMode = window.google.maps.drawing?.OverlayType.CIRCLE;
 
   return (
     <Modal
-      forceRender 
+      forceRender
       destroyOnClose={true}
       confirmLoading={saving}
       open={open}
@@ -156,12 +157,12 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
       cancelText="Cancelar"
       okText="Guardar"
     >
-      <Form 
+      <Form
         form={form}
-        layout="vertical" 
-        style={{overflowY: "auto", overflowX: "hidden", maxHeight: 500}}
+        layout="vertical"
+        style={{ overflowY: "auto", overflowX: "hidden", maxHeight: 500 }}
       >
-        <Row gutter={10} style={{marginTop: 10}}>
+        <Row gutter={10} style={{ marginTop: 10 }}>
           <Col xs={24} sm={24} md={24}>
             <Form.Item
               label="Nombre"
@@ -169,50 +170,50 @@ const BranchDialog: FC<Props> = ({open, onClose, propBranch}) => {
               rules={[{ required: true, message: 'Nombre requerido.' }]}
             >
               <Input
-                value={branch.name} 
-                onChange={(e) => setBranch({...branch, name: e.target.value})}
+                value={branch.name}
+                onChange={(e) => setBranch({ ...branch, name: e.target.value })}
               />
             </Form.Item>
           </Col>
-          <div style={{width: "100%"}}>
-            <Button 
-              style={{margin: 10, float: "right"}}  
-              type="primary" 
-              icon={<ReloadOutlined />} 
+          <div style={{ width: "100%" }}>
+            <Button
+              style={{ margin: 10, float: "right" }}
+              type="primary"
+              icon={<ReloadOutlined />}
               onClick={() => clearPolygon()}
             />
           </div>
-          <Col xs={24} sm={24} md={24} style={{height: 300}}>
-          {
-            loadError 
-            ? 
-              "Error al cargar el mapa" 
-            :  
-              <GoogleMap
-                mapContainerStyle={containerStyle}
-                center={center}
-                zoom={zoom}
-              >
-                <DrawingManager
-                  drawingMode={drawingMode}
-                  onCircleComplete={onPolygonComplete}
-                  options={options}
-                />
-                {
-                  showCircle ? <Circle
-                    onLoad={onLoadCircle}
-                    center={branch.center}
-                    radius={branch.radius}
+          <Col xs={24} sm={24} md={24} style={{ height: 300 }}>
+            {
+              loadError
+                ?
+                "Error al cargar el mapa"
+                :
+                <GoogleMap
+                  mapContainerStyle={containerStyle}
+                  center={center}
+                  zoom={zoom}
+                >
+                  <DrawingManager
+                    drawingMode={drawingMode}
+                    onCircleComplete={onPolygonComplete}
+                    options={options}
                   />
-                  : null
-                }
-              </GoogleMap>
-          }
+                  {
+                    showCircle ? <Circle
+                      onLoad={onLoadCircle}
+                      center={branch.center}
+                      radius={branch.radius}
+                    />
+                      : null
+                  }
+                </GoogleMap>
+            }
           </Col>
         </Row>
       </Form>
     </Modal>
-  )
-}
+  );
+};
 
 export default memo(BranchDialog);

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { Button, Col, Row, Select, Table, DatePicker, message, AutoComplete, Input } from "antd";
+import { Button, Col, Row, Select, Table, DatePicker, AutoComplete, Input } from "antd";
 import HomeDialog from "./homeDialog";
 import useHome from "../../hooks/useHome";
 import { useAuth } from "../../context/AuthContext";
 import { Autocomplete } from "../../interfaces";
 import dayjs from "dayjs";
 import { dayjsToEndDay, dayjsToStartDay } from "../../utils";
+import useMessage from "../../hooks/useMessage";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -35,6 +36,7 @@ const Home = () => {
     onSearchClients,
     onSearchClientsDialog
   } = useHome();
+  const message = useMessage();
 
   const optionsAuotComplete = useMemo(() =>
     clients.map((c) => ({ value: c.esid?.toString(), label: c.esid + " - " + c.client + " - " + c.phone })) as Autocomplete[],
